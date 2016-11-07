@@ -1,0 +1,67 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+nodes = [
+   { :hostname => 'client', :ip => '192.168.33.10', :box => 'centos/7', :ram => 1024, :gport => '5991' },
+   { :hostname => 'server', :ip => '192.168.33.15', :box => 'centos/7', :ram => 1024, :gport => '5992' }
+]
+
+Vagrant.configure(2) do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  nodes.each do |node|
+    config.vm.define node[:hostname] do |nodeconfig|
+      nodeconfig.vm.box = node[:box]
+      nodeconfig.vm.hostname = node[:hostname] + ".box"
+      nodeconfig.vm.network :private_network, ip: node[:ip]
+      # we will stick with the default insecure ssh keys
+      nodeconfig.ssh.insert_key = false
+      nodeconfig.ssh.private_key_path = "../insecure_keys/vagrant.private"
+
+      memory = node[:ram] ? node[:ram] : 256;
+
+      nodeconfig.vm.provider :libvirt do |libvirt|
+        # with vncviewer we can connect to client, server via their specific port definition
+        # we can also use vagrant ssh [client|server] of course
+        libvirt.graphics_port = node[:gport]
+      end
+     
+      nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
+      nodeconfig.vm.provision :shell, path: "provision-centos7.sh"
+
+      # specific provision script for one server
+      nodeconfig.vm.provision :shell, path: "nodeconfig-centos7.sh"
+    # end of config.vm.define node
+    end
+
+  
+
+  # end of nodes.each do |node|
+  end
+
+  config.vm.define "recover", autostart: false do |recover|
+    recover.vm.network :private_network, ip: "192.168.33.5"
+    # recover.ssh.username = "root"
+    recover.ssh.insert_key = false
+    recover.ssh.private_key_path = "../insecure_keys/vagrant.private"
+
+    recover.vm.provider :libvirt do |recover_prov|
+      recover_prov.graphics_port = 5993
+      recover_prov.graphics_ip = '127.0.0.1'
+      recover_prov.video_type = 'qxl'
+      recover_prov.storage :file, :size => '40G', :type => 'raw'
+      # make sure file "/exports/isos/client/rear-client.iso" is readable by others
+      recover_prov.storage :file, :device => :cdrom, :path => '/exports/isos/client/rear-client.iso'
+      recover_prov.boot 'network'
+      recover_prov.boot 'cdrom'
+      recover_prov.boot 'hd'
+      # end of |recover_prov|
+      end
+      
+    # end of |recover| 
+    end
+  
+# end of Vagrant.configure
+end

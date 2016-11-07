@@ -1,0 +1,57 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+nodes = [
+   { :hostname => 'client', :ip => '192.168.33.10', :box => 'centos/7', :ram => 1024 },
+   { :hostname => 'server', :ip => '192.168.33.15', :box => 'centos/7', :ram => 1024 }
+]
+
+Vagrant.configure(2) do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  nodes.each do |node|
+    config.vm.define node[:hostname] do |nodeconfig|
+      nodeconfig.vm.box = "centos/7"
+      nodeconfig.vm.hostname = node[:hostname] + ".box"
+      nodeconfig.vm.network :private_network, ip: node[:ip]
+
+      memory = node[:ram] ? node[:ram] : 256;
+     
+      nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
+      nodeconfig.vm.provision :shell, path: "provision-centos7.sh"
+
+      # specific provision script for one server
+      nodeconfig.vm.provision :shell, path: "nodeconfig-centos7.sh"
+    # end of config.vm.define node
+    end
+  
+  # end of nodes.each do |node|
+  end
+
+
+  file_to_disk = ./recover-dsk.vdi
+
+  config.vm.define "recover", autostart: false do |recover|
+
+    recover.vm.box = "pxe_boot"
+    # Use an empty box 
+    # recover.vm.box_url = "https://s3.amazonaws.com/fnichol/vagrant-base-boxes/blank-amd64-20121109.box"
+    recover.vm.gui = true unless ENV['NO_GUI']
+    recover.vm.memory = 1024
+    recover.vm.cpus = 1
+    # See https://gist.github.com/leifg/4713995  to create a hd
+    unless File.exist?(file_to_disk)
+        recover.vm.customize ['createhd', '--filename', file_to_disk, '--size', 40 * 1024]
+    end
+    recover.vm.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1,
+                          '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+    recover.vm.customize ["modifyvm", :id, "--macaddress1", "auto"]
+    recover.vm.customize ["modifyvm", :id, "--boot1", "net", "--boot2", "disk"]
+    recover.vm.network :private_network, type: "dhcp", auto_config: false
+    # end of |recover| 
+    end
+  
+# end of Vagrant.configure
+end
