@@ -62,6 +62,9 @@ echo "Configure rear on client to use OUTPUT=PXE method"
 ssh -i ../insecure_keys/vagrant.private root@$client "cp -f /usr/share/rear/conf/examples/PXE-booting-example-with-URL-style.conf /etc/rear/local.conf"
 echo
 
+# here we should inject our code into rear to add "default boothd0" after the recovery has finished
+# via a yum install or by just copying a script
+
 echo "Run 'rear -v mkbackup'"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup"
 rc=$?
@@ -80,6 +83,8 @@ else
 fi
 
 # For PXE access we have to make sure that on the server the client area is readable for others
+# in my ~/.ssh/config file I defined the line "UserKnownHostsFile /dev/null" to avoid issues
+# with duplicate host keys (after re-installing from scratch the VMs)
 echo "Make client area readable for others on server"
 ssh -i ../insecure_keys/vagrant.private root@$server "chmod 755 /export/nfs/tftpboot/client"
 echo
