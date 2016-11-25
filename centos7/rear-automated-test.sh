@@ -2,6 +2,34 @@
 #
 # rear-automated-test.sh script
 
+#############
+# functions #
+#############
+
+function IsNotPingable {
+    case $(uname -s) in
+        CYGWIN*) ping -n 1 $1 2>&1 | grep -qE '(timed out|host unreachable)'
+                 rc=$?
+                 ;;
+        Linux|Darwin) ping -c 1 $1 2>&1 | grep -q "100% packet loss"
+                 rc=$?
+                 ;;
+            *  ) ping -c 1 $1 2>&1 | grep -q "100% packet loss"
+                 rc=$?
+                 ;;
+    esac
+    # rc=0 when host is unreachable
+    return $rc
+}
+
+function Error {
+    :
+}
+
+########################################################################
+## M A I N
+########################################################################
+
 echo "
 +--------------------------------------------------+
 |    Relax-and-Recover Automated Testing script    |
@@ -12,11 +40,27 @@ Copyright: GPL v3
 
 "
 
+distro="centos7"	# default distro when no argument is given
+
 client="192.168.33.10"
 server="192.168.33.15"
 
 if [[ $(id -u) -ne 0 ]] ; then
-    echo "Please run this script as root"
+    case $(uname -s) in
+        Linux)
+            echo "Please run this script as root"
+            exit 1
+            ;;
+        CYGWIN*) : # no root required
+            ;;
+            *) : # no root required??
+            ;;
+    esac
+fi
+
+# check if vagrant is present
+if ! type -p vagrant &>/dev/null ; then
+    echo "Please install Vagrant 1.8.7 or higher"
     exit 1
 fi
 
@@ -32,20 +76,15 @@ vagrant status
 
 echo
 echo "Doing ping tests to VMs client and server"
-ping $client -c 1 >/dev/null 2>&1
-rc=$?
-
-if [[ $rc -ne 0 ]] ; then
+if IsNotPingable $client ; then
     echo "VM $client is not pingable - please investigate why"
     exit 1
 else
     echo "VM $client is up and running - ping test OK"
 fi
 
-ping $server  -c 1 >/dev/null 2>&1
-rc=$?
 
-if [[ $rc -ne 0 ]] ; then
+if IsNotPingable $server ; then
     echo "VM $server is not pingable - please investigate why"
     exit 1
 else
@@ -61,9 +100,6 @@ echo
 echo "Configure rear on client to use OUTPUT=PXE method"
 ssh -i ../insecure_keys/vagrant.private root@$client "cp -f /usr/share/rear/conf/examples/PXE-booting-example-with-URL-style.conf /etc/rear/local.conf"
 echo
-
-# here we should inject our code into rear to add "default boothd0" after the recovery has finished
-# via a yum install or by just copying a script
 
 echo "Run 'rear -v mkbackup'"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup"
@@ -85,6 +121,7 @@ fi
 # For PXE access we have to make sure that on the server the client area is readable for others
 # in my ~/.ssh/config file I defined the line "UserKnownHostsFile /dev/null" to avoid issues
 # with duplicate host keys (after re-installing from scratch the VMs)
+
 echo "Make client area readable for others on server"
 ssh -i ../insecure_keys/vagrant.private root@$server "chmod 755 /export/nfs/tftpboot/client"
 echo
