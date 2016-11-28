@@ -2,6 +2,16 @@
 #
 # rear-automated-test.sh script
 
+# Define generic variables
+PRGNAME=${0##*/}
+VERSION=1.0
+
+distro="centos7"	# default distro when no argument is given
+boot_method="PXE"	# default boot method to use to recover rear on 'recover' VM
+
+client="192.168.33.10"
+server="192.168.33.15"
+
 #############
 # functions #
 #############
@@ -22,6 +32,16 @@ function IsNotPingable {
     return $rc
 }
 
+function helpMsg {
+    cat <<eof
+Usage: $PRGNAME [-d <distro>] [-b <boot method>] -vh
+        -d: The distribution to use for this automated test (default: centos7)
+        -b: The boot method to use by our automated test (default: PXE)
+        -h: This help message.
+        -v: Revision number of this script.
+eof
+}
+
 function Error {
     :
 }
@@ -40,15 +60,11 @@ Copyright: GPL v3
 
 "
 
-distro="centos7"	# default distro when no argument is given
-
-client="192.168.33.10"
-server="192.168.33.15"
 
 if [[ $(id -u) -ne 0 ]] ; then
     case $(uname -s) in
         Linux)
-            echo "Please run this script as root"
+            echo "Please run $PRGNAME as root"
             exit 1
             ;;
         CYGWIN*) : # no root required
@@ -57,6 +73,18 @@ if [[ $(id -u) -ne 0 ]] ; then
             ;;
     esac
 fi
+
+while getopts ":d:b:vh" opt; do
+    case "$opt" in
+        d) distro="$OPTARG" ;;
+        b) boot_method="$OPTARG" ;;
+        h) helpMsg; exit 0 ;;
+        v) echo "$PRGNAME version $VERSION"; exit 0 ;;
+       \?) echo "$PRGNAME: unknown option used: [$OPTARG]."
+           helpMsg; exit 0 ;;
+    esac
+done
+shift $(( OPTIND - 1 ))
 
 # check if vagrant is present
 if ! type -p vagrant &>/dev/null ; then
@@ -97,9 +125,26 @@ echo "Update rear on the VM client"
 ssh -i ../insecure_keys/vagrant.private root@$client "yum -y update rear"
 echo
 
+# According the boot_method we can do different stuff now:
+case $boot_method in
+PXE)
 echo "Configure rear on client to use OUTPUT=PXE method"
 ssh -i ../insecure_keys/vagrant.private root@$client "cp -f /usr/share/rear/conf/examples/PXE-booting-example-with-URL-style.conf /etc/rear/local.conf"
 echo
+
+echo "Copy PXE post script to disable PXE booting after sucessful 'rear recover'"
+scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/PXE/default/200_inject_default_boothd0_boot_method.sh
+;;
+
+ISO)
+: # not yet tested by me
+;;
+
+*)
+echo "Boot method $boot_method 'not' yet foreseen by $PRGNAME"
+exit 1
+;;
+esac
 
 echo "Run 'rear -v mkbackup'"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup"
@@ -118,6 +163,10 @@ else
     echo
 fi
 
+# According the boot_method we can do different stuff now:
+case $boot_method in
+PXE)
+
 # For PXE access we have to make sure that on the server the client area is readable for others
 # in my ~/.ssh/config file I defined the line "UserKnownHostsFile /dev/null" to avoid issues
 # with duplicate host keys (after re-installing from scratch the VMs)
@@ -125,6 +174,13 @@ fi
 echo "Make client area readable for others on server"
 ssh -i ../insecure_keys/vagrant.private root@$server "chmod 755 /export/nfs/tftpboot/client"
 echo
+;;
+
+ISO)
+:
+;;
+
+esac
 
 echo "Halting the client VM (before doing the recovery)"
 echo "Recover VM will use the client IP address after it has been fully restored"
