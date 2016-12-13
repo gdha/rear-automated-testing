@@ -1,0 +1,114 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2006 Red Hat, Inc.
+#
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/.
+#
+# Author: Bill Peck
+
+import sys, getopt
+# xmlrpclib doesn't support timeouts
+#import xmlrpclib
+import rhts.timeout_xmlrpclib as xmlrpclib
+
+import string
+import os
+import pprint
+import time
+
+result_server = ''
+recipesetid = ''
+hostname = ''
+
+USAGE_TEXT = """
+Usage:  rhts-sync-set -s <STATE>
+"""
+
+def sync_set(state):
+    global result_server, hostname, recipesetid
+    result_server = "http://%s/cgi-bin/rhts/scheduler_xmlrpc.cgi" % result_server
+
+    if not result_server:
+       print "You must specify the result server with the -R switch"
+       sys.exit(1)
+
+    if not hostname:
+       print "You must specify the hostname with the -m switch"
+       sys.exit(1)
+
+    if not recipesetid:
+       print "You must specify the recipesetid with the -r switch"
+       sys.exit(1)
+
+    client = xmlrpclib.Server(result_server)
+    while True:
+        try:
+            resp = client.sync.set(recipesetid,-1,result_server,hostname,state)
+            [remotestate] = client.sync.block(recipesetid, -1, result_server, [state], [hostname])
+            if state == remotestate:
+                # We successfully set our state.  Exit.
+                break
+        except:
+            print "Unable to connect to server, sleeping 5 seconds..."
+            time.sleep(5)
+
+    if(resp != 0) :
+        raise NameError, "ERROR: setting state...."
+
+def usage():
+    print USAGE_TEXT
+    sys.exit(-1)
+
+def main():
+    global result_server, hostname, recipesetid
+
+    if ('RESULT_SERVER' in os.environ.keys()):
+        result_server = os.environ['RESULT_SERVER']
+    if ('RECIPESETID' in os.environ.keys()):
+        recipesetid = os.environ['RECIPESETID']
+    if ('HOSTNAME' in os.environ.keys()):
+        hostname = os.environ['HOSTNAME']
+
+    args = sys.argv[1:]
+    state = ''
+    try:
+        opts, args = getopt.getopt(args, 'r:s:R:m:', ['result_server='])
+    except:
+        usage()
+    for opt, val in opts:
+        if opt in ('-s', '--state'):
+            state = val
+        if opt in ('-R', '--result_server'):
+            result_server = val
+        if opt in ('-m', '--machine'):
+            hostname = val
+        if opt in ('-r', '--recipesetid'):
+            recipesetid = val
+
+    if not state:
+        print "You must specify a state with the -s switch"
+        sys.exit(1)
+
+    if not result_server:
+        print "result_server not set, assuming developer mode."
+        print "Setting %s to state %s" % (hostname,state)
+        sys.exit(0)
+    else:
+        sync_set(state)
+
+
+if __name__ == '__main__':
+    main()
+    sys.exit(0)
+

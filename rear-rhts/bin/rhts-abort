@@ -1,0 +1,137 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2006 Red Hat, Inc.
+#
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/.
+#
+# Author: Bill Peck
+
+import sys, getopt
+import xmlrpclib
+import string
+import os
+import pprint
+import time
+
+import rhts
+
+result_server = ''
+jobid = ''
+recipesetid = ''
+recipeid = ''
+
+USAGE_TEXT = """
+Usage:  rhts-abort -t [JOB|RECIPESET|RECIPE]
+"""
+
+def abortJob(server, jobid):
+    while True:
+        try:
+            resp = server.watchdog.abortJob(jobid)
+            break
+        except:
+            print "Unable to connect to server, sleeping 5 seconds..."
+            time.sleep(5)
+    return resp
+
+def abortRecipeSet(server, recipesetid):
+    while True:
+        try:
+            resp = server.watchdog.abortRecipeSet(recipesetid)
+            break
+        except:
+            print "Unable to connect to server, sleeping 5 seconds..."
+            time.sleep(5)
+    return resp
+
+def abortRecipe(server, recipeid):
+    while True:
+        try:
+            resp = server.watchdog.abortRecipe(recipeid)
+            break
+        except:
+            print "Unable to connect to server, sleeping 5 seconds..."
+            time.sleep(5)
+    return resp
+
+def usage():
+    print USAGE_TEXT
+    sys.exit(-1)
+
+def main():
+    result_server = None
+    recipesetid = None
+    jobid = None
+    recipeid = None
+    recipetestid = None
+
+    if ('RESULT_SERVER' in os.environ.keys()):
+        result_server = os.environ['RESULT_SERVER']
+    if ('RECIPESETID' in os.environ.keys()):
+        recipesetid = os.environ['RECIPESETID']
+    if ('JOBID' in os.environ.keys()):
+        jobid = os.environ['JOBID']
+    if ('RECIPEID' in os.environ.keys()):
+        recipeid = os.environ['RECIPEID']
+    if ('RECIPETESTID' in os.environ.keys()):
+        recipetestid = os.environ['RECIPETESTID']
+
+    args = sys.argv[1:]
+    type = None
+    
+    try:
+        opts, args = getopt.getopt(args, 't:l:j:s:r:', ['result_server='])
+    except:
+        usage()
+    for opt, val in opts:
+        if opt in ('-t', '--type'):
+            type = val
+        if opt in ('-l', '--result_server'):
+            result_server = val
+        if opt in ('-j', '--jobid'):
+            jobid = val
+        if opt in ('-s', '--recipesetid'):
+            recipesetid = val
+        if opt in ('-r', '--recipeid'):
+            recipeid = val
+
+    if not type:
+        print "You must specify a type with the -t flag"
+        sys.exit(1)
+
+    if not result_server:
+        print "you must specify a result_server with the -l flag"
+        sys.exit(1)
+
+    server = xmlrpclib.Server("http://%s/cgi-bin/rhts/scheduler_xmlrpc.cgi" % result_server)
+    # Upload TESTOUT.log
+    if recipetestid:
+        rhts.uploadWrapper(server, '/mnt/testarea/TESTOUT.log', recipetestid)
+    if type == 'recipe' and recipeid:
+        result = abortRecipe(server,recipeid)
+    elif type == 'recipeset' and recipesetid:
+        result = abortRecipeSet(server,recipesetid)
+    elif type == 'job' and jobid:
+        result = abortJob(server,jobid)
+    else:
+        print "Invalid type: %s or missing %sid" % (type, type)
+        sys.exit(1)
+    if result != 0:
+        print "Failed to abort!"
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+    sys.exit(0)
+

@@ -1,0 +1,36 @@
+#!/usr/bin/python
+
+import sys, xmlrpclib, syslog, os, time
+
+USAGE_TEXT = """
+Usage:
+   rhts-test-update <result_server> <test_id> <call_type[start|cancel|abort|finish]> 
+
+"""
+def usage():
+    print USAGE_TEXT
+    sys.exit(-1)
+
+timetext = time.strftime('%m/%d/%y %H:%M:%S ', time.localtime(time.time()))
+
+result_server = sys.argv[1]
+server = "http://%s/cgi-bin/rhts/scheduler_xmlrpc.cgi" % (result_server)
+test_id = sys.argv[2]
+call_type = sys.argv[3]
+pkgs = ''
+for i in sys.argv[4:]:
+  pkgs = "%s %s" % (pkgs, i)
+
+client = xmlrpclib.Server(server)
+while True:
+    try:
+        resp = client.test.testCheckin(test_id, call_type)
+        break
+    except:
+        print "Unable to connect to server, sleeping 5 seconds..."
+        time.sleep(5)
+
+# syslog the message
+syslog.syslog("%s testID:%s %s:\n" % (timetext, test_id, call_type))
+# send it to stderr as well
+sys.stderr.write("%s testID:%s %s:\n" % (timetext, test_id, call_type))

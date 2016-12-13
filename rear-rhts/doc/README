@@ -1,0 +1,65 @@
+= RHTS =
+
+Collection of shell scripts used to author and execute tests.
+
+The test is a package containing {{{Makefile}}} and {{{PURPOSE}}} files.  Use
+{{{make run}}} to execute one manually. When scheduler runs the test
+additional environment variables are created e.g. {{{KILLTIME}}} referred to
+later.
+
+Minimal documentation can be found
+[https://fedorahosted.org/beaker/wiki/QuickRhts here].
+
+The sources can be obtained from project's
+[http://git.fedorahosted.org/git/?p=rhts.git git repository].
+
+Links:
+
+ * [https://fedorahosted.org/beaker beaker]
+ * [https://fedorahosted.org/beakerlib beakerlib]
+ * [https://fedorahosted.org/beah beah]
+
+== FEATURES ==
+
+''Disclaimer: This list is incomplete and addresses especially new features.
+Existing features will be added when referred by a new one.''
+Use {{{--help}}} option to get the help on particular scripts.
+
+=== Local Watchdog ===
+
+Each task has a maximum permitted run time. If the task take longer than
+specified time, the system information is collected, the task is killed and
+the machine is rebooted.
+
+This time is specified in {{{TestTime}}} item in metadata file. Time unit
+suffix is accepted: m for minutes, h for hours. Default is seconds for no
+suffix. Example:
+
+    TestTime:     5m
+
+The task expects local watchdog in {{{KILLTIME}}} environment variable and
+{{{KILLTIMEOVERRIDE}}} environment variable can be used to override the
+watchdog.  Both variables are integer values in seconds.
+
+==== Custom scripts to run before local watchdog ====
+
+''New in rhts-test-env-4.32.''
+
+Custom scripts can be launched before local watchdog triggers. These are
+executable files located in {{{$HOME/.rhts/hooks/watchdog}}} and
+{{{/usr/share/rhts/hooks/watchdog}}}. The scripts found in these locations are
+sorted by basename and executed in that order in the same environment as the
+task with task's pid accessible in additional {{{TASK_PID}}} environment
+variable.
+
+The script may kill the task in which case the task should create a FAIL or
+WARN result as appropriate.
+
+=== Metadata ===
+
+Each task contains a metadata file {{{testinfo.desc}}}. The file is part of
+the package and usually can be created by {{{make testinfo.desc}}}. This file
+is read by scheduler as well as by a test harness to access test metadata.
+
+Metadata are written in {{{Keyword: Value}}} format.
+

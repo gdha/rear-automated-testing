@@ -1,0 +1,156 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2006 Red Hat, Inc.
+#
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/.
+#
+# Author: Bill Peck
+#
+
+import sys, getopt
+
+# xmlrpclib doesn't support timeouts
+#import xmlrpclib
+import rhts.timeout_xmlrpclib as xmlrpclib
+
+import syslog
+import string
+import os
+import pprint
+import time
+import datetime
+import socket
+
+result_server = ''
+recipesetid = ''
+testorder = ''
+hostname = ''
+
+USAGE_TEXT = """
+Usage: rhts-sync-block -s <STATE> [-s <STATE>] [--any] [--timeout <SECONDS>] <MACHINE> [<MACHINE>] [<MACHINE>]
+
+Options:
+ -s, --state	The state to look for, if repeated the machine(s) can be in any of the states.
+ --any		Changes it so that only one machine needs to match the state(s)
+ --timeout      Number of seconds to wait for state(s) before exiting non-zero
+"""
+def isset(x):
+    if x:
+       return 1
+    else:
+       return 0
+
+def info(msg):
+    syslog.syslog(msg)
+    sys.stderr.write(msg + '\n')
+
+def sync_block(states,machines,any_machine,timeout):
+    global result_server, hostname, recipesetid, testorder
+    result_server = "http://%s/cgi-bin/rhts/scheduler_xmlrpc.cgi" % result_server
+
+    if not result_server:
+       raise Exception, "You must specify the result server with the -R switch"
+
+    if not recipesetid:
+       raise Exception, "You must specify the recipesetid with the -r switch"
+
+    if not testorder:
+       raise Exception, "You must specify the testorder with the -t switch"
+
+    client = xmlrpclib.Server(result_server)
+    curr_states = []
+    while True:
+        if any_machine:
+            for machine in machines:
+                try:
+                    curr_states.extend(client.sync.block(recipesetid,testorder,result_server,states,[machine]))
+                except xmlrpclib.Fault, e:
+                    pass # assuming it's just a timeout
+                except Exception, e:
+                    info('rhts-sync-block: %s' % e)
+                if curr_states:
+                    break
+        else:
+            try:
+                curr_states = client.sync.block(recipesetid,testorder,result_server,states,machines)
+            except xmlrpclib.Fault, e:
+                pass # assuming it's just a timeout
+            except Exception, e:
+                info('rhts-sync-block: %s' % e)
+        if curr_states:
+            break
+        if timeout and datetime.datetime.now() > timeout:
+            info('rhts-sync-block --timeout exceeded')
+            return 1
+        time.sleep(5)
+    print string.join(curr_states,":")
+    return 0
+
+
+def usage():
+    sys.stderr.write(USAGE_TEXT)
+    return -1
+
+def main():
+    global result_server, hostname, recipesetid, testorder
+
+    if ('RESULT_SERVER' in os.environ.keys()):
+        result_server = os.environ['RESULT_SERVER']
+    if ('RECIPESETID' in os.environ.keys()):
+        recipesetid = os.environ['RECIPESETID']
+    if ('TESTORDER' in os.environ.keys()):
+        testorder = os.environ['TESTORDER']
+
+    states = []
+    any_machine = False
+    timeout = None
+    args = sys.argv[1:]
+    try:
+        opts, args = getopt.getopt(args, 'r:t:s:R:', ['state=', 'result_server=', 'recipesetid=', 'testorder=', 'any', 'timeout='])
+    except:
+        return usage()
+    for opt, val in opts:
+        if opt in ('-s', '--state'):
+            states.append(val)
+        if opt in ('-R', '--result_server'):
+            result_server = val
+        if opt in ('-r', '--recipesetid'):
+            recipesetid = val
+        if opt in ('-t', '--testorder'):
+            testorder = val
+        if opt in ('--any'):
+            any_machine = True
+        if opt in ('--timeout'):
+            timeout = datetime.datetime.now() + datetime.timedelta(seconds=int(val))
+
+    machines = args[0:]
+    machines = filter(isset,machines)
+    if not machines:
+        print "no machines specified. exiting"
+        return -1
+
+    if not states:
+       raise Exception, "You must specify a state with the -s switch"
+
+    if not result_server:
+        sys.stderr.write("result_server not set, assuming developer mode.\n")
+        sys.stderr.write("Enter STATE:STATE:etc. when the following machines\n %s\nare in one of these states: %s" % (machines,states))
+        resp = raw_input()
+	print resp
+    else:
+        return sync_block(states,machines,any_machine,timeout)
+
+if __name__ == '__main__':
+    sys.exit(main())
+

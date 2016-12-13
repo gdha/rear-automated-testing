@@ -1,0 +1,122 @@
+# Copyright (c) 2006 Red Hat, Inc.
+#
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/.
+#
+# Author: Greg Nichols <gnichols@redhat.com>
+
+#
+# rhts-make.include
+#
+# default rules and settings for rhts makefiles
+#
+
+# Common Variables.
+TEST_DIR=/mnt/tests$(TEST)
+INSTALL_DIR=$(DEST)$(TEST_DIR)
+METADATA=testinfo.desc
+
+# Append path to internal RHTS tools so that they can be used from the Makefile
+# (not intended to be used from outside it)
+RHTS_TOOLS_DIR=/usr/libexec/rhts/
+PATH:=$(PATH):$(RHTS_TOOLS_DIR)
+
+# tag: mark the test source as a release
+
+tag:
+	rhts-mk-tag-release 
+
+release: tag
+
+# diff: show differences since last tag
+
+diff:
+	rhts-mk-diff-since-last-tag
+
+# prep: prepare the test(s) for packaging
+
+install: $(FILES) testinfo.desc
+	mkdir -p $(INSTALL_DIR)
+	cp -a $(FILES) Makefile $(INSTALL_DIR)
+	if [ -e "runtest.sh" ]; then install -m 0755 runtest.sh $(INSTALL_DIR); fi
+
+install-built-files: $(BUILT_FILES)
+	cp -a $(BUILT_FILES) $(INSTALL_DIR)
+
+# package: build the test package
+
+noarch-rpm:
+	rhts-mk-build-package
+
+arch-rpm:
+	rhts-mk-build-package -a
+
+rpm: noarch-rpm
+
+package: noarch-rpm
+
+
+
+
+help:
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Available targets supplied by common Makefile are:"
+	@echo "        help:  show this text"
+	@echo "         tag:  for CVS, tag based on name-version-release"
+	@echo "     release:  synonym for 'tag'"
+	@echo "  noarch-rpm:  build a noarch RPM package of the test, with any compilation happening at test time"
+	@echo "    arch-rpm:  build an arch-specific RPM package of the test, with compilation happening at build time"
+	@echo "         rpm:  synonym for 'noarch-rpm'"
+	@echo "     package:  synonym for 'noarch-rpm'"
+	@echo "      bkradd:  upload the test RPM using bkr task-add"
+	@echo ""
+	@echo "Targets supplied by common Makefile for overriding by tests are:"
+	@echo "      install:  install the test sources into INSTALL_DIR"
+	@echo ""
+	@echo "Targets typically supplied by a test's Makefile are:"
+	@echo "         run:  perform the test"
+	@echo "    download:  grab upstream tarballs and other resources"
+	@echo "       clean:  clean the directory"
+	@echo ""
+
+TESTSERVER ?= rhts.redhat.com
+submit:
+	echo "Sorry! RHTS doesn't exist anymore. Try make bkradd instead." ; exit 1
+
+.INTERMEDIATE: $(METADATA)
+bkradd: $(METADATA) snake-submit
+	rhts-mk-build-package -b
+
+SNAKESERVER ?= $(TESTSERVER)
+snake-submit:
+	rhts-mk-snake-template -s $(SNAKESERVER)
+
+##################################################
+# example makefile
+#
+# include ~/devel/rhts/greg/rhts_nb/make.include
+#
+# FILES=prog1.c prog2.c
+#
+# ARENA=$(DEST)/mnt/tests/glibc/double-free-exploit
+# 
+# install: 
+# 	mkdir -p $(ARENA)
+#	cp -a runtest.sh $(FILES) $(ARENA)
+# 
+# run: tests
+#	runtest.sh
+#	
+# tests: prog2 prog2
+

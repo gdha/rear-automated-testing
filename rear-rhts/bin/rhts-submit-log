@@ -1,0 +1,93 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2006 Red Hat, Inc.
+#
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/.
+#
+# Author: Bill Peck
+#
+
+import sys, getopt
+import xmlrpclib
+import string
+import os
+import pprint
+
+import rhts
+
+server = ''
+
+USAGE_TEXT = """
+Usage:  rhts-submit-log -T <recipetestid> -l <logfile>
+"""
+
+def report_log(recipetestid, logname, start=0):
+   session = xmlrpclib.Server(result_server)
+   rhts.uploadWrapper(session, logname, recipetestid, start=start)
+
+
+def usage():
+    print USAGE_TEXT
+    sys.exit(-1)
+
+def main():
+    global result_server, recipetestid
+
+    result_server = ''
+    recipetestid = ''
+
+    if ('RESULT_SERVER' in os.environ.keys()):
+        result_server = "http://%s/cgi-bin/rhts/scheduler_xmlrpc.cgi" % os.environ['RESULT_SERVER']
+    if ('RECIPETESTID' in os.environ.keys()):
+        recipetestid = os.environ['RECIPETESTID']
+
+    logpath = ''
+    logname = ''
+    logdata = ''
+    start = 0
+    args = sys.argv[1:]
+    try:
+        opts, args = getopt.getopt(args, 'l:T:S:s:', ['server=', 'start='])
+    except:
+        usage()
+    for opt, val in opts:
+        if opt in ('-T', '--testid'):
+            recipetestid = val
+        if opt in ('-l', '--log'):
+            logname = val
+        if opt in ('-S', '--server'):
+            result_server = "http://%s/cgi-bin/rhts/scheduler_xmlrpc.cgi" % val
+        if opt in ('-s', '--start'):
+            start = int(val)
+            assert start >= 0, "start must be greater or equall zero."
+
+    if not logname:
+        print "You must specify a logfile with the -l switch"
+        sys.exit(1)
+
+    if not result_server:
+        print "result_server not set, assuming developer mode."
+        print "Log File : %s" % logname
+        sys.exit(0)
+    else:
+        if not recipetestid:
+           print "You must specify a recipetestid with the -T switch"
+           sys.exit(1)
+        report_log(recipetestid, logname, start=start)
+
+
+if __name__ == '__main__':
+    main()
+    sys.exit(0)
+

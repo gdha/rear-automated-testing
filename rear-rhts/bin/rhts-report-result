@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Copyright (c) 2006 Red Hat, Inc.
+#
+# This program is free software: you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/.
+#
+# Author: David Malcolm
+
+function usage() {
+	echo "Usage: rhts-report-result TESTNAME TESTRESULT LOGFILE [METRIC]"
+	echo "where TESTNAME is the name of the test result being reported"
+	echo "      TESTRESULT should be PASS or FAIL"
+	echo "      LOGFILE is the name of the log file to be uploaded"
+	echo "      METRIC is an optional numeric metric (e.g. a performance figure)"
+	echo "It will also upload the kernel ring buffer (using dmesg)"
+}
+
+if [ $# -lt 3 -o $# -gt 4 ]; then
+	usage
+	exit 1
+fi
+
+declare -a options
+
+if [ -n "$4" ]; then
+    options[${#options[@]}]="--resultvalue=$4"
+fi
+
+# echo Reporting test $1 as $2 > /dev/stderr
+dmesg -c > /mnt/testarea/dmesg.log
+
+if [ -n "$RESULT_SERVER" ] ; then
+    options[${#options[@]}]="--server=$RESULT_SERVER"
+fi
+
+if [ -n "$RECIPETESTID" ] ; then
+    options[${#options[@]}]="--testid=$RECIPETESTID"
+fi
+
+rhts-db-submit-result \
+        --testname="$1" \
+        --result="$2" \
+        --log="$3" \
+        "${options[@]}" \
+        --testversion="$TESTVERSION" \
+        --dmesg=/mnt/testarea/dmesg.log
