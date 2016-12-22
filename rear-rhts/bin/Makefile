@@ -18,11 +18,11 @@ PRIVATE_PYTHON_SCRIPTS := rhts-mk-test-import rhts-mk-generate-specfile
 PUBLIC_FILES := $(PUBLIC_SHELL_SCRIPTS) $(PUBLIC_PYTHON_SCRIPTS)
 PRIVATE_FILES := $(PRIVATE_SHELL_SCRIPTS) $(PRIVATE_PYTHON_SCRIPTS)
 
-SHELL_SCRIPTS := $(PUBLIC_SHELL_SCRIPTS) $(PRIVATE_SHELL_SCRIPTS)
-PYTHON_SCRIPTS := $(PUBLIC_PYTHON_SCRIPTS) $(PRIVATE_PYTHON_SCRIPTS)
+SHELL_SCRIPTS := $(PUBLIC_SHELL_SCRIPTS)
+PYTHON_SCRIPTS := $(PUBLIC_PYTHON_SCRIPTS)
 
 install:
 	mkdir -p $(DESTDIR)/usr/bin
 	for file in $(PUBLIC_FILES); do install -m 755 $$file $(DESTDIR)/usr/bin; done
 	mkdir -p $(DESTDIR)/usr/libexec/rhts
-	for file in $(PRIVATE_FILES); do install -m 755 $$file $(DESTDIR)/usr/libexec/rhts; done
+	#for file in $(PRIVATE_FILES); do install -m 755 $$file $(DESTDIR)/usr/libexec/rhts; done
