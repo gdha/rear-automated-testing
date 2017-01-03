@@ -98,6 +98,15 @@ if [[ ! -d "$distro" ]] ; then
     exit 1 
 fi
 
+# hard-code the correct security settings on vagrant SSH keys
+if [[ -f insecure_keys/vagrant.private ]] ; then
+    chmod 600 insecure_keys/vagrant.private
+    chmod 644 insecure_keys/vagrant.public
+else
+    echo "ERROR: file insecure_keys/vagrant.private not found"
+    exit 1
+fi
+
 Current_dir=$(pwd)
 ################################
 # Entering directory $distro
