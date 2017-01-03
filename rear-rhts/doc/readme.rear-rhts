@@ -1,0 +1,12 @@
+ReaR-RHTS
+---------
+RHTS is an obsolete package still used by beakerlib for consistency tests by RHEL for ReaR.
+We have trimmed most stuff out of the package and renamed it to rear-rhts to differentiate it
+from the original package.
+
+What is not done by the package is the followingi (add all extras here below):
+
+# ln -s /usr/share/rear-rhts /usr/share/rhts
+# mkdir /mnt/scratchspace
+# mkdir -m 1777 /mnt/testarea
+
