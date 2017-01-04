@@ -103,6 +103,14 @@ chmod 600 ~vagrant/.ssh/authorized_keys
 # firewallD is by default not running with this box
 
 # Networking setup..
+#---------------------
+# Fix slow DNS (issue #8):
+# Add 'single-request-reopen' so it is included when /etc/resolv.conf is generated
+# https://access.redhat.com/site/solutions/58625 (subscription required)
+echo 'RES_OPTIONS="single-request-reopen"' >>/etc/sysconfig/network
+service network restart
+echo 'Slow DNS fix applied (single-request-reopen)'
+
 # Don't fix ethX names to hw address.
 rm -f /etc/udev/rules.d/*persistent-net.rules
 rm -f /etc/udev/rules.d/*-net.rules
