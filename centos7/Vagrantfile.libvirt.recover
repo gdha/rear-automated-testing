@@ -52,8 +52,8 @@ Vagrant.configure(2) do |config|
       recover_prov.graphics_ip = '127.0.0.1'
       recover_prov.video_type = 'qxl'
       recover_prov.storage :file, :size => '40G', :type => 'raw'
-      # make sure file "/exports/isos/client/rear-client.iso" is readable by others
-      recover_prov.storage :file, :device => :cdrom, :path => '/exports/isos/client/rear-client.iso'
+      # make sure file "/export/isos/client/rear-client.iso" is readable by others
+      recover_prov.storage :file, :device => :cdrom, :path => '/export/isos/client/rear-client.iso'
       recover_prov.boot 'cdrom'
       recover_prov.boot 'hd'
       recover_prov.boot 'network'
