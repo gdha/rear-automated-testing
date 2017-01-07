@@ -6,6 +6,8 @@ nodes = [
    { :hostname => 'server', :ip => '192.168.33.15', :box => 'centos/7', :ram => 1024, :gport => '5992' }
 ]
 
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
+
 Vagrant.configure(2) do |config|
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
