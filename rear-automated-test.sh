@@ -40,11 +40,12 @@ function IsNotPingable {
 
 function helpMsg {
     cat <<eof
-Usage: $PRGNAME [-d <distro>] [-b <boot method>] [-s <server IP>] -vh
+Usage: $PRGNAME [-d <distro>] [-b <boot method>] [-s <server IP>] [-p provider] [-c <rear-config-file.conf> -vh
         -d: The distribution to use for this automated test (default: $distro)
         -b: The boot method to use by our automated test (default: $boot_method)
         -s: The <boot server> IP address (default: $boot_server)
 	-p: The vagrant <provider> to use (default: $VAGRANT_DEFAULT_PROVIDER)
+	-c: The ReaR config file we want to use with this test (default: PXE-booting-example-with-URL-style.conf)
         -h: This help message.
         -v: Revision number of this script.
 
@@ -52,8 +53,9 @@ Comments:
 --------
 distro: select the distribution you want to use for these testings
 boot method: select the rescue image boot method (default PXE) - supported are PXE and ISO
-boot server: is the server where the PXE or ISO stuff resides on (could be the hypervisor or host system)
+boot server: is the server where the PXE or ISO images resides on (could be the hypervisor or host system)
 provider: as we use vagrant we need to select the provider to use (virtualbox, libvirt)
+rear-config-file.conf: is the ReaR config file we would like to use to drive the test scenario with (optional with PXE)
 eof
 }
 
@@ -90,12 +92,13 @@ if [[ $(id -u) -ne 0 ]] ; then
     esac
 fi
 
-while getopts ":d:b:s:p:vh" opt; do
+while getopts ":d:b:s:p:c:vh" opt; do
     case "$opt" in
         d) distro="$OPTARG" ;;
         b) boot_method="$OPTARG" ;;
 	s) boot_server="$OPTARG" ;;
 	p) provider="$OPTARG" ;;
+	c) config="$OPTARG" ;;
         h) helpMsg; exit 0 ;;
         v) echo "$PRGNAME version $VERSION"; exit 0 ;;
        \?) echo "$PRGNAME: unknown option used: [$OPTARG]."
@@ -120,13 +123,23 @@ fi
 
 # define a proper supported vagrant provider
 case "$provider" in
-	libvirt) VAGRANT_DEFAULT_PROVIDER="libvirt" ;;
-	virtualbox) VAGRANT_DEFAULT_PROVIDER="virtualbox" ;;
+	"") # use default VAGRANT_DEFAULT_PROVIDER as defined in the beginning
+	    : ;;
+	"libvirt") VAGRANT_DEFAULT_PROVIDER="libvirt" ;;
+	"virtualbox") VAGRANT_DEFAULT_PROVIDER="virtualbox" ;;
 	*) echo "ERROR: vagrant provider $provider is not (yet) supported by $PRGNAME"
 	   echo "       You can always sponsor this - see README.md"
 	   exit 1 ;;
 esac
 export VAGRANT_DEFAULT_PROVIDER
+
+# ReaR config file selection check
+if [[ ! -z "$config" ]] && [[ -f "$config" ]] ; then
+    REAR_CONFIG="$config"
+else
+    # most likelya no argument was supplied and therefore, $config is empty = use default PXE template
+    REAR_CONFIG=../templates/PXE-booting-with-URL-style.conf
+fi
 
 # hard-code the correct security settings on vagrant SSH keys
 if [[ -f insecure_keys/vagrant.private ]] ; then
@@ -136,6 +149,11 @@ else
     echo "ERROR: file insecure_keys/vagrant.private not found"
     exit 1
 fi
+
+#
+# When virtualbox is in play then on the hypervisor/host tftpboot and dhcpd must be configured to boot PXE
+# We should check this (Todo) Directory /export/nfs/tftpboot should exist and /export must be exported as well
+#
 
 Current_dir=$(pwd)
 ################################
@@ -159,6 +177,16 @@ echo
 vagrant status
 
 echo
+
+# if we are dealing with virtualbox if might be that $client/$server are not pingable due to an
+# bug in vagrant itself
+# Work-around is to check if "eth1" is active - if not then restart the network
+echo "Check if 'eth1' is active on client [known issue https://github.com/mitchellh/vagrant/issues/8166]"
+vagrant ssh client -c "sudo su -c \"ip addr show dev eth1 | grep -q DOWN && systemctl restart network.service\""
+
+echo "Check if 'eth1' is active on server"
+vagrant ssh server -c "sudo su -c \"ip addr show dev eth1 | grep -q DOWN && systemctl restart network.service\""
+
 echo "Doing ping tests to VMs client and server"
 if IsNotPingable $client ; then
     echo "VM $client is not pingable - please investigate why"
@@ -183,40 +211,65 @@ echo
 
 # PXE/ISO boot server - for ISO boot_server should always be defined
 # for PXE with virtualbox we need boot_server (the host); with libvirt we can PXE boot from the server VM
-if [[ "$server" != "$boot_server" ]] ; then
-    # the hypervisor or host system must be reachable of course
-    if IsNotPingable $boot_server ; then
-        echo "System $boot_server is not pingable - please investigate why"
-        exit 1
-    else
-        echo "System $boot_server is up and running - ping test OK"
-    fi
-fi
+# However, with virtualbox the boot_server should be 10.0.2.2 which is not pingable from here :-//
+# My advise, do not define $boot_server as argument with virtualbox
+# Perhaps it is not required anymore?? Need to think about it....
+#if [[ "$server" != "$boot_server" ]] ; then
+#    # the hypervisor or host system must be reachable of course
+#    if IsNotPingable $boot_server ; then
+#        echo "System $boot_server is not pingable - please investigate why"
+#        exit 1
+#    else
+#        echo "System $boot_server is up and running - ping test OK"
+#    fi
+#fi
 
 # According the boot_method we can do different stuff now:
 case $boot_method in
+#~~~~~~~~~~~~~~~~~~
 PXE)
 ####
-echo "Configure rear on client to use OUTPUT=PXE method"
-ssh -i ../insecure_keys/vagrant.private root@$client "cp -f /usr/share/rear/conf/examples/PXE-booting-example-with-URL-style.conf /etc/rear/local.conf"
-echo
+    case $VAGRANT_DEFAULT_PROVIDER in
+        virtualbox) boot_server="10.0.2.2" ;;
+        #libvirt)   we use the $server to PXE boot from
+    esac
 
-echo "Copy PXE post script to disable PXE booting after sucessful 'rear recover'"
-scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/PXE/default/200_inject_default_boothd0_boot_method.sh
+    # Copy the ReaR config template to the client VM, but first we need to replace @server@ and @boot_server@ with the
+    # real values defined with arguments given or use the default ones
+    sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
+    echo "Configure rear on client to use OUTPUT=PXE method"
+    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf
+    echo
 
-;;
+    echo "Copy PXE post script to disable PXE booting after sucessful 'rear recover'"
+    ssh -i ../insecure_keys/vagrant.private root@$client "mkdir -p -m 755 /usr/share/rear/wrapup/PXE/default"
+    scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/PXE/default/200_inject_default_boothd0_boot_method.sh
 
+    ;;
+#~~~~~~~~~~~~~~~~~~~~
 ISO)
 ####
-: # not yet tested by me
-echo "ERROR: Sorry 'not' (yet) implemented by $PRGNAME"
-;;
+   echo "WARNING: Sorry 'not' (yet completely) implemented by $PRGNAME"
+   case $VAGRANT_DEFAULT_PROVIDER in
+       virtualbox) boot_server="10.0.2.2" ;;
+       libvirt)    boot_server="192.168.33.1" ;;
+   esac
 
+   sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
+   echo "Configure rear on client to use OUTPUT=ISO method"
+   scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf
+   echo
+
+   ;;
+#~~~~~~~~~~~~~~~~~~~~
 *)
-echo "ERROR: Boot method $boot_method 'not' yet foreseen by $PRGNAME"
-exit 1
-;;
+    echo "ERROR: Boot method $boot_method 'not' yet foreseen by $PRGNAME"
+    exit 1
+    ;;
 esac
+
+# remove the temporary ReaR config file from this host
+rm -f /tmp/rear_config.$$
 
 echo "Run 'rear -v mkbackup'"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup"
@@ -237,22 +290,27 @@ fi
 
 # According the boot_method we can do different stuff now:
 case $boot_method in
-PXE)
-####
+    PXE)
+    ####
 
-# For PXE access we have to make sure that on the server the client area is readable for others
-# in my ~/.ssh/config file I defined the line "UserKnownHostsFile /dev/null" to avoid issues
-# with duplicate host keys (after re-installing from scratch the VMs)
+    # For PXE access we have to make sure that on the server the client area is readable for others
+    # In my ~/.ssh/config file I defined the line "UserKnownHostsFile /dev/null" to avoid issues
+    # with duplicate host keys (after re-installing from scratch the VMs)
 
-echo "Make client area readable for others on server"
-ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client"
-echo
-;;
+    echo "Make client area readable for others on server"
+    case $VAGRANT_DEFAULT_PROVIDER in
+       virtualbox) chmod 755 /export/nfs/tftpboot/client
+       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client"
+                   ;;
+    esac
+    echo
+    ;;
 
-ISO)
-####
-:
-;;
+    ISO)
+    ####
+    # Todo: clean up the PXE area to avoid PXE booting?
+    :
+    ;;
 
 esac
 
