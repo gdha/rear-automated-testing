@@ -14,6 +14,10 @@ server="192.168.33.15"
 boot_server="$server"	# when using Oracle VirtualBox with PXE booting then the boot server needs to be host
 			# In case of KVM we can use $server VM to boot from
 
+# Vagrant variables
+# VAGRANT_DEFAULT_PROVIDER is an official variable vagrant supports, so we re-use this for our purposes as well
+VAGRANT_DEFAULT_PROVIDER=virtualbox	# default select virtualbox
+
 #############
 # functions #
 #############
@@ -37,11 +41,19 @@ function IsNotPingable {
 function helpMsg {
     cat <<eof
 Usage: $PRGNAME [-d <distro>] [-b <boot method>] [-s <server IP>] -vh
-        -d: The distribution to use for this automated test (default: centos7)
-        -b: The boot method to use by our automated test (default: PXE)
+        -d: The distribution to use for this automated test (default: $distro)
+        -b: The boot method to use by our automated test (default: $boot_method)
         -s: The <boot server> IP address (default: $boot_server)
+	-p: The vagrant <provider> to use (default: $VAGRANT_DEFAULT_PROVIDER)
         -h: This help message.
         -v: Revision number of this script.
+
+Comments:
+--------
+distro: select the distribution you want to use for these testings
+boot method: select the rescue image boot method (default PXE) - supported are PXE and ISO
+boot server: is the server where the PXE or ISO stuff resides on (could be the hypervisor or host system)
+provider: as we use vagrant we need to select the provider to use (virtualbox, libvirt)
 eof
 }
 
@@ -56,6 +68,7 @@ function Error {
 echo "
 +--------------------------------------------------+
 |    Relax-and-Recover Automated Testing script    |
+|             version $VERSION                          |
 +--------------------------------------------------+
 
 Author: Gratien D'haese
@@ -77,11 +90,12 @@ if [[ $(id -u) -ne 0 ]] ; then
     esac
 fi
 
-while getopts ":d:b:s:vh" opt; do
+while getopts ":d:b:s:p:vh" opt; do
     case "$opt" in
         d) distro="$OPTARG" ;;
         b) boot_method="$OPTARG" ;;
 	s) boot_server="$OPTARG" ;;
+	p) provider="$OPTARG" ;;
         h) helpMsg; exit 0 ;;
         v) echo "$PRGNAME version $VERSION"; exit 0 ;;
        \?) echo "$PRGNAME: unknown option used: [$OPTARG]."
@@ -92,15 +106,27 @@ shift $(( OPTIND - 1 ))
 
 # check if vagrant is present
 if ! type -p vagrant &>/dev/null ; then
-    echo "Please install Vagrant 1.8.7 or higher"
+    echo "ERROR: Please install Vagrant 1.8.7 or higher"
     exit 1
 fi
 
 # check if <distro> directory exists?
 if [[ ! -d "$distro" ]] ; then
-    echo "Could not find directory '$distro'"
+    echo "ERROR: Could not find directory '$distro'"
+    echo "       Distribution $distro is not (yet) by $PRGNAME"
+    echo "       You can always sponsor this - see README.md"
     exit 1 
 fi
+
+# define a proper supported vagrant provider
+case "$provider" in
+	libvirt) VAGRANT_DEFAULT_PROVIDER="libvirt" ;;
+	virtualbox) VAGRANT_DEFAULT_PROVIDER="virtualbox" ;;
+	*) echo "ERROR: vagrant provider $provider is not (yet) supported by $PRGNAME"
+	   echo "       You can always sponsor this - see README.md"
+	   exit 1 ;;
+esac
+export VAGRANT_DEFAULT_PROVIDER
 
 # hard-code the correct security settings on vagrant SSH keys
 if [[ -f insecure_keys/vagrant.private ]] ; then
@@ -117,6 +143,10 @@ Current_dir=$(pwd)
 cd "$distro"
 echo "Current distro directory is $distro"
 ################################
+
+# Before starting vagrant we need to copy the Vagrantfile for the proper provider (VAGRANT_DEFAULT_PROVIDER)
+echo "Copy the Vagrantfile.$VAGRANT_DEFAULT_PROVIDER to Vagrantfile"
+cp Vagrantfile.$VAGRANT_DEFAULT_PROVIDER Vagrantfile
 
 # start up and client server vagrant VMs (the recover VM stays down)
 echo "Bringing up the vagrant VMs client and server"
@@ -151,6 +181,18 @@ echo "Update rear on the VM client"
 ssh -i ../insecure_keys/vagrant.private root@$client "yum -y update rear"
 echo
 
+# PXE/ISO boot server - for ISO boot_server should always be defined
+# for PXE with virtualbox we need boot_server (the host); with libvirt we can PXE boot from the server VM
+if [[ "$server" != "$boot_server" ]] ; then
+    # the hypervisor or host system must be reachable of course
+    if IsNotPingable $boot_server ; then
+        echo "System $boot_server is not pingable - please investigate why"
+        exit 1
+    else
+        echo "System $boot_server is up and running - ping test OK"
+    fi
+fi
+
 # According the boot_method we can do different stuff now:
 case $boot_method in
 PXE)
@@ -162,25 +204,16 @@ echo
 echo "Copy PXE post script to disable PXE booting after sucessful 'rear recover'"
 scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/PXE/default/200_inject_default_boothd0_boot_method.sh
 
-if [[ "$server" != "$boot_server" ]] ; then
-    # PXE boot server is most likely the host and not the server VM
-    if IsNotPingable $boot_server ; then
-        echo "System $boot_server is not pingable - please investigate why"
-        exit 1
-    else
-        echo "System $boot_server is up and running - ping test OK"
-    fi
-
-fi
 ;;
 
 ISO)
 ####
 : # not yet tested by me
+echo "ERROR: Sorry 'not' (yet) implemented by $PRGNAME"
 ;;
 
 *)
-echo "Boot method $boot_method 'not' yet foreseen by $PRGNAME"
+echo "ERROR: Boot method $boot_method 'not' yet foreseen by $PRGNAME"
 exit 1
 ;;
 esac
