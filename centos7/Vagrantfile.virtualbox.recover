@@ -18,6 +18,9 @@ Vagrant.configure(2) do |config|
       nodeconfig.vm.network :private_network, ip: node[:ip]
 
       memory = node[:ram] ? node[:ram] : 256;
+      nodeconfig.vm.provider :virtualbox do |vb|
+        #
+      end
      
       nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
       nodeconfig.vm.provision :shell, path: "provision-centos7.sh"
@@ -27,31 +30,38 @@ Vagrant.configure(2) do |config|
     # end of config.vm.define node
     end
   
+
   # end of nodes.each do |node|
   end
 
-
-  file_to_disk = ./recover-dsk.vdi
-
   config.vm.define "recover", autostart: false do |recover|
+    recover.vm.box = "clink15/pxe"
+    recover.vm.boot_timeout = 3600
+    recover.ssh.insert_key = "false"
 
-    recover.vm.box = "pxe_boot"
-    # Use an empty box 
-    # recover.vm.box_url = "https://s3.amazonaws.com/fnichol/vagrant-base-boxes/blank-amd64-20121109.box"
-    recover.vm.gui = true unless ENV['NO_GUI']
-    recover.vm.memory = 1024
-    recover.vm.cpus = 1
-    # See https://gist.github.com/leifg/4713995  to create a hd
-    unless File.exist?(file_to_disk)
-        recover.vm.customize ['createhd', '--filename', file_to_disk, '--size', 40 * 1024]
+    #recover.vm.network "public_network"
+    recover.vm.network :private_network, ip: "192.168.33.5"
+    recover.ssh.username = "root"
+
+    recover.vm.provider :virtualbox do |recover_prov|
+      recover_prov.name = "recover"
+      recover_prov.gui = true unless ENV['NO_GUI']
+      recover_prov.memory = "1024"
+      recover_prov.cpus = "1"
+
+      # https://docs.vagrantup.com/v2/virtualbox/configuration.html
+      # http://superuser.com/questions/741734/virtualbox-how-can-i-add-mount-an-iso-image-file-from-command-line
+      # make sure file "/export/isos/client/rear-client.iso" is readable by others
+      # According URL https://github.com/mitchellh/vagrant/issues/8105 "IDE Controller" might be "IDE" only
+      recover_prov.customize ["storageattach", :id, "--storagectl", "IDE",
+                              "--port", "0", "--device", "1", "--type", "dvddrive",
+                              "--medium", "/export/isos/client/rear-client.iso"]
+      recover_prov.customize ["modifyvm", :id, "--boot1", "DVD", "--boot2", "disk",
+                              "--boot3", "none", "--boot4", "none"]
+      # end of |recover_prov|
+      end
+    # end of |recover|
     end
-    recover.vm.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1,
-                          '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
-    recover.vm.customize ["modifyvm", :id, "--macaddress1", "auto"]
-    recover.vm.customize ["modifyvm", :id, "--boot1", "net", "--boot2", "disk"]
-    recover.vm.network :private_network, type: "dhcp", auto_config: false
-    # end of |recover| 
-    end
-  
+
 # end of Vagrant.configure
-end
+end 
