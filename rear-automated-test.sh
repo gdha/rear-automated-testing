@@ -13,6 +13,9 @@ client="192.168.33.10"
 server="192.168.33.15"
 boot_server="$server"	# when using Oracle VirtualBox with PXE booting then the boot server needs to be host
 			# In case of KVM we can use $server VM to boot from
+# Default tftpboot root directory (for libvirt we keep the default; for virtualbox we need vb TFTP path (defined later)
+# The ReaR config templates need to be edited and replaced with the proper path (automatically done)
+pxe_tftpboot_path="/export/nfs/tftpboot"
 
 # Vagrant variables
 # VAGRANT_DEFAULT_PROVIDER is an official variable vagrant supports, so we re-use this for our purposes as well
@@ -230,13 +233,17 @@ case $boot_method in
 PXE)
 ####
     case $VAGRANT_DEFAULT_PROVIDER in
-        virtualbox) boot_server="10.0.2.2" ;;
+        virtualbox) boot_server="10.0.2.2"
+                    pxe_tftpboot_path="/root/.config/VirtualBox/TFTP"
+                    [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path"
+                    ;;
         #libvirt)   we use the $server to PXE boot from
     esac
 
     # Copy the ReaR config template to the client VM, but first we need to replace @server@ and @boot_server@ with the
     # real values defined with arguments given or use the default ones
-    sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
+    sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" \
+        -e "s/@pxe_tftpboot_path@/$pxe_tftpboot_path/g" < $REAR_CONFIG > /tmp/rear_config.$$
     echo "Configure rear on client to use OUTPUT=PXE method"
     scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf
     echo

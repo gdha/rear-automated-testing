@@ -58,8 +58,9 @@ Vagrant.configure(2) do |config|
       recover_prov.customize ["storageattach", :id, "--storagectl", "IDE",
                               "--port", "0", "--device", "1", "--type", "dvddrive",
                               "--medium", "/export/isos/client/rear-client.iso"]
-      recover_prov.customize ["modifyvm", :id, "--boot1", "DVD", "--boot2", "disk",
-                              "--boot3", "none", "--boot4", "none"]
+      recover_prov.customize ["modifyvm", :id, "--boot1", "net", "--boot2", "DVD",
+                              "--boot3", "disk", "--boot4", "none"]
+      recover_prov.customize ["modifyvm", :id, "--nattftpfile1", "pxelinux.0"]
       # end of |recover_prov|
       end
     # end of |recover|
