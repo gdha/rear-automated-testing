@@ -63,7 +63,8 @@ eof
 }
 
 function Error {
-    :
+    echo "ERROR: $*"
+    exit 1
 }
 
 ########################################################################
@@ -85,8 +86,7 @@ Copyright: GPL v3
 if [[ $(id -u) -ne 0 ]] ; then
     case $(uname -s) in
         Linux)
-            echo "Please run $PRGNAME as root"
-            exit 1
+            Error "Please run $PRGNAME as root"
             ;;
         CYGWIN*) : # no root required
             ;;
@@ -112,8 +112,7 @@ shift $(( OPTIND - 1 ))
 
 # check if vagrant is present
 if ! type -p vagrant &>/dev/null ; then
-    echo "ERROR: Please install Vagrant 1.8.7 or higher"
-    exit 1
+    Error "Please install Vagrant 1.8.7 or higher"
 fi
 
 # check if <distro> directory exists?
@@ -136,6 +135,16 @@ case "$provider" in
 esac
 export VAGRANT_DEFAULT_PROVIDER
 
+# We have chosen the proper provider - did we? Check the basics - are the main paths there or not?
+case $VAGRANT_DEFAULT_PROVIDER in
+    libvirt)
+        [[ ! -d /var/lib/libvirt ]] && Error "Libvirt seems not to be installed - use another provider perhaps"
+        ;;
+    virtualbox) 
+        [[ ! -d /usr/lib/virtualbox ]] && Error "VirtualBox seems not to be installed - use another provider perhaps"
+        ;;
+esac
+
 # ReaR config file selection check
 if [[ ! -z "$config" ]] && [[ -f "$config" ]] ; then
     REAR_CONFIG="$config"
@@ -149,8 +158,7 @@ if [[ -f insecure_keys/vagrant.private ]] ; then
     chmod 600 insecure_keys/vagrant.private
     chmod 644 insecure_keys/vagrant.public
 else
-    echo "ERROR: file insecure_keys/vagrant.private not found"
-    exit 1
+    Error "file insecure_keys/vagrant.private not found"
 fi
 
 #
@@ -192,16 +200,14 @@ vagrant ssh server -c "sudo su -c \"ip addr show dev eth1 | grep -q DOWN && syst
 
 echo "Doing ping tests to VMs client and server"
 if IsNotPingable $client ; then
-    echo "VM $client is not pingable - please investigate why"
-    exit 1
+    Error "VM $client is not pingable - please investigate why"
 else
     echo "VM $client is up and running - ping test OK"
 fi
 
 
 if IsNotPingable $server ; then
-    echo "VM $server is not pingable - please investigate why"
-    exit 1
+    Error "VM $server is not pingable - please investigate why"
 else
     echo "VM $server is up and running - ping test OK"
 fi
@@ -273,8 +279,7 @@ ISO)
    ;;
 #~~~~~~~~~~~~~~~~~~~~
 *)
-    echo "ERROR: Boot method $boot_method 'not' yet foreseen by $PRGNAME"
-    exit 1
+    Error "Boot method $boot_method 'not' yet foreseen by $PRGNAME"
     ;;
 esac
 
@@ -291,8 +296,7 @@ if [[ $rc -ne 0 ]] ; then
     echo "The last 20 lines are:"
     ssh -i ../insecure_keys/vagrant.private root@$client "tail -20 /var/log/rear/rear-client.log"
     echo
-    echo "Check yourself via 'vagrant ssh client'"
-    exit 1
+    Error "Check yourself via 'vagrant ssh client'"
 else
     echo "The rear mkbackup was successful"
     echo
