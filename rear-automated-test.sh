@@ -234,16 +234,18 @@ PXE)
 ####
     case $VAGRANT_DEFAULT_PROVIDER in
         virtualbox) boot_server="10.0.2.2"
+                    # with VirtualBox the TFTP boot path is under:
                     pxe_tftpboot_path="/root/.config/VirtualBox/TFTP"
                     [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path"
+                    [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg"
                     ;;
         #libvirt)   we use the $server to PXE boot from
     esac
 
     # Copy the ReaR config template to the client VM, but first we need to replace @server@ and @boot_server@ with the
     # real values defined with arguments given or use the default ones
-    sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" \
-        -e "s/@pxe_tftpboot_path@/$pxe_tftpboot_path/g" < $REAR_CONFIG > /tmp/rear_config.$$
+    sed -e "s;@server@;$server;g" -e "s;@boot_server@;$boot_server;g" \
+        -e "s;@pxe_tftpboot_path@;$pxe_tftpboot_path;g" < $REAR_CONFIG > /tmp/rear_config.$$
     echo "Configure rear on client to use OUTPUT=PXE method"
     scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf
     echo
@@ -262,6 +264,7 @@ ISO)
        libvirt)    boot_server="192.168.33.1" ;;
    esac
 
+   # We expect that the REAR_CONFIG was an argument with this script
    sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
    echo "Configure rear on client to use OUTPUT=ISO method"
    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf
@@ -304,9 +307,10 @@ case $boot_method in
     # In my ~/.ssh/config file I defined the line "UserKnownHostsFile /dev/null" to avoid issues
     # with duplicate host keys (after re-installing from scratch the VMs)
 
-    echo "Make client area readable for others on server"
+    echo "Make client area readable for others on PXE boot server $boot_server"
     case $VAGRANT_DEFAULT_PROVIDER in
-       virtualbox) chmod 755 /export/nfs/tftpboot/client
+       virtualbox) chmod 755 "$pxe_tftpboot_path"/client
+                   ;;
        libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client"
                    ;;
     esac
