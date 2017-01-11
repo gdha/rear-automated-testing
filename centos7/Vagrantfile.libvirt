@@ -56,9 +56,9 @@ Vagrant.configure(2) do |config|
       recover_prov.storage :file, :size => '40G', :type => 'raw'
       # make sure file "/export/isos/client/rear-client.iso" is readable by others
       recover_prov.storage :file, :device => :cdrom, :path => '/export/isos/client/rear-client.iso'
+      recover_prov.boot 'network'
       recover_prov.boot 'cdrom'
       recover_prov.boot 'hd'
-      recover_prov.boot 'network'
       # end of |recover_prov|
       end
       
