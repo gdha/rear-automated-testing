@@ -41,6 +41,23 @@ function IsNotPingable {
     return $rc
 }
 
+function findUser() {
+    thisPID=$$
+    origUser=$(whoami)
+    thisUser=$origUser
+
+    while [ "$thisUser" = "$origUser" ]
+    do
+        ARR=($(ps h -p$thisPID -ouser,ppid;))
+        thisUser="${ARR[0]}"
+        myPPid="${ARR[1]}"
+        thisPID=$myPPid
+    done
+
+    getent passwd "$thisUser" | cut -d: -f1
+}
+
+
 function helpMsg {
     cat <<eof
 Usage: $PRGNAME [-d <distro>] [-b <boot method>] [-s <server IP>] [-p provider] [-c <rear-config-file.conf> -vh
@@ -145,6 +162,27 @@ case $VAGRANT_DEFAULT_PROVIDER in
         ;;
 esac
 
+# Check and/or add the client/server IP addresses to the local /etc/hosts file
+grep -q "^$client" /etc/hosts
+if [[ $? -eq 1 ]] ;then
+   echo "Add IP addresses of client and server to /etc/hosts file (on the vagrant host)"
+   echo "192.168.33.10   vagrant-client" >> /etc/hosts
+   echo "192.168.33.15   vagrant-server" >> /etc/hosts
+   echo "192.168.33.1    vagrant-host" >> /etc/hosts
+fi
+
+# Verify the real user's .ssh/config file
+user=$(findUser)
+[[ ! -f ~$user/.ssh/config ]] && touch ~$user/.ssh/config
+grep -q "vagrant-client" ~$user/.ssh/config 2>/dev/null
+if [[ $? -ge 1 ]] ;then
+    echo "HOST vagrant-client vagrant-server" >> ~$user/.ssh/config
+    echo "     CheckHostIP no" >> ~$user/.ssh/config
+    echo "     StrictHostKeyChecking no" >> ~$user/.ssh/config
+    echo "     UserKnownHostsFile /dev/null" >> ~$user/.ssh/config
+    echo "     VerifyHostKeyDNS no" >> ~$user/.ssh/config
+fi
+
 # ReaR config file selection check
 if [[ ! -z "$config" ]] && [[ -f "$config" ]] ; then
     REAR_CONFIG="$config"
@@ -215,7 +253,7 @@ fi
 # first update rear inside VM client
 echo
 echo "Update rear on the VM client"
-ssh -i ../insecure_keys/vagrant.private root@$client "yum -y update rear"
+ssh -i ../insecure_keys/vagrant.private root@$client "yum -y update rear" 2>/dev/null
 echo
 
 # PXE/ISO boot server - for ISO boot_server should always be defined
@@ -253,12 +291,12 @@ PXE)
     sed -e "s;@server@;$server;g" -e "s;@boot_server@;$boot_server;g" \
         -e "s;@pxe_tftpboot_path@;$pxe_tftpboot_path;g" < $REAR_CONFIG > /tmp/rear_config.$$
     echo "Configure rear on client to use OUTPUT=PXE method"
-    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf
+    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf 2>/dev/null
     echo
 
     echo "Copy PXE post script to disable PXE booting after sucessful 'rear recover'"
-    ssh -i ../insecure_keys/vagrant.private root@$client "mkdir -p -m 755 /usr/share/rear/wrapup/PXE/default"
-    scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/PXE/default/200_inject_default_boothd0_boot_method.sh
+    ssh -i ../insecure_keys/vagrant.private root@$client "mkdir -p -m 755 /usr/share/rear/wrapup/PXE/default" 2>/dev/null
+    scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/PXE/default/200_inject_default_boothd0_boot_method.sh 2>/dev/null
 
     ;;
 #~~~~~~~~~~~~~~~~~~~~
@@ -273,7 +311,7 @@ ISO)
    # We expect that the REAR_CONFIG was an argument with this script
    sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
    echo "Configure rear on client to use OUTPUT=ISO method"
-   scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf
+   scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf 2>/dev/null
    echo
 
    ;;
@@ -287,14 +325,14 @@ esac
 rm -f /tmp/rear_config.$$
 
 echo "Run 'rear -v mkbackup'"
-ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup"
+ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup" 2>/dev/null
 rc=$?
 
 echo
 if [[ $rc -ne 0 ]] ; then
     echo "Please check the rear logging /var/log/rear/rear-client.log"
     echo "The last 20 lines are:"
-    ssh -i ../insecure_keys/vagrant.private root@$client "tail -20 /var/log/rear/rear-client.log"
+    ssh -i ../insecure_keys/vagrant.private root@$client "tail -20 /var/log/rear/rear-client.log" 2>/dev/null
     echo
     Error "Check yourself via 'vagrant ssh client'"
 else
@@ -315,7 +353,7 @@ case $boot_method in
     case $VAGRANT_DEFAULT_PROVIDER in
        virtualbox) chmod 755 "$pxe_tftpboot_path"/client
                    ;;
-       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client"
+       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client" 2>/dev/null
                    ;;
     esac
     echo
