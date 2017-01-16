@@ -8,7 +8,10 @@ case $(hostname) in
 client*)
 #######
 echo "Running client only commands:"
-
+# In order to run the tests (from RHEL) we need rear-rhts and beakerlib software
+# rear-rhts is customized package from the obsolete rhts package, but the tests
+# scripts seem to need it
+yum install -y rear-rhts beakerlib
 ;;
 # end of client specific code
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
