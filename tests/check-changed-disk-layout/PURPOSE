@@ -1,0 +1,3 @@
+PURPOSE of /CoreOS/rear/Sanity/check-changed-disk-layout
+Description: Check changed disk layout with parameter checklayout.
+Author: Tereza Cerna <tcerna@redhat.com>

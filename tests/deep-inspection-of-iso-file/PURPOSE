@@ -1,0 +1,3 @@
+PURPOSE of /CoreOS/rear/Sanity/deep-inspection-of-iso-file
+Description: This is initial test for new component rear. There is created basic backup and checked created iso file and saved system configuration. This is test for BZ#1059196 and BZ#981637.
+Author: Tereza Cerna <tcerna@redhat.com>

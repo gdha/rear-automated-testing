@@ -1,0 +1,3 @@
+PURPOSE of /CoreOS/rear/Sanity/make-backup-and-check-files
+Description: Rear creates backup and rescue and check created files (tar.gz and iso).
+Author: Tereza Cerna <tcerna@redhat.com>

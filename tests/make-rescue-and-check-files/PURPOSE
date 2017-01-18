@@ -1,0 +1,3 @@
+PURPOSE of /CoreOS/rear/Sanity/make-rescue-and-check-files
+Description: Rear creates only rescue and check that only iso file was created.
+Author: Tereza Cerna <tcerna@redhat.com>

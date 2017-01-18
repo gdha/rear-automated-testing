@@ -1,0 +1,17 @@
+bin
+boot
+dev
+etc
+init
+lib
+lib64
+mnt
+proc
+root
+run
+sbin
+selinux
+sys
+tmp
+usr
+var

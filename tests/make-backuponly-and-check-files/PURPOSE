@@ -1,0 +1,3 @@
+PURPOSE of /CoreOS/rear/Sanity/make-backuponly-and-check-files
+Description: Rear creates only backup and check that only tar.gz file was created.
+Author: Tereza Cerna <tcerna@redhat.com>
