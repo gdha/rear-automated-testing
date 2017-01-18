@@ -21,6 +21,8 @@ pxe_tftpboot_path="/export/nfs/tftpboot"
 # VAGRANT_DEFAULT_PROVIDER is an official variable vagrant supports, so we re-use this for our purposes as well
 VAGRANT_DEFAULT_PROVIDER=virtualbox	# default select virtualbox
 
+DO_TEST=		# execute a validation test (default no)
+
 #############
 # functions #
 #############
@@ -60,22 +62,25 @@ function findUser() {
 
 function helpMsg {
     cat <<eof
-Usage: $PRGNAME [-d <distro>] [-b <boot method>] [-s <server IP>] [-p provider] [-c <rear-config-file.conf> -vh
+Usage: $PRGNAME [-d distro] [-b <boot method>] [-s <server IP>] [-p provider] [-c rear-config-file.conf] [-t test] -vh
         -d: The distribution to use for this automated test (default: $distro)
         -b: The boot method to use by our automated test (default: $boot_method)
         -s: The <boot server> IP address (default: $boot_server)
 	-p: The vagrant <provider> to use (default: $VAGRANT_DEFAULT_PROVIDER)
 	-c: The ReaR config file we want to use with this test (default: PXE-booting-example-with-URL-style.conf)
+	-t: The ReaR validation test directory (see tests directory; no default)
         -h: This help message.
         -v: Revision number of this script.
 
 Comments:
 --------
-distro: select the distribution you want to use for these testings
-boot method: select the rescue image boot method (default PXE) - supported are PXE and ISO
-boot server: is the server where the PXE or ISO images resides on (could be the hypervisor or host system)
-provider: as we use vagrant we need to select the provider to use (virtualbox, libvirt)
-rear-config-file.conf: is the ReaR config file we would like to use to drive the test scenario with (optional with PXE)
+<distro>: select the distribution you want to use for these testings
+<boot method>: select the rescue image boot method (default PXE) - supported are PXE and ISO
+<boot server>: is the server where the PXE or ISO images resides on (could be the hypervisor or host system)
+<provider>: as we use vagrant we need to select the provider to use (virtualbox, libvirt)
+<rear-config-file.conf>: is the ReaR config file we would like to use to drive the test scenario with (optional with PXE)
+<test-dir>: under the tests/ directory there are sub-directories with the beakerlib tests (donated by RedHat).
+       When -t option is used then we will not execute an automated recover test (at least no yet)
 eof
 }
 
@@ -112,13 +117,17 @@ if [[ $(id -u) -ne 0 ]] ; then
     esac
 fi
 
-while getopts ":d:b:s:p:c:vh" opt; do
+while getopts ":d:b:s:p:c:t:vh" opt; do
     case "$opt" in
         d) distro="$OPTARG" ;;
         b) boot_method="$OPTARG" ;;
 	s) boot_server="$OPTARG" ;;
 	p) provider="$OPTARG" ;;
 	c) config="$OPTARG" ;;
+	t) test_dir="$OPTARG"
+	   DO_TEST="y"
+	   [[ ! -d "tests/$test_dir" ]] && Error "Test directory tests/$test_dir not found"
+	   ;;
         h) helpMsg; exit 0 ;;
         v) echo "$PRGNAME version $VERSION"; exit 0 ;;
        \?) echo "$PRGNAME: unknown option used: [$OPTARG]."
@@ -173,14 +182,14 @@ fi
 
 # Verify the real user's .ssh/config file
 user=$(findUser)
-[[ ! -f ~$user/.ssh/config ]] && touch ~$user/.ssh/config
-grep -q "vagrant-client" ~$user/.ssh/config 2>/dev/null
+[[ ! -f "~$user/.ssh/config" ]] && touch "~$user/.ssh/config"
+grep -q "vagrant-client" "~$user/.ssh/config" 2>/dev/null
 if [[ $? -ge 1 ]] ;then
-    echo "HOST vagrant-client vagrant-server" >> ~$user/.ssh/config
-    echo "     CheckHostIP no" >> ~$user/.ssh/config
-    echo "     StrictHostKeyChecking no" >> ~$user/.ssh/config
-    echo "     UserKnownHostsFile /dev/null" >> ~$user/.ssh/config
-    echo "     VerifyHostKeyDNS no" >> ~$user/.ssh/config
+    echo "HOST vagrant-client vagrant-server" >> "~$user/.ssh/config"
+    echo "     CheckHostIP no" >> "~$user/.ssh/config"
+    echo "     StrictHostKeyChecking no" >> "~$user/.ssh/config"
+    echo "     UserKnownHostsFile /dev/null" >> "~$user/.ssh/config"
+    echo "     VerifyHostKeyDNS no" >> "~$user/.ssh/config"
 fi
 
 # ReaR config file selection check
@@ -224,7 +233,6 @@ sleep 5
 
 echo
 vagrant status
-
 echo
 
 # if we are dealing with virtualbox if might be that $client/$server are not pingable due to an
@@ -255,6 +263,15 @@ echo
 echo "Update rear on the VM client"
 ssh -i ../insecure_keys/vagrant.private root@$client "yum -y update rear" 2>/dev/null
 echo
+
+# Option -f test will be executed on 'client' VM only (at least for now)
+# Therefore, check if the test is an existing directory for the test we want
+if [[ "$DO_TEST" = "y" ]] ; then
+    # $test_dir contains the test we want to execute; first copy it to the client vm
+    scp -i ../insecure_keys/vagrant.private -r ../tests root@$client:/var/tmp 2>/dev/null
+    # on the client vm all tests are available under /var/tmp/tests/
+    exit 0
+fi
 
 # PXE/ISO boot server - for ISO boot_server should always be defined
 # for PXE with virtualbox we need boot_server (the host); with libvirt we can PXE boot from the server VM
