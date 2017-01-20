@@ -182,14 +182,15 @@ fi
 
 # Verify the real user's .ssh/config file
 user=$(findUser)
-[[ ! -f "~$user/.ssh/config" ]] && touch "~$user/.ssh/config"
-grep -q "vagrant-client" "~$user/.ssh/config" 2>/dev/null
+my_home=$(getent passwd | grep ^${user} | cut -d: -f6)
+[[ ! -f "$my_home/.ssh/config" ]] && touch "$my_home/.ssh/config"
+grep -q "vagrant-client" "$my_home/.ssh/config" 2>/dev/null
 if [[ $? -ge 1 ]] ;then
-    echo "HOST vagrant-client vagrant-server" >> "~$user/.ssh/config"
-    echo "     CheckHostIP no" >> "~$user/.ssh/config"
-    echo "     StrictHostKeyChecking no" >> "~$user/.ssh/config"
-    echo "     UserKnownHostsFile /dev/null" >> "~$user/.ssh/config"
-    echo "     VerifyHostKeyDNS no" >> "~$user/.ssh/config"
+    echo "HOST vagrant-client vagrant-server" >> "$my_home/.ssh/config"
+    echo "     CheckHostIP no" >> "$my_home/.ssh/config"
+    echo "     StrictHostKeyChecking no" >> "$my_home/.ssh/config"
+    echo "     UserKnownHostsFile /dev/null" >> "$my_home/.ssh/config"
+    echo "     VerifyHostKeyDNS no" >> "$my_home/.ssh/config"
 fi
 
 # ReaR config file selection check
@@ -340,6 +341,15 @@ esac
 
 # remove the temporary ReaR config file from this host
 rm -f /tmp/rear_config.$$
+
+echo
+echo "ReaR version that will be tested is:"
+ssh -i ../insecure_keys/vagrant.private root@$client "rear -V" 2>/dev/null
+echo
+
+echo "Content of /etc/rear/local.conf is:"
+ssh -i ../insecure_keys/vagrant.private root@$client "grep -v \# /etc/rear/local.conf" 2>/dev/null
+echo
 
 echo "Run 'rear -v mkbackup'"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup" 2>/dev/null
