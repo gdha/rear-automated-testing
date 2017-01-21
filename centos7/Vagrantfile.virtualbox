@@ -48,6 +48,7 @@ Vagrant.configure(2) do |config|
     recover.vm.provider :virtualbox do |recover_prov|
       recover_prov.name = "recover"
       recover_prov.gui = true unless ENV['NO_GUI']
+      recover_prov.customize ['setextradata', :id, 'GUI/ScaleFactor', '1.5']
       recover_prov.memory = "1024"
       recover_prov.cpus = "1"
 
