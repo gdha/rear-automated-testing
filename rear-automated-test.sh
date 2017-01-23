@@ -273,9 +273,12 @@ if [[ "$DO_TEST" = "y" ]] ; then
     # on the client vm all tests are available under /var/tmp/tests/
     echo "Executing test $test_dir"
     echo "---------------------------------"
-    ssh -i ../insecure_keys/vagrant.private root@$client 'cd /var/tmp/tests/$test_dir ; make' 2>/dev/null
+    ssh -i ../insecure_keys/vagrant.private root@$client "cd /var/tmp/tests/$test_dir ; make" 2>/dev/null
+    rc=$?
+    [[ $rc -gt 0 ]] && Error "make command failed for test $test_dir"
     jFile=/$(ssh -i ../insecure_keys/vagrant.private root@$client 'tail -1 /mnt/testarea/current.log | cut -d/ -f2-' 2>/dev/null)
     # jFile=/var/tmp/beakerlib-lGspW7z/journal.txt for example
+    [[ "$jFile" = "/" ]] && Error "Test results file not found on $client (check /mnt/testarea)"
     scp -i ../insecure_keys/vagrant.private root@$client:$jFile ../tests/$test_dir/test-results-of-$(date '+%Y%m%d')
     echo "Saved the results as tests/$test_dir/test-results-of-$(date '+%Y%m%d')"
     exit 0
