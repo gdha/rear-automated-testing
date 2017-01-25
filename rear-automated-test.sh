@@ -2,6 +2,10 @@
 #
 # rear-automated-test.sh script
 
+# trap some interrupts during vagrant calls (we will foresee a small time to interrupt
+# during a period that is safe - meaning do not scratch a VM box)
+trap "" 1 2 3
+
 # Define generic variables
 PRGNAME=${0##*/}
 VERSION=1.0
@@ -229,10 +233,14 @@ cp Vagrantfile.$VAGRANT_DEFAULT_PROVIDER Vagrantfile
 echo "Bringing up the vagrant VMs client and server"
 vagrant up
 echo
-echo "Sleep for 5 seconds"
-sleep 5
 
+trap 1 2 3     # disable the traps
+echo "Sleep for 5 seconds (Control-C is now possible)"
+sleep 5
+trap "" 1 2 3  # enable the traps again
+echo "Disabled Control-C again"
 echo
+
 vagrant status
 echo
 
