@@ -2,9 +2,6 @@
 #
 # rear-automated-test.sh script
 
-# trap some interrupts during vagrant calls (we will foresee a small time to interrupt
-# during a period that is safe - meaning do not scratch a VM box)
-trap "" 1 2 3
 
 # Define generic variables
 PRGNAME=${0##*/}
@@ -201,7 +198,7 @@ fi
 if [[ ! -z "$config" ]] && [[ -f "$config" ]] ; then
     REAR_CONFIG="$config"
 else
-    # most likelya no argument was supplied and therefore, $config is empty = use default PXE template
+    # most likely no argument was supplied and therefore, $config is empty = use default PXE template
     REAR_CONFIG=../templates/PXE-booting-with-URL-style.conf
 fi
 
@@ -229,16 +226,18 @@ echo "Current distro directory is $distro"
 echo "Copy the Vagrantfile.$VAGRANT_DEFAULT_PROVIDER to Vagrantfile"
 cp Vagrantfile.$VAGRANT_DEFAULT_PROVIDER Vagrantfile
 
+# trap Cntrl-C interrupts during vagrant calls (we will foresee a small time to interrupt
+# during a period that is safe - meaning do not scratch a VM box)
+trap '' SIGINT
+
 # start up and client server vagrant VMs (the recover VM stays down)
 echo "Bringing up the vagrant VMs client and server"
 vagrant up
 echo
 
-trap 1 2 3     # disable the traps
+trap - SIGINT       # disable the trap
 echo "Sleep for 5 seconds (Control-C is now possible)"
 sleep 5
-trap "" 1 2 3  # enable the traps again
-echo "Disabled Control-C again"
 echo
 
 vagrant status
