@@ -81,13 +81,42 @@ Comments:
 <provider>: as we use vagrant we need to select the provider to use (virtualbox, libvirt)
 <rear-config-file.conf>: is the ReaR config file we would like to use to drive the test scenario with (optional with PXE)
 <test-dir>: under the tests/ directory there are sub-directories with the beakerlib tests (donated by RedHat).
-       When -t option is used then we will not execute an automated recover test (at least no yet)
+       When -t option is used then we will not execute an automated recover test (at least not yet)
 eof
 }
 
 function Error {
-    echo "ERROR: $*"
+    echo "$(bold $(red ERROR: $*))"
     exit 1
+}
+
+# usage example of colored output: echo "some $(bold $(red hello world)) test"
+function bold {
+    ansi 1 "$@";
+}
+
+function italic {
+     ansi 3 "$@";
+}
+
+function underline {
+     ansi 4 "$@";
+}
+
+function strikethrough {
+     ansi 9 "$@";
+}
+
+function red {
+     ansi 31 "$@";
+}
+
+function green {
+     ansi 32 "$@";
+}
+
+function ansi {
+     echo -e "\e[${1}m${*:2}\e[0m";
 }
 
 ########################################################################
@@ -144,8 +173,8 @@ fi
 
 # check if <distro> directory exists?
 if [[ ! -d "$distro" ]] ; then
-    echo "ERROR: Could not find directory '$distro'"
-    echo "       Distribution $distro is not (yet) by $PRGNAME"
+    echo "$(bold $(red ERROR: Could not find directory '$distro'))"
+    echo "       Distribution $distro is not (yet) supported by $PRGNAME"
     echo "       You can always sponsor this - see README.md"
     exit 1 
 fi
@@ -156,7 +185,7 @@ case "$provider" in
 	    : ;;
 	"libvirt") VAGRANT_DEFAULT_PROVIDER="libvirt" ;;
 	"virtualbox") VAGRANT_DEFAULT_PROVIDER="virtualbox" ;;
-	*) echo "ERROR: vagrant provider $provider is not (yet) supported by $PRGNAME"
+	*) echo "(bold $(red ERROR: vagrant provider $provider is not (yet) supported by $PRGNAME))"
 	   echo "       You can always sponsor this - see README.md"
 	   exit 1 ;;
 esac
@@ -219,7 +248,7 @@ Current_dir=$(pwd)
 ################################
 # Entering directory $distro
 cd "$distro"
-echo "Current distro directory is $distro"
+echo "$(bold Current distro directory is $(green $distro))"
 ################################
 
 # Before starting vagrant we need to copy the Vagrantfile for the proper provider (VAGRANT_DEFAULT_PROVIDER)
@@ -231,7 +260,7 @@ cp Vagrantfile.$VAGRANT_DEFAULT_PROVIDER Vagrantfile
 trap '' SIGINT
 
 # start up and client server vagrant VMs (the recover VM stays down)
-echo "Bringing up the vagrant VMs client and server"
+echo "$(italic Bringing up the vagrant VMs client and server)"
 vagrant up
 echo
 
@@ -246,29 +275,29 @@ echo
 # if we are dealing with virtualbox if might be that $client/$server are not pingable due to an
 # bug in vagrant itself
 # Work-around is to check if "eth1" is active - if not then restart the network
-echo "Check if 'eth1' is active on client [known issue https://github.com/mitchellh/vagrant/issues/8166]"
+echo "Check if 'eth1' is active on client $(italic [known issue https://github.com/mitchellh/vagrant/issues/8166])"
 vagrant ssh client -c "sudo su -c \"ip addr show dev eth1 | grep -q DOWN && systemctl restart network.service\""
 
 echo "Check if 'eth1' is active on server"
 vagrant ssh server -c "sudo su -c \"ip addr show dev eth1 | grep -q DOWN && systemctl restart network.service\""
 
-echo "Doing ping tests to VMs client and server"
+echo "$(bold Doing ping tests to VMs client and server)"
 if IsNotPingable $client ; then
     Error "VM $client is not pingable - please investigate why"
 else
-    echo "VM $client is up and running - ping test OK"
+    echo "$(bold client) is up and running - ping test $(green OK)"
 fi
 
 
 if IsNotPingable $server ; then
     Error "VM $server is not pingable - please investigate why"
 else
-    echo "VM $server is up and running - ping test OK"
+    echo "$(bold server) is up and running - ping test $(green OK)"
 fi
 
 # first update rear inside VM client
 echo
-echo "Update rear on the VM client"
+echo "$(bold Update rear on the VM client)"
 ssh -i ../insecure_keys/vagrant.private root@$client "yum -y update rear" 2>/dev/null
 echo
 
@@ -325,7 +354,7 @@ PXE)
     # real values defined with arguments given or use the default ones
     sed -e "s;@server@;$server;g" -e "s;@boot_server@;$boot_server;g" \
         -e "s;@pxe_tftpboot_path@;$pxe_tftpboot_path;g" < $REAR_CONFIG > /tmp/rear_config.$$
-    echo "Configure rear on client to use OUTPUT=PXE method"
+    echo "$(bold Configure rear on client to use $(green OUTPUT=PXE) method)"
     scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf 2>/dev/null
     echo
 
@@ -337,7 +366,7 @@ PXE)
 #~~~~~~~~~~~~~~~~~~~~
 ISO)
 ####
-   echo "WARNING: Sorry 'not' (yet completely) implemented by $PRGNAME"
+   echo "$(red WARNING: Sorry 'not' (yet completely) implemented by $PRGNAME)"
    case $VAGRANT_DEFAULT_PROVIDER in
        virtualbox) boot_server="10.0.2.2" ;;
        libvirt)    boot_server="192.168.33.1" ;;
@@ -345,7 +374,7 @@ ISO)
 
    # We expect that the REAR_CONFIG was an argument with this script
    sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
-   echo "Configure rear on client to use OUTPUT=ISO method"
+   echo "$(bold Configure rear on client to use $(green OUTPUT=ISO) method)"
    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf 2>/dev/null
    echo
 
@@ -360,27 +389,27 @@ esac
 rm -f /tmp/rear_config.$$
 
 echo
-echo "ReaR version that will be tested is:"
+echo "$(bold ReaR version that will be tested is:)"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -V" 2>/dev/null
 echo
 
-echo "Content of /etc/rear/local.conf is:"
+echo "$(bold Content of /etc/rear/local.conf is:)"
 ssh -i ../insecure_keys/vagrant.private root@$client "grep -v \# /etc/rear/local.conf" 2>/dev/null
 echo
 
-echo "Run 'rear -v mkbackup'"
+echo "$(bold Run 'rear -v mkbackup')"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup" 2>/dev/null
 rc=$?
 
 echo
 if [[ $rc -ne 0 ]] ; then
-    echo "Please check the rear logging /var/log/rear/rear-client.log"
+    echo "$(red Please check the rear logging /var/log/rear/rear-client.log)"
     echo "The last 20 lines are:"
     ssh -i ../insecure_keys/vagrant.private root@$client "tail -20 /var/log/rear/rear-client.log" 2>/dev/null
     echo
     Error "Check yourself via 'vagrant ssh client'"
 else
-    echo "The rear mkbackup was successful"
+    echo "$(bold $(green The rear mkbackup was successful))"
     echo
 fi
 
@@ -393,7 +422,7 @@ case $boot_method in
     # In my ~/.ssh/config file I defined the line "UserKnownHostsFile /dev/null" to avoid issues
     # with duplicate host keys (after re-installing from scratch the VMs)
 
-    echo "Make client area readable for others on PXE boot server $boot_server"
+    echo "$(bold Make client area readable for others on PXE boot server $(green $boot_server))"
     case $VAGRANT_DEFAULT_PROVIDER in
        virtualbox) chmod 755 "$pxe_tftpboot_path"/client
                    ;;
@@ -411,13 +440,13 @@ case $boot_method in
 
 esac
 
-echo "Halting the client VM (before doing the recovery)"
+echo "$(bold Halting the client VM (before doing the recovery))"
 echo "Recover VM will use the client IP address after it has been fully restored"
 echo
 vagrant halt client
 echo
 
-echo "Starting the recover VM"
+echo "$(bold Starting the recover VM)"
 vagrant up recover
 
 type -p vncviewer >/dev/null
