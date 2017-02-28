@@ -440,7 +440,7 @@ case $boot_method in
 
 esac
 
-echo "$(bold Halting the client VM (before doing the recovery))"
+echo "$(bold Halting the client VM $(italic before doing the recovery))"
 echo "Recover VM will use the client IP address after it has been fully restored"
 echo
 vagrant halt client
