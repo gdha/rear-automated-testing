@@ -307,7 +307,11 @@ echo
 # Therefore, check if the test is an existing directory for the test we want
 if [[ "$DO_TEST" = "y" ]] ; then
     # $test_dir contains the test we want to execute; first copy it to the client vm
+    echo "$(bold Copying the Beaker tests onto the VM client)"    
     scp -i ../insecure_keys/vagrant.private -r ../tests root@$client:/var/tmp 2>/dev/null
+    # install rear-rhts and beakerlib
+    echo "$(italic Install rear-rhts  and beakerlib packages required for the Beaker tests)"
+    ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum -y install rear-rhts beakerlib"
     # on the client vm all tests are available under /var/tmp/tests/
     echo "Executing test $test_dir"
     echo "---------------------------------"
