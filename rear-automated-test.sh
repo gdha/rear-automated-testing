@@ -268,11 +268,13 @@ vagrant up
 echo
 
 trap - SIGINT       # disable the trap
-echo "Sleep for 5 seconds (Control-C is now possible)"
+echo "$(italic Sleep for 5 seconds [$(bold Control-C) is now possible])"
 sleep 5
 echo
 
+echo "------------------------------------------------------------------------------"
 vagrant status
+echo "------------------------------------------------------------------------------"
 echo
 
 # if we are dealing with virtualbox if might be that $client/$server are not pingable due to an
@@ -301,14 +303,18 @@ fi
 # first update rear inside VM client
 echo
 echo "$(bold Update rear on the VM client)"
-ssh -i ../insecure_keys/vagrant.private root@$client "yum -y update rear" 2>/dev/null
+ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum -y update rear" 2>/dev/null
 echo
 
 # Option -f test will be executed on 'client' VM only (at least for now)
 # Therefore, check if the test is an existing directory for the test we want
 if [[ "$DO_TEST" = "y" ]] ; then
     # $test_dir contains the test we want to execute; first copy it to the client vm
+    echo "$(bold Copying the Beaker tests onto the VM client)"    
     scp -i ../insecure_keys/vagrant.private -r ../tests root@$client:/var/tmp 2>/dev/null
+    # install rear-rhts and beakerlib
+    echo "$(italic Install rear-rhts  and beakerlib packages required for the Beaker tests)"
+    ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum -y install rear-rhts beakerlib"
     # on the client vm all tests are available under /var/tmp/tests/
     echo "Executing test $test_dir"
     echo "---------------------------------"
@@ -470,6 +476,17 @@ echo "Recover VM will use the client IP address after it has been fully restored
 echo
 vagrant halt client
 echo
+
+# For issue #15 with virtualbox and "recover: Warning: Authentication failure. Retrying" we need to copy
+# the client private key to the recover directory
+case $VAGRANT_DEFAULT_PROVIDER in
+    virtualbox) 
+        if [[ -f .vagrant/machines/client/virtualbox/private_key ]] ; then
+            cp .vagrant/machines/client/virtualbox/private_key .vagrant/machines/recover/virtualbox/private_key
+            echo "Copied private key of client VB to recover VB config area"
+        fi
+        ;;
+esac
 
 echo "$(bold Starting the recover VM)"
 vagrant up recover
