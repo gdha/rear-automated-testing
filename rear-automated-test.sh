@@ -153,7 +153,10 @@ while getopts ":d:b:s:p:c:t:vh" opt; do
         b) boot_method="$OPTARG" ;;
 	s) boot_server="$OPTARG" ;;
 	p) provider="$OPTARG" ;;
-	c) config="$OPTARG" ;;
+	c) config="$OPTARG"
+           [[ ! -f "$config" ]] && Error "ReaR Configuration file $config not found."
+           config="$PWD/$config"
+           ;;
 	t) test_dir="$OPTARG"
 	   DO_TEST="y"
 	   [[ ! -d "tests/$test_dir" ]] && Error "Test directory tests/$test_dir not found"
@@ -366,7 +369,7 @@ PXE)
 #~~~~~~~~~~~~~~~~~~~~
 ISO)
 ####
-   echo "$(red WARNING: Sorry 'not' (yet completely) implemented by $PRGNAME)"
+   echo "$(red WARNING: Sorry 'not' yet completely implemented by $PRGNAME)"
    case $VAGRANT_DEFAULT_PROVIDER in
        virtualbox) boot_server="10.0.2.2" ;;
        libvirt)    boot_server="192.168.33.1" ;;
@@ -377,7 +380,29 @@ ISO)
    echo "$(bold Configure rear on client to use $(green OUTPUT=ISO) method)"
    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf 2>/dev/null
    echo
-
+   # We need to check the OUTPUT_URL/BACKUP_URL paths on the server side; if paths do not exist create them
+   if grep -q ^OUTPUT_URL /tmp/rear_config.$$ ; then
+       url=$( grep ^OUTPUT_URL /tmp/rear_config.$$ | cut -d= -f 2 )
+       url_without_scheme=${url#*//}
+       my_path="/${url_without_scheme#*/}"
+       my_server="${url_without_scheme%%/*}"
+       if [[ "$my_server" = "$boot_server" ]] ; then
+           mkdir -m 755 -p $my_path
+       else
+           ssh -i ../insecure_keys/vagrant.private root@$my_server "mkdir -p -m 755 $my_path"
+       fi
+   fi
+   if grep -q ^BACKUP_URL /tmp/rear_config.$$ ; then
+       url=$( grep ^BACKUP_URL /tmp/rear_config.$$ | cut -d= -f 2 )
+       url_without_scheme=${url#*//}
+       my_path="/${url_without_scheme#*/}"
+       my_server="${url_without_scheme%%/*}"
+       if [[ "$my_server" = "$boot_server" ]] ; then
+           mkdir -m 755 -p $my_path
+       else
+           ssh -i ../insecure_keys/vagrant.private root@$my_server "mkdir -p -m 755 $my_path"
+       fi
+   fi
    ;;
 #~~~~~~~~~~~~~~~~~~~~
 *)
