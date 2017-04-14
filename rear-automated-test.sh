@@ -16,7 +16,8 @@ boot_server="$server"	# when using Oracle VirtualBox with PXE booting then the b
 			# In case of KVM we can use $server VM to boot from
 # Default tftpboot root directory (for libvirt we keep the default; for virtualbox we need vb TFTP path (defined later)
 # The ReaR config templates need to be edited and replaced with the proper path (automatically done)
-pxe_tftpboot_path="/export/nfs/tftpboot"
+# Variable pxe_tftpboot_path will be set by function define_pxe_tftpboot_path
+# pxe_tftpboot_path="/export/nfs/tftpboot"
 
 # Vagrant variables
 # VAGRANT_DEFAULT_PROVIDER is an official variable vagrant supports, so we re-use this for our purposes as well
@@ -117,6 +118,23 @@ function green {
 
 function ansi {
      echo -e "\e[${1}m${*:2}\e[0m";
+}
+
+function define_pxe_tftpboot_path {
+    # pxe_tftpboot_path path is need by boot methods PXE and ISO
+    # PXE to fill up the client PXE boot configs
+    # ISO to remove to client PXE configs (otherwise we boot from PXE or boothd0)
+    case $VAGRANT_DEFAULT_PROVIDER in
+        virtualbox) 
+                    # with VirtualBox the TFTP boot path is under:
+                    pxe_tftpboot_path="/root/.config/VirtualBox/TFTP"   
+                    ;;
+        libvirt) 
+                    # has already been defined in the default settings
+                    pxe_tftpboot_path="/export/nfs/tftpboot"
+                    ;;
+    esac
+    echo $pxe_tftpboot_path
 }
 
 ########################################################################
@@ -352,7 +370,7 @@ PXE)
     case $VAGRANT_DEFAULT_PROVIDER in
         virtualbox) boot_server="10.0.2.2"
                     # with VirtualBox the TFTP boot path is under:
-                    pxe_tftpboot_path="/root/.config/VirtualBox/TFTP"
+                    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
                     [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path"
                     [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg"
                     ;;
@@ -466,7 +484,12 @@ case $boot_method in
     ISO)
     ####
     # Todo: clean up the PXE area to avoid PXE booting?
-    :
+    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
+    if [[ -f "$pxe_tftpboot_path/pxelinux.cfg/rear-client" ]] ; then
+        rm -f "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
+        echo "$(bold $(green Removed the PXE boot configuration file rear-client))"
+        #ls "$pxe_tftpboot_path/pxelinux.cfg/"
+    fi
     ;;
 
 esac
