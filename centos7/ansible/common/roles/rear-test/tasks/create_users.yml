@@ -1,0 +1,21 @@
+---
+# File: ansible/common/roles/rear-test/tasks/create_users.yml
+#
+# URL: https://raw.githubusercontent.com/msergiy87/ansible-create-users/master/create_users.yml
+
+- name: Generate password
+  shell: python -c 'import crypt; print crypt.crypt("vagrant", "$1$SomeSalt$")'
+  register: genpass
+
+# https://raymii.org/s/tutorials/Ansible_-_Sudo_Safety_and_Sanity_Checks.html
+# Used some parts of above link
+
+- name: Creating admin group
+  group: name=admin system=yes state=present
+
+- name: Creating users with admin access
+  user: name=vagrant password={{ genpass.stdout }} groups=admin shell=/bin/bash createhome=yes append=yes
+
+- name: copy file sudoers to /etc/sudoers
+  copy: src=sudoers dest=/etc/sudoers owner=root group=root mode=0440
+

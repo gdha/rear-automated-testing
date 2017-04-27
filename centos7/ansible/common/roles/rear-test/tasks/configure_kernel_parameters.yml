@@ -1,0 +1,12 @@
+---
+# File: ansible/common/roles/rear-test/tasks/configure_kernel_parameters.yml
+
+- name: Configure kernel parameters
+  lineinfile:
+    dest: /etc/sysctl.conf
+    regexp: "^{{ item.property }}="
+    line: "{{ item.property }}={{ item.value }}"
+  with_items:
+    - { property: 'kernel.shmall', value: '2097152' }
+    - { property: 'kernel.shmmax', value: '134217728' }
+    - { property: 'fs.file-max', value: '65536' }

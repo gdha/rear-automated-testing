@@ -1,0 +1,11 @@
+---
+# File: ansible/common/roles/rear-test/tasks/copy_repos.yml for Redhat/CentOS
+
+- name: Make sure the /etc/yum.repos.d directory exists
+  file: path=/etc/yum.repos.d state=directory mode=0755 owner=root group=root recurse=yes
+
+- name: copy ReaR snapshot repo to /etc/yum.repos.d directory
+  copy: src=Archiving:Backup:Rear:Snapshot.repo dest=/etc/yum.repos.d/Archiving:Backup:Rear:Snapshot.repo mode=0644
+
+- name: copy Gratien Dhaese personal repo to /etc/yum.repos.d directory
+  copy: src=home:gdha.repo dest=/etc/yum.repos.d/home:gdha.repo mode=0644

@@ -1,0 +1,17 @@
+---
+# File: ansible/client/roles/rear-test/tasks/main.yml
+# Ansible tasks meant for the client only
+
+- include: github_pub_key.yml
+
+- name: Install redhat test tools, beakerlib packages and some other goodies
+  package: name={{ item }} state=present
+  with_items:
+    - rear-rhts
+    - beakerlib
+    - nano
+
+# Add various helpful configuration files
+- name: Install the message of the day
+  copy: src=motd dest=/etc/motd
+

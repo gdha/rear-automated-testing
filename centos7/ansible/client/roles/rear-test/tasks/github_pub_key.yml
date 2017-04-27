@@ -1,0 +1,8 @@
+---
+# File: ansible/client/roles/rear-test/tasks/github_pub_key.yml
+#
+# From URL http://hakunin.com/six-ansible-practices - section "Add Github to known_hosts properly and securely"
+# Required if we want to 'git clone' our project rear
+
+- name: ensure github.com is a known host
+  lineinfile: dest=/root/.ssh/known_hosts create=yes state=present line="{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}" regexp="^github\\.com"

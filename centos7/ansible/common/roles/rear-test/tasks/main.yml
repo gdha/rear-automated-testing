@@ -1,0 +1,42 @@
+---
+# File: ansible/common/roles/rear-test/tasks/main.yml
+# Ansible taks which are common for client and server
+
+- include: copy_repos.yml
+- include: create_users.yml
+- include: create_private_ssh_key.yml
+- include: configure_kernel_parameters.yml
+- include: update_sshd_config.yml
+
+- name: Install basic development packages
+  package: name={{ item }} state=present
+  with_items:
+    - epel-release
+    - git
+    - tree
+    - vim-enhanced
+    - httpd
+    - createrepo
+    - wget
+
+# Add various helpful configuration files
+- name: Install the hosts file
+  copy: src=hosts dest=/etc/hosts mode=0644
+
+- name: Install packages we need for our ReaR tests
+  package: name={{ item }} state=present
+  with_items:
+    - syslinux
+    - cifs-utils
+    - genisoimage
+    - net-tools
+    - samba
+    - samba-client
+    - tftp
+    - bind-utils
+    - rear
+    - mtools
+    - attr
+    - libusal
+    - sshfs
+

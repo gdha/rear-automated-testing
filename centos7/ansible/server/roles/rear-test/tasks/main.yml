@@ -1,0 +1,14 @@
+---
+
+#- include: clamav.yml
+
+- name: Install helpful development packages
+  package: name={{ item }} state=present
+  with_items:
+    - samba
+    - samba-client
+
+# Add various helpful configuration files
+- name: Install the message of the day
+  copy: src=motd dest=/etc/motd
+

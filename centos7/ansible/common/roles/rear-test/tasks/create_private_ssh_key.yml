@@ -1,0 +1,10 @@
+---
+
+# File: ansible/client/roles/rear-test/tasks/create_private_ssh_key.yml
+# Create the private SSH keypair for root
+#
+
+- name: Generate a new keypair for root
+  command: ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -P ''
+  args:
+    creates: /root/.ssh/id_rsa

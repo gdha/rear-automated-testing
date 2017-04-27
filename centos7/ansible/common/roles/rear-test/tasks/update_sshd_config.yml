@@ -1,0 +1,21 @@
+---
+# File: ansible/common/roles/rear-test/tasks/update_sshd_config.yml
+#
+
+- name: Update SSG configuration file - /etc/ssh/sshd_config
+  lineinfile:
+     dest=/etc/ssh/sshd_config
+     regexp="{{ item.regexp }}"
+     line="{{ item.line }}"
+     state=present
+  with_items:
+    - regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication yes"
+    - regexp: "^UseDNS"
+      line: "UseDNS no"
+    - regexp: "^StrictHostKeyChecking"
+      line: "StrictHostKeyChecking no"
+
+#- name: Restart ssh
+#  service: name=ssh state=restarted
+

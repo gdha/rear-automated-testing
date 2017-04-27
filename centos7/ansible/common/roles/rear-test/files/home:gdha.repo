@@ -1,0 +1,7 @@
+[home_gdha]
+name=gdha's Home Project (CentOS_7)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/gdha/CentOS_7/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/gdha/CentOS_7//repodata/repomd.xml.key
+enabled=1
