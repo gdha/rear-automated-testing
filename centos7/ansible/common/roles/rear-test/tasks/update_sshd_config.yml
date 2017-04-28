@@ -2,7 +2,7 @@
 # File: ansible/common/roles/rear-test/tasks/update_sshd_config.yml
 #
 
-- name: Update SSG configuration file - /etc/ssh/sshd_config
+- name: Update SSH configuration file - /etc/ssh/sshd_config
   lineinfile:
      dest=/etc/ssh/sshd_config
      regexp="{{ item.regexp }}"
@@ -13,9 +13,16 @@
       line: "PasswordAuthentication yes"
     - regexp: "^UseDNS"
       line: "UseDNS no"
-    - regexp: "^StrictHostKeyChecking"
-      line: "StrictHostKeyChecking no"
+#    - regexp: "^StrictHostKeyChecking"
+#      line: "StrictHostKeyChecking no"
 
+# Due to issues with restarting ssh (see https://github.com/ansible/ansible-modules-core/issues/1533)
+# We need to do it on a different way
 #- name: Restart ssh
 #  service: name=ssh state=restarted
+
+- name: Restart ssh
+  shell: sleep 3; systemctl restart sshd
+  async: 1
+  poll: 0
 
