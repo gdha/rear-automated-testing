@@ -56,7 +56,7 @@ sed -i 's,.*disable.*,\tdisable\t\t\t= no,' /etc/xinetd.d/tftp
 systemctl start xinetd
 systemctl enable xinetd
 
-# install PXE booting pre-reqs
+# install PXE booting pre-reqs (for libvirt)
 yum install -y dhcp syslinux-tftpboot
 [[ ! -d /export/nfs/tftpboot/pxelinux.cfg ]] && mkdir -m 755 -p /export/nfs/tftpboot/pxelinux.cfg
 cp /usr/share/syslinux/pxelinux.0 /export/nfs/tftpboot/

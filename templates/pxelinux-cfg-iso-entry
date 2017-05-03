@@ -1,0 +1,11 @@
+say ----------------------------------------------------------
+say boot iso - Boot from local rear iso
+label iso
+MENU label ^Boot ReaR ISO image
+TEXT HELP
+Boot from the local ReaR ISO image
+ENDTEXT
+kernel memdisk
+append iso initrd=isos/client/rear-client.iso
+default iso
+
