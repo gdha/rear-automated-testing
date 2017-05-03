@@ -173,7 +173,6 @@ while getopts ":d:b:s:p:c:t:vh" opt; do
 	p) provider="$OPTARG" ;;
 	c) config="$OPTARG"
            [[ ! -f "$config" ]] && Error "ReaR Configuration file $config not found."
-           config="$PWD/$config"
            ;;
 	t) test_dir="$OPTARG"
 	   DO_TEST="y"
@@ -408,8 +407,7 @@ ISO)
    esac
 
    # We expect that the REAR_CONFIG was an argument with this script
-   sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" \
-       -e "s;@pxe_tftpboot_path@;$pxe_tftpboot_path;g" < $REAR_CONFIG > /tmp/rear_config.$$
+   sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
    echo "$(bold Configure rear on client to use $(green OUTPUT=ISO) method)"
    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf 2>/dev/null
    echo
@@ -526,8 +524,9 @@ echo
 case $VAGRANT_DEFAULT_PROVIDER in
     virtualbox) 
         if [[ -f .vagrant/machines/client/virtualbox/private_key ]] ; then
-            cp .vagrant/machines/client/virtualbox/private_key .vagrant/machines/recover/virtualbox/private_key
-            echo "Copied private key of client VB to recover VB config area"
+            ##cp .vagrant/machines/client/virtualbox/private_key .vagrant/machines/recover/virtualbox/private_key
+            ##echo "Copied private key of client VB to recover VB config area"
+            :
         fi
         ;;
 esac
