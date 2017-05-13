@@ -5,6 +5,7 @@
 
 # Define generic variables
 PRGNAME=${0##*/}
+PRGDIR=$(pwd)
 VERSION=1.0
 
 distro="centos7"	# default distro when no argument is given
@@ -245,7 +246,7 @@ fi
 
 # ReaR config file selection check
 if [[ ! -z "$config" ]] && [[ -f "$config" ]] ; then
-    REAR_CONFIG="$config"
+    REAR_CONFIG="$PRGDIR/templates/$( basename $config )"  # use full path
 else
     # most likely no argument was supplied and therefore, $config is empty = use default PXE template
     REAR_CONFIG=../templates/PXE-booting-with-URL-style.conf
@@ -320,7 +321,8 @@ fi
 # first update rear inside VM client
 echo
 echo "$(bold Update rear on the VM client)"
-ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum -y update rear" 2>/dev/null
+#TODO: uncomment next line when done with debugging ISO auto-recover
+#ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" 2>/dev/null
 echo
 
 # Option -f test will be executed on 'client' VM only (at least for now)
@@ -331,7 +333,7 @@ if [[ "$DO_TEST" = "y" ]] ; then
     scp -i ../insecure_keys/vagrant.private -r ../tests root@$client:/var/tmp 2>/dev/null
     # install rear-rhts and beakerlib
     echo "$(italic Install rear-rhts  and beakerlib packages required for the Beaker tests)"
-    ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum -y install rear-rhts beakerlib"
+    ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y install rear-rhts beakerlib"
     # on the client vm all tests are available under /var/tmp/tests/
     echo "Executing test $test_dir"
     echo "---------------------------------"
@@ -434,6 +436,8 @@ ISO)
            ssh -i ../insecure_keys/vagrant.private root@$my_server "mkdir -p -m 755 $my_path"
        fi
    fi
+   ssh -i ../insecure_keys/vagrant.private root@$client "mkdir -p -m 755 /usr/share/rear/wrapup/ISO/default" 2>/dev/null
+   scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/ISO/default/200_inject_default_boothd0_boot_method.sh 2>/dev/null
    ;;
 #~~~~~~~~~~~~~~~~~~~~
 *)
@@ -496,7 +500,7 @@ case $boot_method in
        virtualbox) chmod 755 "$pxe_tftpboot_path"/client
                    if [[ -d /export/isos/client ]] ; then
                        chmod 755  /export/isos/client
-                       chmod 644  "/export/isos/client/*.iso"
+                       chmod 644  /export/isos/client/*.iso
                        # the PXE entry must be created after the rear mkbackup has finished as the pxe cfg file is recreated
                        grep -q "label iso" "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
                        if [[ $? -eq 1 ]] ; then

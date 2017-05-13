@@ -11,7 +11,8 @@
 [[ "$WORKFLOW" != "recover" ]] && return
 
 # step 2 - only continue if OUTPUT=PXE
-[[ "$OUTPUT" != "PXE" ]] && return
+# DO not check Output as script is saved in the proper path and this way we can use it for PXE and ISO boot methods
+# [[ "$OUTPUT" != "PXE" ]] && return
 # Also, only valid when we used the PXE_CONFIG_URL style
 [[ -z "$PXE_CONFIG_URL" ]] && return
 
@@ -32,7 +33,7 @@ chmod 444 "$PXE_LOCAL_PATH/$PXE_CONFIG_FILE"
 
 # step 5 - umount path
 LogPrint "Updated pxelinux config '${PXE_CONFIG_PREFIX}$HOSTNAME' to boot from first hard disk at next reboot"
-umount_url $PXE_TFTP_URL $BUILD_DIR/tftpbootfs
+umount_url $PXE_CONFIG_URL $BUILD_DIR/tftpbootfs
 rmdir $BUILD_DIR/tftpbootfs >&2
 if [[ $? -eq 0 ]] ; then
     RemoveExitTask "rm -Rf $v $BUILD_DIR/tftpbootfs >&2"
