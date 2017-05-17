@@ -39,4 +39,5 @@
     - attr
     - libusal
     - sshfs
+    - bc
 
