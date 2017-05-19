@@ -1,0 +1,15 @@
+---
+# common/roles/rear-test/tasks/update_and_restart_network.yml
+
+# Add 'single-request-reopen' so it is included when /etc/resolv.conf is generated
+# https://access.redhat.com/site/solutions/58625 (subscription required)
+
+- name: single-request-reopen fix
+  lineinfile:
+    dest=/etc/sysconfig/network
+    regexp="^RES_OPTIONS=[*]"
+    line='RES_OPTIONS="single-request-reopen"'
+    state=present
+    insertafter=EOF
+    create=true
+  notify: restart network

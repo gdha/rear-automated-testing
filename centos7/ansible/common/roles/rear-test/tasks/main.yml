@@ -7,6 +7,7 @@
 - include: create_private_ssh_key.yml
 - include: configure_kernel_parameters.yml
 - include: update_sshd_config.yml
+- include: update_and_restart_network.yml
 
 - name: Install common basic development packages
   package: name={{ item }} state=present

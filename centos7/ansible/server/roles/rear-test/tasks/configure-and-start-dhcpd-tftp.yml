@@ -11,18 +11,24 @@
     - tftp-server
     - xinetd
 
-- name: Modify /etc/xinetd.d/tftp server_args and enable tftp service
-  lineinfile:
-     dest=/etc/xinetd.d/tftp
-     regexp="{{ item.regexp }}"
-     line="{{ item.line }}"
-     state=present
-  notify: restart xinitd
-  with_items:
-     - regexp: "^[*]server_args[*]"
-       line: "\tserver_args\t\t= -s /export/nfs/tftpboot"
-     - regexp: "^[*]disable[*]"
-       line: "\tdisable\t\t\t= no"
+# The 2 lines are always appended instead of replaced.
+#- name: Modify /etc/xinetd.d/tftp server_args and enable tftp service
+#  lineinfile:
+#     dest=/etc/xinetd.d/tftp
+#     regexp="{{ item.regexp }}"
+#     line="{{ item.line }}"
+#     state=present
+#  notify: restart xinitd
+#  with_items:
+#     - regexp: "^[*]server_args[*]"
+#       backrefs: true
+#       line: "\tserver_args\t\t= -s /export/nfs/tftpboot"
+#     - regexp: "^[*]disable[*]"
+#       backrefs: yes
+#       line: "\tdisable\t\t\t= no"
+
+- name: Copy tftp file to /etc/xinetd.d/tftp
+  copy: src=tftp dest=/etc/xinetd.d/tftp mode=0644
 
 - name: Create the pxelinux.cfg directory
   file:

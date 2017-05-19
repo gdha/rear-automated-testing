@@ -2,7 +2,7 @@
 # server/roles/rear-test/tasks/start-samba.yml
 
 - name: start Samba
-  service: name={{ item }} state=running enabled=yes
+  service: name={{ item }} state=started enabled=yes
   with_items:
      - smb
      - nmb
