@@ -1,12 +1,15 @@
 ---
+# server/roles/rear-test/tasks/main.yml
 
-#- include: clamav.yml
+- include: configure-nfs-server.yml
+- include: configure-and-start-dhcpd-tftp.yml
+- include: start-samba.yml
 
-- name: Install helpful development packages
+- name: Install packages required by the server only
   package: name={{ item }} state=present
   with_items:
-    - samba
-    - samba-client
+    - nfs-utils
+    - rpcbind
 
 # Add various helpful configuration files
 - name: Install the message of the day
