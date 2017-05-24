@@ -322,7 +322,7 @@ fi
 echo
 echo "$(bold Update rear on the VM client)"
 #TODO: uncomment next line when done with debugging ISO auto-recover
-#ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" 2>/dev/null
+ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" 2>/dev/null
 echo
 
 # Option -f test will be executed on 'client' VM only (at least for now)
@@ -394,7 +394,7 @@ PXE)
 #~~~~~~~~~~~~~~~~~~~~
 ISO)
 ####
-   echo "$(red WARNING: Sorry 'not' yet completely implemented by $PRGNAME)"
+   echo "$(red WARNING: Sorry 'not' yet completely tested by $PRGNAME)"
    case $VAGRANT_DEFAULT_PROVIDER in
        virtualbox) boot_server="10.0.2.2"
                    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
@@ -409,7 +409,8 @@ ISO)
    esac
 
    # We expect that the REAR_CONFIG was an argument with this script
-   sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" < $REAR_CONFIG > /tmp/rear_config.$$
+   sed -e "s/@server@/$server/g" -e "s/@boot_server@/$boot_server/g" \
+       -e "s;@pxe_tftpboot_path@;$pxe_tftpboot_path;g" < $REAR_CONFIG > /tmp/rear_config.$$
    echo "$(bold Configure rear on client to use $(green OUTPUT=ISO) method)"
    scp -i ../insecure_keys/vagrant.private /tmp/rear_config.$$ root@$client:/etc/rear/local.conf 2>/dev/null
    echo
@@ -438,6 +439,10 @@ ISO)
    fi
    ssh -i ../insecure_keys/vagrant.private root@$client "mkdir -p -m 755 /usr/share/rear/wrapup/ISO/default" 2>/dev/null
    scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/ISO/default/200_inject_default_boothd0_boot_method.sh 2>/dev/null
+
+   # TODO: maek sure that in the pxeconfig.cfg files boothd0 is not the default as that will be performed by
+   # the script 200_inject_default_boothd0_boot_method.sh (so that after recovery we boot from hd0, and to avoid
+   # booting from hd0 before we did a recovery when we should boot from ISO instead)
    ;;
 #~~~~~~~~~~~~~~~~~~~~
 *)
