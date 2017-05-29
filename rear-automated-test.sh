@@ -500,18 +500,18 @@ case $boot_method in
     # Todo: clean up the PXE area to avoid PXE booting?
     pxe_tftpboot_path=$( define_pxe_tftpboot_path )
     case $VAGRANT_DEFAULT_PROVIDER in
-       virtualbox) chmod 755 "$pxe_tftpboot_path"/client
+       virtualbox) [[ ! -d "$pxe_tftpboot_path"/client ]] && mkdir -p -m 755 "$pxe_tftpboot_path"/client
+                   chmod 755 "$pxe_tftpboot_path"/client
                    if [[ -d /export/isos/client ]] ; then
                        chmod 755  /export/isos/client
                        chmod 644  /export/isos/client/*.iso
-                       # the PXE entry must be created after the rear mkbackup has finished as the pxe cfg file is recreated
-                       grep -q "label iso" "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
-                       if [[ $? -eq 1 ]] ; then
-                           echo "Copy PXE configuration entry to pxelinux.cfg to enable ISO boot menu entry"
-                           # we overwrite any existing pxelinux.cfg file with our template pxelinux-cfg-with-iso-entry
-                           cat ../templates/pxelinux-cfg-with-iso-entry > "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
-                       fi
+                   else
+                       mkdir -p -m 755 /export/isos/client
                    fi
+                   # the PXE entry must be created after the rear mkbackup has finished as the pxe cfg file is recreated
+                   echo "Copy PXE configuration entry to pxelinux.cfg to enable ISO boot menu entry"
+                   # we overwrite any existing pxelinux.cfg file with our template pxelinux-cfg-with-iso-entry
+                   cat ../templates/pxelinux-cfg-with-iso-entry > "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
                    ;;
        libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client" 2>/dev/null
                    ;;
