@@ -399,6 +399,7 @@ ISO)
        virtualbox) boot_server="10.0.2.2"
                    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
                    [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path"
+                   [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg"
                    # ISO images are stored under /export/isos/client - we will make a soft link to it
                    # in our pxelinux config file rear-client we will use this for the ISO menu
                    [[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos "$pxe_tftpboot_path/isos"
@@ -440,9 +441,6 @@ ISO)
    ssh -i ../insecure_keys/vagrant.private root@$client "mkdir -p -m 755 /usr/share/rear/wrapup/ISO/default" 2>/dev/null
    scp -i ../insecure_keys/vagrant.private ../rear-scripts/200_inject_default_boothd0_boot_method.sh root@$client:/usr/share/rear/wrapup/ISO/default/200_inject_default_boothd0_boot_method.sh 2>/dev/null
 
-   # TODO: maek sure that in the pxeconfig.cfg files boothd0 is not the default as that will be performed by
-   # the script 200_inject_default_boothd0_boot_method.sh (so that after recovery we boot from hd0, and to avoid
-   # booting from hd0 before we did a recovery when we should boot from ISO instead)
    ;;
 #~~~~~~~~~~~~~~~~~~~~
 *)
@@ -510,7 +508,8 @@ case $boot_method in
                        grep -q "label iso" "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
                        if [[ $? -eq 1 ]] ; then
                            echo "Copy PXE configuration entry to pxelinux.cfg to enable ISO boot menu entry"
-                           cat ../templates/pxelinux-cfg-iso-entry >> "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
+                           # we overwrite any existing pxelinux.cfg file with our template pxelinux-cfg-with-iso-entry
+                           cat ../templates/pxelinux-cfg-with-iso-entry > "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
                        fi
                    fi
                    ;;

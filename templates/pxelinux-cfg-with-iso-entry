@@ -1,0 +1,61 @@
+timeout 30
+prompt 0
+MENU title Relax-and-Recover
+display client/client.message
+say ----------------------------------------------------------
+say local - Boot from next boot device
+label local
+MENU label Boot ^Next device
+TEXT HELP
+Boot from the next device in the BIOS boot order list.
+ENDTEXT
+localboot -1
+say ----------------------------------------------------------
+say boothd0 - boot first local disk
+label boothd0
+MENU label Boot First ^Local disk (hd0)
+kernel chain.c32
+append hd0
+say ----------------------------------------------------------
+say boothd1 - boot second local disk
+label boothd1
+MENU label Boot ^Second Local disk (hd1)
+kernel chain.c32
+append hd1
+say ----------------------------------------------------------
+say hdt - Hardware Detection Tool
+label hdt
+MENU label ^Hardware Detection Tool
+TEXT HELP
+Information about your current hardware configuration
+ENDTEXT
+kernel hdt.c32
+say ----------------------------------------------------------
+say reboot - Reboot the system
+label reboot
+MENU label Re^Boot system
+TEXT HELP
+Reboot the system now
+ENDTEXT
+kernel reboot.c32
+say ----------------------------------------------------------
+say poweroff - Poweroff the system
+label poweroff
+MENU label ^Power off system
+TEXT HELP
+Power off the system now
+ENDTEXT
+kernel poweroff.com
+default rear-unattended
+default boothd0
+say ----------------------------------------------------------
+say boot iso - Boot from local rear iso
+label iso
+MENU label ^Boot ReaR ISO image
+TEXT HELP
+Boot from the local ReaR ISO image
+ENDTEXT
+kernel memdisk
+append iso initrd=isos/client/rear-client.iso
+default iso
+
