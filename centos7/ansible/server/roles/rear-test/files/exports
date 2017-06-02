@@ -1,1 +1,2 @@
 /export/nfs 192.168.0.0/16(rw,no_root_squash)
+/export/isos 192.168.0.0/16(rw,no_root_squash)

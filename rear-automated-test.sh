@@ -375,7 +375,10 @@ PXE)
                     [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path"
                     [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg"
                     ;;
-        #libvirt)   we use the $server to PXE boot from
+        libvirt)   # we use the $server to PXE boot from
+                   pxe_tftpboot_path=$( define_pxe_tftpboot_path )
+                   ssh -i ../insecure_keys/vagrant.private root@$server "mkdir -p -m 755 $pxe_tftpboot_path/pxelinux.cfg" 2>/dev/null
+                   ;;
     esac
 
     # Copy the ReaR config template to the client VM, but first we need to replace @server@ and @boot_server@ with the
@@ -406,7 +409,13 @@ ISO)
                    # we need memdisk to boot an ISO image
                    [[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk "$pxe_tftpboot_path"
                    ;;
-       libvirt)    boot_server="192.168.33.1" ;;
+       libvirt)    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
+                   boot_server="192.168.33.15"
+                   ssh -i ../insecure_keys/vagrant.private root@$server "mkdir -p -m 755 $pxe_tftpboot_path/pxelinux.cfg" 2>/dev/null
+                   ssh -i ../insecure_keys/vagrant.private root@$server "[[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos $pxe_tftpboot_path/isos"
+                   ssh -i ../insecure_keys/vagrant.private root@$server "[[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk $pxe_tftpboot_path"
+                   
+                   ;;
    esac
 
    # We expect that the REAR_CONFIG was an argument with this script
@@ -513,7 +522,10 @@ case $boot_method in
                    # we overwrite any existing pxelinux.cfg file with our template pxelinux-cfg-with-iso-entry
                    cat ../templates/pxelinux-cfg-with-iso-entry > "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
                    ;;
-       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client" 2>/dev/null
+       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod -R 755 /export/nfs/tftpboot/client" 2>/dev/null
+                   ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod -R 755 /export/isos/client" 2>/dev/null
+                   ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 644  /export/isos/client/*.iso" 2>/dev/null
+                   scp -i ../insecure_keys/vagrant.private ../templates/pxelinux-cfg-with-iso-entry root@$boot_server:"$pxe_tftpboot_path/pxelinux.cfg/rear-client"
                    ;;
     esac
 
