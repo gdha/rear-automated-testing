@@ -78,9 +78,9 @@ echo "Provisioning centos/7"
 #echo 'Slow DNS fix applied (single-request-reopen)'
 
 # Don't fix ethX names to hw address.
-rm -f /etc/udev/rules.d/*persistent-net.rules
-rm -f /etc/udev/rules.d/*-net.rules
-rm -fr /var/lib/dhclient/*
+#rm -f /etc/udev/rules.d/*persistent-net.rules
+#rm -f /etc/udev/rules.d/*-net.rules
+#rm -fr /var/lib/dhclient/*
 
 # SElinux settings when Enforce is on (default setting)
 echo "Current mode of SELinux is \"$(getenforce)\"" 

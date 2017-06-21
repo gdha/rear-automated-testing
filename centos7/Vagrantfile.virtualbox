@@ -27,8 +27,8 @@ Vagrant.configure(2) do |config|
      
       nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
 
-      nodeconfig.vm.provision "shell", inline: "echo RUNNING yum update -y"
-      nodeconfig.vm.provision "shell", inline: "sudo yum update -y"
+      #nodeconfig.vm.provision "shell", inline: "echo RUNNING yum update -y"
+      #nodeconfig.vm.provision "shell", inline: "sudo yum update -y"
 
       nodeconfig.vm.provision "ansible_local" do |ansible|
          # first run the common ansible playbook

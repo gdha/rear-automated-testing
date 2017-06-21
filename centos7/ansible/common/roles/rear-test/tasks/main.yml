@@ -3,11 +3,13 @@
 # Ansible taks which are common for client and server
 
 - include: copy_repos.yml
+- include: update_all_packages.yml
 - include: create_users.yml
 - include: create_private_ssh_key.yml
 - include: configure_kernel_parameters.yml
 - include: update_sshd_config.yml
 - include: update_and_restart_network.yml
+- include: disable_biosdevnames.yml
 
 - name: Install common basic development packages
   package: name={{ item }} state=present
