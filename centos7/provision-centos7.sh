@@ -83,11 +83,11 @@ echo "Provisioning centos/7"
 #rm -fr /var/lib/dhclient/*
 
 # SElinux settings when Enforce is on (default setting)
-echo "Current mode of SELinux is \"$(getenforce)\"" 
-echo "Disable SELinux for now"
-setenforce 0
-sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+#echo "Current mode of SELinux is \"$(getenforce)\"" 
+#echo "Disable SELinux for now"
+#setenforce 0
+#sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 
 # add the domain name to the /etc/idmapd.conf file (for NFSv4)
-sed -i -e 's,^#Domain =.*,Domain = box,' /etc/idmapd.conf
+#sed -i -e 's,^#Domain =.*,Domain = box,' /etc/idmapd.conf
 

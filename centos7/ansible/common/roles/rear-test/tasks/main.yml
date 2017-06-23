@@ -10,6 +10,8 @@
 - include: update_sshd_config.yml
 - include: update_and_restart_network.yml
 - include: disable_biosdevnames.yml
+- include: change_selinux_state.yml
+- include: update_imapd_conf.yml
 
 - name: Install common basic development packages
   package: name={{ item }} state=present

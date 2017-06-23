@@ -1,0 +1,11 @@
+---
+# File: ansible/common/roles/rear-test/tasks/update_imapd_conf.yml
+
+- name: add the domain name (box) to the /etc/idmapd.conf file (for NFSv4)
+  lineinfile:
+     dest=/etc/idmapd.conf
+     regexp="{{ item.regexp }}"
+     line="{{ item.line }}"
+  with_items:
+    - regexp: "^#Domain =.*"
+      line: "Domain = box"
