@@ -1,0 +1,61 @@
+---
+# ansible/server/roles/rear-test/tasks/setup-bareos-server.yml
+
+- name: copy bareos.repo to /etc/yum.repos.d directory
+  copy: src=bareos.repo dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
+
+- name: Install postgresql
+  package: name={{ item }} state=present
+  with_items:
+   - postgresql-server
+
+- name: Initialize the postgresql database
+  command: /bin/postgresql-setup initdb
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: Enable/Start database server
+  service: name=postgresql state=started enabled=yes
+
+- name: Install bareos server packages
+  package: name={{ item }} state=present
+  with_items:
+   - bareos 
+   - bareos-database-postgresql
+
+- name: copy bareos configuration files to /etc/bareos
+  copy: src={{ item }} dest=/etc/bareos/{{ item }} owner=bareos group=bareos mode=0640
+  with_items:
+    - bareos-dir.conf
+    - bareos-fd.conf
+    - bareos-sd.conf
+    - bconsole.conf
+
+- name: mkdir /etc/bareos/bareos-dir.d
+  file: path=/etc/bareos/bareos-dir.d state=directory mode=0755
+
+- name: copy the client.conf file to /etc/bareos/bareos-dir.d
+  copy: src=client.conf dest=/etc/bareos/bareos-dir.d/client.conf owner=bareos group=bareos mode=0640
+
+- name: Run 'create_bareos_database' script
+  shell: sleep 2; su postgres -c /usr/lib/bareos/scripts/create_bareos_database
+  async: 1
+  poll: 0
+
+- name:  Run 'make_bareos_tables' script
+  shell: sleep 2; su postgres -c /usr/lib/bareos/scripts/make_bareos_tables
+  async: 1
+  poll: 0
+
+- name: Run 'grant_bareos_privileges' script
+  shell: sleep 2; su postgres -c /usr/lib/bareos/scripts/grant_bareos_privileges
+  async: 1
+  poll: 0
+
+- name: Enable/Start bareos related services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - bareos-dir
+   - bareos-sd
+   - bareos-fd
