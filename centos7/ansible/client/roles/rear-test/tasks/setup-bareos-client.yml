@@ -1,0 +1,25 @@
+---
+# ansible/server/roles/rear-test/tasks/setup-bareos-client.yml
+
+- name: copy bareos.repo to /etc/yum.repos.d directory
+  copy: src=bareos.repo dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
+
+- name: Install bareos server packages
+  package: name={{ item }} state=present
+  with_items:
+   - bareos-filedaemon
+   - bareos-bconsole
+
+- name: copy bareos configuration files to /etc/bareos
+  copy: src={{ item }} dest=/etc/bareos/{{ item }} owner=bareos group=bareos mode=0640
+  with_items:
+    - bareos-fd.conf
+    - bconsole.conf
+
+- name: copy the pre-backup script for rear/bareos
+  copy=client-backup-with-bareos dest=/etc/rear/client-backup-with-bareos owner=root mode=0755
+
+- name: Enable/Start bareos related services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - bareos-fd

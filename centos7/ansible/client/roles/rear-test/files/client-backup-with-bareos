@@ -1,0 +1,5 @@
+bconsole <<EOD
+run job=client-backup yes
+wait
+quit
+EOD

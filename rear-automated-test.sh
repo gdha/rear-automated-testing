@@ -6,7 +6,7 @@
 # Define generic variables
 PRGNAME=${0##*/}
 PRGDIR=$(pwd)
-VERSION=1.0
+VERSION=1.1
 
 distro="centos7"	# default distro when no argument is given
 boot_method="PXE"	# default boot method to use to recover rear on 'recover' VM
@@ -397,7 +397,7 @@ PXE)
 #~~~~~~~~~~~~~~~~~~~~
 ISO)
 ####
-   echo "$(red WARNING: Sorry 'not' yet completely tested by $PRGNAME)"
+   #echo "$(red WARNING: Sorry 'not' yet completely tested by $PRGNAME)"
    case $VAGRANT_DEFAULT_PROVIDER in
        virtualbox) boot_server="10.0.2.2"
                    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
