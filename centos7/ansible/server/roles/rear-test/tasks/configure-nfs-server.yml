@@ -2,6 +2,12 @@
 # server/roles/rear-test/tasks/configure-nfs-server.yml
 #
 
+- name: Install packages required by the server only
+  package: name={{ item }} state=present
+  with_items:
+    - nfs-utils
+    - rpcbind
+
 - name: directory /export/nfs is used to store NFS backups
   file: path=/export/nfs state=directory mode=0755
 

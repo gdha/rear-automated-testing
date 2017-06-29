@@ -6,11 +6,6 @@
 - include: start-samba.yml
 - include: setup-bareos-server.yml
 
-- name: Install packages required by the server only
-  package: name={{ item }} state=present
-  with_items:
-    - nfs-utils
-    - rpcbind
 
 # Add various helpful configuration files
 - name: Install the message of the day
