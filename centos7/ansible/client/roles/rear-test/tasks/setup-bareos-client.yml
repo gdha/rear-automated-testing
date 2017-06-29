@@ -17,7 +17,7 @@
     - bconsole.conf
 
 - name: copy the pre-backup script for rear/bareos
-  copy=client-backup-with-bareos dest=/etc/rear/client-backup-with-bareos owner=root mode=0755
+  copy: src=client-backup-with-bareos dest=/etc/rear/client-backup-with-bareos owner=root mode=0755
 
 - name: Enable/Start bareos related services
   service: name={{ item }} state=started enabled=yes
