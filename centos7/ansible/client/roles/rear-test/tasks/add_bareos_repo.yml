@@ -1,0 +1,6 @@
+---
+# ansible/client/roles/rear-test/tasks/add_bareos_repo.yml
+
+- name: copy bareos.repo to /etc/yum.repos.d directory
+  copy: src=bareos.repo dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
+
