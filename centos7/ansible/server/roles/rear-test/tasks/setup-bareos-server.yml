@@ -4,6 +4,15 @@
 - name: copy bareos.repo to /etc/yum.repos.d directory
   copy: src=bareos.repo dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
 
+
+# we have to be careful when we re-provision that the dir /var/lib/pgsql/ is wiped out
+# before running initdb once again
+
+- name: Remove directory /var/lib/pgsql/data
+  file:
+    path: /var/lib/pgsql/data
+    state: absent
+
 - name: Install postgresql
   package: name={{ item }} state=present
   with_items:
@@ -25,7 +34,7 @@
    - bareos-database-postgresql
 
 - name: copy bareos configuration files to /etc/bareos
-  copy: src={{ item }} dest=/etc/bareos/{{ item }} owner=bareos group=bareos mode=0640
+  copy: src={{ item }} dest=/etc/bareos/{{ item }} owner=bareos group=bareos mode=0644
   with_items:
     - bareos-dir.conf
     - bareos-fd.conf
@@ -36,7 +45,7 @@
   file: path=/etc/bareos/bareos-dir.d state=directory mode=0755
 
 - name: copy the client.conf file to /etc/bareos/bareos-dir.d
-  copy: src=client.conf dest=/etc/bareos/bareos-dir.d/client.conf owner=bareos group=bareos mode=0640
+  copy: src=client.conf dest=/etc/bareos/bareos-dir.d/client.conf owner=bareos group=bareos mode=0644
 
 - name: Run 'create_bareos_database' script
   shell: sleep 2; su postgres -c /usr/lib/bareos/scripts/create_bareos_database
