@@ -3,6 +3,7 @@
 # Ansible tasks meant for the client only
 
 - include: github_pub_key.yml
+- include: add_bareos_repo.yml
 - include: setup-bareos-client.yml
 
 - name: Install redhat test tools, beakerlib packages and some other goodies
