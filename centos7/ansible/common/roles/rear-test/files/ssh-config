@@ -1,0 +1,7 @@
+Protocol 2
+ForwardAgent no
+CheckHostIP no
+StrictHostKeyChecking no
+UserKnownHostsFile /dev/null
+VerifyHostKeyDNS no
+LogLevel ERROR

@@ -2,6 +2,7 @@
 # File: ansible/common/roles/rear-test/tasks/main.yml
 # Ansible taks which are common for client and server
 
+- include: define_timezone.yml
 - include: apt_add_repositories.yml
 - include: update_all_packages.yml
 - include: create_users.yml

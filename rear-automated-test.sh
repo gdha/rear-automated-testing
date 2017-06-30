@@ -231,18 +231,21 @@ if [[ $? -eq 1 ]] ;then
    echo "192.168.33.1    vagrant-host" >> /etc/hosts
 fi
 
-# Verify the real user's .ssh/config file
+# Verify the real user's and root .ssh/config files
 user=$(findUser)
 my_home=$(getent passwd | grep ^${user} | cut -d: -f6)
-[[ ! -f "$my_home/.ssh/config" ]] && touch "$my_home/.ssh/config"
-grep -q "vagrant-client" "$my_home/.ssh/config" 2>/dev/null
-if [[ $? -ge 1 ]] ;then
-    echo "HOST vagrant-client vagrant-server" >> "$my_home/.ssh/config"
-    echo "     CheckHostIP no" >> "$my_home/.ssh/config"
-    echo "     StrictHostKeyChecking no" >> "$my_home/.ssh/config"
-    echo "     UserKnownHostsFile /dev/null" >> "$my_home/.ssh/config"
-    echo "     VerifyHostKeyDNS no" >> "$my_home/.ssh/config"
-fi
+for DIR in /root $my_home
+do
+    [[ ! -f "$DIR/.ssh/config" ]] && touch "$DIR/.ssh/config"
+    grep -q "vagrant-client" "$DIR/.ssh/config" 2>/dev/null
+    if [[ $? -ge 1 ]] ;then
+        echo "HOST vagrant-client vagrant-server 192.168.33.10 192.168.33.15" >> "$DIR/.ssh/config"
+        echo "     CheckHostIP no" >> "$DIR/.ssh/config"
+        echo "     StrictHostKeyChecking no" >> "$DIR/.ssh/config"
+        echo "     UserKnownHostsFile /dev/null" >> "$DIR/.ssh/config"
+        echo "     VerifyHostKeyDNS no" >> "$DIR/.ssh/config"
+    fi
+done
 
 # ReaR config file selection check
 if [[ ! -z "$config" ]] && [[ -f "$config" ]] ; then
@@ -321,7 +324,6 @@ fi
 # first update rear inside VM client
 echo
 echo "$(bold Update rear on the VM client)"
-#TODO: uncomment next line when done with debugging ISO auto-recover
 ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" 2>/dev/null
 echo
 
@@ -348,20 +350,6 @@ if [[ "$DO_TEST" = "y" ]] ; then
     exit 0
 fi
 
-# PXE/ISO boot server - for ISO boot_server should always be defined
-# for PXE with virtualbox we need boot_server (the host); with libvirt we can PXE boot from the server VM
-# However, with virtualbox the boot_server should be 10.0.2.2 which is not pingable from here :-//
-# My advise, do not define $boot_server as argument with virtualbox
-# Perhaps it is not required anymore?? Need to think about it....
-#if [[ "$server" != "$boot_server" ]] ; then
-#    # the hypervisor or host system must be reachable of course
-#    if IsNotPingable $boot_server ; then
-#        echo "System $boot_server is not pingable - please investigate why"
-#        exit 1
-#    else
-#        echo "System $boot_server is up and running - ping test OK"
-#    fi
-#fi
 
 # According the boot_method we can do different stuff now:
 case $boot_method in
