@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 nodes = [
-   { :hostname => 'client', :ip => '192.168.33.10', :box => 'yk0/ubuntu-xenial', :ram => 1024 },
-   { :hostname => 'server', :ip => '192.168.33.15', :box => 'yk0/ubuntu-xenial', :ram => 1024 }
+   { :hostname => 'client', :ip => '192.168.33.10', :box => 'bento/ubuntu-16.04', :ram => 1024 },
+   { :hostname => 'server', :ip => '192.168.33.15', :box => 'bento/ubuntu-16.04', :ram => 1024 }
 ]
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
 
   nodes.each do |node|
     config.vm.define node[:hostname] do |nodeconfig|
-      nodeconfig.vm.box = "yk0/ubuntu-xenial"
+      nodeconfig.vm.box = node[:box]
       nodeconfig.vm.hostname = node[:hostname] + ".box"
       nodeconfig.vm.network :private_network, ip: node[:ip]
 
@@ -25,11 +25,12 @@ Vagrant.configure(2) do |config|
         #
       end
      
-      nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
+      # sync .. to have both centos7 and ubuntu16 directories as there are symbolic links between them
+      nodeconfig.vm.synced_folder "..", "/vagrant", disabled: false
 
       nodeconfig.vm.provision "ansible_local" do |ansible|
          # first run the common ansible playbook
-         ansible.playbook = "ansible/common/vagrant-playbook.yml"
+         ansible.playbook = "/vagrant/ubuntu16/ansible/common/vagrant-playbook.yml"
          ansible.sudo = true
          # ansible.verbose = 'vvvv'
       end
@@ -49,20 +50,18 @@ Vagrant.configure(2) do |config|
       # Now we will run the client or server ansible playbook depending on the hostname
       if host =~ /server/
          nodeconfig.vm.provision "ansible_local" do |ansible|
-           ansible.playbook = "ansible/server/vagrant-playbook.yml"
+           ansible.playbook = "/vagrant/ubuntu16/ansible/server/vagrant-playbook.yml"
            ansible.sudo = true
            # ansible.verbose = 'vvvv'
          end
       elsif host =~ /client/
         nodeconfig.vm.provision "ansible_local" do |ansible|
-          ansible.playbook = "ansible/client/vagrant-playbook.yml"
+          ansible.playbook = "/vagrant/ubuntu16/ansible/client/vagrant-playbook.yml"
           ansible.sudo = true
           # ansible.verbose = 'vvvv'
         end
       end
 
-      # specific provision script for one server
-      # nodeconfig.vm.provision :shell, path: "nodeconfig-centos7.sh"
     # end of config.vm.define node
     end
   
