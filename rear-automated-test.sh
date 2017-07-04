@@ -138,6 +138,21 @@ function define_pxe_tftpboot_path {
     echo $pxe_tftpboot_path
 }
 
+function os_release {
+    # purpose of this function is to return a string with OS ID which is
+    # typically retrieved from /etc/os-release (on modern OSes)
+    # Not used for the moment
+    typeset ID=""
+    if [[ -f /etc/os-release ]] ; then
+        ID=$( grep ^ID= /etc/os-release | cut -d= -f2 | sed -e 's/"//g' )
+    elif [[ -f /etc/system-release ]]; then
+        ID=$( awk '{print $1}' /etc/system-release )
+    else
+        ID="unkown"
+    fi
+    echo "$ID"
+}
+
 ########################################################################
 ## M A I N
 ########################################################################
@@ -298,14 +313,20 @@ vagrant status
 echo "------------------------------------------------------------------------------"
 echo
 
-# if we are dealing with virtualbox if might be that $client/$server are not pingable due to an
+# If we are dealing with virtualbox if might be that $client/$server are not pingable due to an
 # bug in vagrant itself
 # Work-around is to check if "eth1" is active - if not then restart the network
-echo "Check if 'eth1' is active on client $(italic [known issue https://github.com/mitchellh/vagrant/issues/8166])"
-vagrant ssh client -c "sudo su -c \"ip addr show dev eth1 | grep -q DOWN && systemctl restart network.service\""
+# However, first check how the 2th interface is named (eth1 or enp0s8 or something else):
 
-echo "Check if 'eth1' is active on server"
-vagrant ssh server -c "sudo su -c \"ip addr show dev eth1 | grep -q DOWN && systemctl restart network.service\""
+iface1=$( vagrant ssh server -c "sudo su -c \"ip addr show\" | grep ^3: | cut -d: -f2" )
+#echo $iface1
+
+echo "Check if $iface1 is active on client $(italic [known issue https://github.com/mitchellh/vagrant/issues/8166])"
+# todo: fix next line (not sure what is wrong)
+vagrant ssh client -c "sudo su -c \"ip addr show dev $iface1 | grep -q DOWN && systemctl restart network.service\""
+
+echo "Check if $iface1 is active on server"
+vagrant ssh server -c "sudo su -c \"ip addr show dev $iface1 | grep -q DOWN && systemctl restart network.service\""
 
 echo "$(bold Doing ping tests to VMs client and server)"
 if IsNotPingable $client ; then
@@ -324,7 +345,15 @@ fi
 # first update rear inside VM client
 echo
 echo "$(bold Update rear on the VM client)"
-ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" 2>/dev/null
+case "$distro" in
+    (ubuntu*)
+        ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get update"
+        ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get -y --force-yes install rear"
+        ;;
+    (centos*)
+        ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" 2>/dev/null
+        ;;
+esac
 echo
 
 # Option -f test will be executed on 'client' VM only (at least for now)
