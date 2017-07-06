@@ -1,0 +1,55 @@
+---
+# File: ansible/server/roles/rear-test/tasks/configure-and-start-dhcpd-tftp.yml for Redhat/CentOS
+#
+
+- name: Install packages we need for dhcp and tftpboot
+  package: name={{ item }} state=present
+  with_items:
+    - isc-dhcp-server
+    - tftp
+    - tftpd
+    - xinetd
+
+# The 2 lines are always appended instead of replaced.
+#- name: Modify /etc/xinetd.d/tftp server_args and enable tftp service
+#  lineinfile:
+#     dest=/etc/xinetd.d/tftp
+#     regexp="{{ item.regexp }}"
+#     line="{{ item.line }}"
+#     state=present
+#  notify: restart xinitd
+#  with_items:
+#     - regexp: "^[*]server_args[*]"
+#       backrefs: true
+#       line: "\tserver_args\t\t= -s /export/nfs/tftpboot"
+#     - regexp: "^[*]disable[*]"
+#       backrefs: yes
+#       line: "\tdisable\t\t\t= no"
+
+- name: Copy tftp file to /etc/xinetd.d/tftp
+  copy: src=tftp dest=/etc/xinetd.d/tftp mode=0644
+
+- name: Create the pxelinux.cfg directory
+  file:
+    path: /export/nfs/tftpboot/pxelinux.cfg
+    state: directory
+    mode: 0755
+
+- name: create /run/dhcp-server directory
+  file:
+    path: /run/dhcp-server
+    state: directory
+    mode: 0755
+
+- name: Copy pxelinux.0 to /export/nfs/tftpboot directory
+  copy: src=/usr/lib/syslinux/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
+
+- name: Copy menu.c32 to /export/nfs/tftpboot directory
+  copy: src=/usr/lib/syslinux/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
+
+- name: Copy dhcpd.conf file
+  copy: src=dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=0644
+
+- name: Make sure dhcpd daemon is up and running
+  service: name=isc-dhcp-server state=started enabled=yes
+

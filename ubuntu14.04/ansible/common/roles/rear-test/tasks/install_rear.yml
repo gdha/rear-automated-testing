@@ -1,0 +1,22 @@
+---
+# ubuntu14.04/ansible/common/roles/rear-test/tasks/install_rear.yml
+# apt-get install rear will NOT work because the package has a dependency for isolinux,
+# which does not exist on ubuntu 14.04 (is part of syslinux-common)
+
+- name: download rear package locally
+  shell: apt-get download rear
+  async: 1
+  poll: 0
+
+
+- name: install rear (and exclude isolinux)
+  shell: dpkg  --ignore-depends isolinux -i rear_2.1-0_amd64.deb 
+  async: 1
+  poll: 0
+
+- name: install rear dependencies (if still required)
+  shell: apt-get -f install
+  register: out
+  async: 1
+  poll: 0
+

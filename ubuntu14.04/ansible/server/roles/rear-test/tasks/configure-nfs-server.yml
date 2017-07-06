@@ -1,0 +1,39 @@
+---
+# server/roles/rear-test/tasks/configure-nfs-server.yml
+#
+
+- name: install nfs server packages
+  package: name={{ item }} state=present
+  with_items:
+    - nfs-kernel-server
+    - nfs-common
+    - rpcbind
+
+- name: directory /export/nfs is used to store NFS backups
+  file: path=/export/nfs state=directory mode=0755
+
+- name: directory /export/archives is used to store sshfs or rsync backups
+  file: path=/export/archives state=directory mode=0755
+
+- name: directory /export/nfs/tftpboot is used by PXE booting
+  file: path=/export/nfs/tftpboot state=directory mode=0755
+
+- name: create the /etc/exports file
+  copy: src=exports dest=/etc/exports mode=0644
+
+- name: start and enable NFS related services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - nfs-kernel-server
+    - rpcbind
+
+- name: export NFS shares
+  shell: sleep 2; exportfs -a
+  async: 1
+  poll: 0
+
+- name: show the exported NFS shares
+  command: showmount -e
+  register: out
+
+- debug: var=out.stdout_lines

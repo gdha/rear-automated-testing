@@ -1,0 +1,33 @@
+---
+# ansible/client/roles/rear-test/tasks/setup-bareos-client.yml
+
+- name: add http://download.bareos.org/bareos/release/latest/xUbuntu_14.04/ repo
+  apt_repository:
+    repo: deb http://download.bareos.org/bareos/release/latest/xUbuntu_14.04/ ./
+    state: present
+    update_cache: yes
+
+# allow_unauthenticated=yes is required because the bareos repo is 'unsigned' and therefore, untrusted
+- name: Install bareos client packages
+  package: name={{ item }} state=present allow_unauthenticated=yes
+  with_items:
+   - libfastlz
+   - libjansson4
+   - liblzo2-2
+   - bareos-common
+   - bareos-filedaemon
+   - bareos-bconsole
+
+- name: copy bareos configuration files to /etc/bareos
+  copy: src={{ item }} dest=/etc/bareos/{{ item }} owner=bareos group=bareos mode=0644
+  with_items:
+    - bareos-fd.conf
+    - bconsole.conf
+
+- name: copy the pre-backup script for rear/bareos (rear mkbackup calls this one)
+  copy: src=client-backup-with-bareos dest=/etc/rear/client-backup-with-bareos owner=root mode=0755
+
+- name: Enable/Start bareos related services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - bareos-fd

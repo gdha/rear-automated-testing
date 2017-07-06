@@ -1,0 +1,13 @@
+---
+# File ansible/common/roles/rear-test/tasks/update_all_packages.yml
+#
+# A work-around is https://github.com/ansible/ansible/issues/11620 for allow_unauthenticated:
+#
+- name: super-ugly hack to allow unauthenticated packages to install
+  copy: content='APT::Get::AllowUnauthenticated "true";' dest=/etc/apt/apt.conf.d/99allowunauthenticated owner=root group=root mode=0644
+
+- name: update all packages
+  apt: upgrade=yes
+    register: out
+
+- debug: var=out.stdout_lines
