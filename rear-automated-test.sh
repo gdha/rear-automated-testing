@@ -53,13 +53,16 @@ function findUser() {
 
     while [ "$thisUser" = "$origUser" ]
     do
-        ARR=($(ps h -p$thisPID -ouser,ppid;))
+        ARR=($(ps h -p$thisPID -ouser,ppid; | tail -1) )   # tail -1 required for MacOS
         thisUser="${ARR[0]}"
         myPPid="${ARR[1]}"
         thisPID=$myPPid
     done
 
-    getent passwd "$thisUser" | cut -d: -f1
+    case $(uname -s) in
+        Linux) getent passwd "$thisUser" | cut -d: -f1 ;;
+        *) grep "^$thisUser" | cut -d: -f1 ;;
+    esac
 }
 
 
@@ -171,7 +174,7 @@ Copyright: GPL v3
 
 if [[ $(id -u) -ne 0 ]] ; then
     case $(uname -s) in
-        Linux)
+        Linux|Darwin)
             Error "Please run $PRGNAME as root"
             ;;
         CYGWIN*) : # no root required
@@ -233,7 +236,11 @@ case $VAGRANT_DEFAULT_PROVIDER in
         [[ ! -d /var/lib/libvirt ]] && Error "Libvirt seems not to be installed - use another provider perhaps"
         ;;
     virtualbox) 
-        [[ ! -d /usr/lib/virtualbox ]] && Error "VirtualBox seems not to be installed - use another provider perhaps"
+        if [[ -x /usr/bin/VBox ]] || [[ -x /usr/local/bin/VirtualBox ]] ; then
+            echo "Using virtualbox as hypervisor"
+        else
+            Error "VirtualBox seems not to be installed - use another provider perhaps"
+        fi
         ;;
 esac
 
@@ -248,8 +255,8 @@ fi
 
 # Verify the real user's and root .ssh/config files
 user=$(findUser)
-my_home=$(getent passwd | grep ^${user} | cut -d: -f6)
-for DIR in /root $my_home
+my_home=$(grep ^${user} /etc/passwd | cut -d: -f6)
+for DIR in /root /var/root $my_home    # added /var/root for MacOS
 do
     [[ ! -f "$DIR/.ssh/config" ]] && touch "$DIR/.ssh/config"
     grep -q "vagrant-client" "$DIR/.ssh/config" 2>/dev/null
@@ -323,6 +330,7 @@ iface1=$( vagrant ssh server -c "sudo su -c \"ip addr show\" | grep ^3: | cut -d
 
 echo "Check if $iface1 is active on client $(italic [known issue https://github.com/mitchellh/vagrant/issues/8166])"
 # todo: fix next line (not sure what is wrong)
+################################################
 vagrant ssh client -c "sudo su -c \"ip addr show dev $iface1 | grep -q DOWN && systemctl restart network.service\""
 
 echo "Check if $iface1 is active on server"
