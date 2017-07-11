@@ -121,7 +121,11 @@ function green {
 }
 
 function ansi {
-     echo -e "\e[${1}m${*:2}\e[0m";
+     case $(uname -s) in
+        Linux)  echo -e "\e[${1}m${*:2}\e[0m" ;;
+        Darwin) echo "\033[${1}m${*:2}\033[0m" ;;
+             *) echo "$2" ;;
+     esac
 }
 
 function define_pxe_tftpboot_path {
@@ -131,7 +135,7 @@ function define_pxe_tftpboot_path {
     case $VAGRANT_DEFAULT_PROVIDER in
         virtualbox) 
                     # with VirtualBox the TFTP boot path is under:
-                    pxe_tftpboot_path="/root/.config/VirtualBox/TFTP"   
+                    pxe_tftpboot_path="$root_home/.config/VirtualBox/TFTP"   
                     ;;
         libvirt) 
                     # has already been defined in the default settings
@@ -233,9 +237,11 @@ export VAGRANT_DEFAULT_PROVIDER
 # We have chosen the proper provider - did we? Check the basics - are the main paths there or not?
 case $VAGRANT_DEFAULT_PROVIDER in
     libvirt)
+        # most likely Linux only
         [[ ! -d /var/lib/libvirt ]] && Error "Libvirt seems not to be installed - use another provider perhaps"
         ;;
     virtualbox) 
+        # can run on Linux, MacOS, Windows
         if [[ -x /usr/bin/VBox ]] || [[ -x /usr/local/bin/VirtualBox ]] ; then
             echo "Using virtualbox as hypervisor"
         else
@@ -256,7 +262,10 @@ fi
 # Verify the real user's and root .ssh/config files
 user=$(findUser)
 my_home=$(grep ^${user} /etc/passwd | cut -d: -f6)
-for DIR in /root /var/root $my_home    # added /var/root for MacOS
+root_home=$(grep ^root /etc/passwd | cut -d: -f6)
+export root_home
+
+for DIR in $root_home $my_home    # added /var/root for MacOS
 do
     [[ ! -f "$DIR/.ssh/config" ]] && touch "$DIR/.ssh/config"
     grep -q "vagrant-client" "$DIR/.ssh/config" 2>/dev/null
@@ -314,6 +323,7 @@ trap - SIGINT       # disable the trap
 echo "$(italic Sleep for 5 seconds [$(bold Control-C) is now possible])"
 sleep 5
 echo
+echo "$(italic Do $(red not) use $(bold Control-C) anymore, or the VMs will be destroyed)"
 
 echo "------------------------------------------------------------------------------"
 vagrant status
