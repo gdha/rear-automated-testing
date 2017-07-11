@@ -61,7 +61,8 @@ function findUser() {
 
     case $(uname -s) in
         Linux) getent passwd "$thisUser" | cut -d: -f1 ;;
-        *) grep "^$thisUser" | cut -d: -f1 ;;
+        Darwin) echo "$thisUser" ;;  # on MacOS we could use dscl
+        *) grep "^$thisUser" /etc/passwd | cut -d: -f1 ;;
     esac
 }
 
