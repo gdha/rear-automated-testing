@@ -53,7 +53,7 @@ function findUser() {
 
     while [ "$thisUser" = "$origUser" ]
     do
-        ARR=($(ps h -p$thisPID -ouser,ppid; | tail -1) )   # tail -1 required for MacOS
+        ARR=($(ps h -p$thisPID -ouser,ppid | tail -1) )   # tail -1 required for MacOS
         thisUser="${ARR[0]}"
         myPPid="${ARR[1]}"
         thisPID=$myPPid
