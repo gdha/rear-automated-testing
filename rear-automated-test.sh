@@ -124,7 +124,7 @@ function green {
 function ansi {
      case $(uname -s) in
         Linux)  echo -e "\e[${1}m${*:2}\e[0m" ;;
-        Darwin) echo "\033[${1}m${*:2}\033[0m" ;;
+        Darwin) echo -e "\033[${1}m${*:2}\033[0m" ;;
              *) echo "$2" ;;
      esac
 }
