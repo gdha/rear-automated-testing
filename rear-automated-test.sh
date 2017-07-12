@@ -405,7 +405,11 @@ case $boot_method in
 PXE)
 ####
     case $VAGRANT_DEFAULT_PROVIDER in
-        virtualbox) boot_server="10.0.2.2"
+        virtualbox) 
+                    case $(uname -s) in
+                      Linux)  boot_server="10.0.2.2" ;;
+                      Darwin) boot_server="192.168.33.1" ;;
+                    esac
                     # with VirtualBox the TFTP boot path is under:
                     pxe_tftpboot_path=$( define_pxe_tftpboot_path )
                     [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path"
