@@ -337,15 +337,14 @@ echo
 # However, first check how the 2th interface is named (eth1 or enp0s8 or something else):
 
 iface1=$( vagrant ssh server -c "sudo su -c \"ip addr show\" | grep ^3: | cut -d: -f2" )
-#echo $iface1
+# The variable iface1 contains a control character which must be removed with a tr command (see below):
+lan1=$( echo "$iface1" | tr -cd "[:print:]\n" )
 
-echo "Check if $iface1 is active on client $(italic [known issue https://github.com/mitchellh/vagrant/issues/8166])"
-# todo: fix next line (not sure what is wrong)
-################################################
-vagrant ssh client -c "sudo su -c \"ip addr show dev $iface1 | grep -q DOWN && systemctl restart network.service\""
+echo "Check if $lan1 is active on client $(italic [known issue https://github.com/mitchellh/vagrant/issues/8166])"
+vagrant ssh client -c "sudo su -c \"ip addr show dev $lan1 | grep -q DOWN && systemctl restart network.service\""
 
-echo "Check if $iface1 is active on server"
-vagrant ssh server -c "sudo su -c \"ip addr show dev $iface1 | grep -q DOWN && systemctl restart network.service\""
+echo "Check if $lan1 is active on server"
+vagrant ssh server -c "sudo su -c \"ip addr show dev $lan1 | grep -q DOWN && systemctl restart network.service\""
 
 echo "$(bold Doing ping tests to VMs client and server)"
 if IsNotPingable $client ; then
