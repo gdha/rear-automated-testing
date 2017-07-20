@@ -268,6 +268,7 @@ export root_home
 
 for DIR in $root_home $my_home    # added /var/root for MacOS
 do
+    [[ ! -d "$DIR/.ssh" ]] && mkdir -m 700 -p "$DIR/.ssh"
     [[ ! -f "$DIR/.ssh/config" ]] && touch "$DIR/.ssh/config"
     grep -q "vagrant-client" "$DIR/.ssh/config" 2>/dev/null
     if [[ $? -ge 1 ]] ;then
