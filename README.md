@@ -10,7 +10,7 @@ When the ReaR backup is completed we halt the *client* VM and start the *recover
 
 ## Execute the automated ReaR Recovery test
 
-Select the GNU/Linux OS to test by going into the proper directory. However, initially we only have **centos7**, but more will follow over time (and do not forget it goes much faster with *sponsoring*).
+Select the GNU/Linux OS to test by going into the proper directory. However, initially we only have **centos7**, but more will follow over time (and do not forget it goes much faster with *sponsoring* - Ubuntu 14.04 and Ubuntu 16.04 were added with sponsoring).
 
 ````
 $ cd rear-automated-testing
