@@ -416,6 +416,13 @@ PXE)
                     esac
                     # with VirtualBox the TFTP boot path is under:
                     pxe_tftpboot_path=$( define_pxe_tftpboot_path )
+                    # Linux: /root/.config/VirtualBox/TFTP
+                    # OS/X:  /var/root/.config/VirtualBox/TFTP - however, to PXE boot on a Mac you need a
+                    # symbolic link to /var/root/Library/VirtualBox/TFTP
+                    case $(uname -s) in
+                      Darwin) [[ ! -e /var/root/Library/VirtualBox/TFTP ]] && ln -s $pxe_tftpboot_path /var/root/Library/VirtualBox/TFTP ;;
+                    esac
+ 
                     [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path"
                     [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg"
                     ;;
