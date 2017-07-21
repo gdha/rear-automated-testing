@@ -53,15 +53,19 @@ To use this tool on a KVM/libvirt Linux system and as CentOS7 and PXE are the de
 
 ### Using VirtualBox
 
-To use this tool on a VirtualBox Linux or OS/X system and as CentOS7 and PXE are the default we do not need additional parameters as it will try to set-up and FTPboot area on the host system itself. However, it is imported that the hosts system is a NFS server as the client VM will try to mount the TFTboot area. Why do we need the host system? That is because VirtualBox uses a NAT network to PXE boot from and that is always pointing the host system (a pity we cannot use the server VM).
+To use this tool on a VirtualBox with Linux or OS/X system and to test of GNU/Linux operating system CentOS 7, Ubuntu 14.04 or Ubuntu 16.04 and with boot methods PXE or ISO. The tool will try to set-up an FTPboot area on the host system itself. However, it is imported that the hosts system is a NFS server as the client VM will try to mount the TFTboot area. Why do we need the host system? That is because VirtualBox uses a NAT network to PXE boot from and that is always pointing the host system (a pity we cannot use the server VM).
 
-The host system should be a NFS server (when using VirtualBox). To get this right create a /etc/exports file that looks like:
+To setup a NFS server (when using VirtualBox) on the host system create a /etc/exports file that looks like:
 
 - Linux:
 /export 192.168.0.0/16(rw,no_root_squash) 10.0.2.0/24(rw,insecure,no_root_squash) 127.0.0.1(rw,insecure,no_root_squash)
 /root/.config/VirtualBox/TFTP 192.168.0.0/16(rw,no_root_squash) 10.0.2.0/24(rw,insecure,no_root_squash) 127.0.0.1(rw,insecure,no_root_squash)
 
-OS/X:
+- OS/X:
 /   -alldirs  -rw  -maproot=0:0 -sec=sys:krb5  -network 192.168.33.0 -mask 255.255.255.0
 
 Use the `showmount -e` command to check if the export was successfull. 
+
+### ReaR configuration files
+
+There are several ReaR configuration files available under the templates directory.
