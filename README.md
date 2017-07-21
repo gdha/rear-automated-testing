@@ -1,7 +1,7 @@
 # rear-automated-testing
 Relax-and-Recover (ReaR) Automated Testing is using Vagrant and standard GNU/Linux boxes to deploy one server and one client virtual machine (VM), and besides a recover VM is also created, but not provisioned. The main goal of this project is to foresee in a simple way to test the latest snapshot release of ReaR without too many manual interactions by doing a full backup with an automated restore into the *recover* VM.
 
-In short we start the *client* and *server* VM via vagrant, and do a provisioning if required so that the *server* VM is capable of being a NFS server, PXE server and TFTP server. Then, we install the latest **ReaR** snapshot in the *client* VM and run a full backup using the *NETFS* backup method (with the help of `tar`). The tar archive is stored on the *server* VM and in the same time the PXE environment is configured on the *server* VM as well (when using KVM/libvirt), or a PXE environment is configured on the host system when using virtualbox..
+In short we start the *client* and *server* VM via vagrant, and do a provisioning if required so that the *server* VM is capable of being a NFS server, PXE server and TFTP server. Then, we install the latest **ReaR** snapshot in the *client* VM and run a full backup using the *NETFS* backup method (with the help of `tar` or *bareos*). The tar archive is stored on the *server* VM and in the same time the PXE environment is configured on the *server* VM as well (when using KVM/libvirt), or a PXE environment is configured on the host system when using virtualbox..
 When the ReaR backup is completed we halt the *client* VM and start the *recover* VM and do a full restore of the *client* content. Once the restore is completed the *recover* VM reboot automatically.
 
 ## Clone this Git repository
@@ -58,11 +58,15 @@ To use this tool on a VirtualBox with Linux or OS/X system and to test of GNU/Li
 To setup a NFS server (when using VirtualBox) on the host system create a /etc/exports file that looks like:
 
 - Linux:
+````
 /export 192.168.0.0/16(rw,no_root_squash) 10.0.2.0/24(rw,insecure,no_root_squash) 127.0.0.1(rw,insecure,no_root_squash)
 /root/.config/VirtualBox/TFTP 192.168.0.0/16(rw,no_root_squash) 10.0.2.0/24(rw,insecure,no_root_squash) 127.0.0.1(rw,insecure,no_root_squash)
+````
 
 - OS/X:
+````
 /   -alldirs  -rw  -maproot=0:0 -sec=sys:krb5  -network 192.168.33.0 -mask 255.255.255.0
+````
 
 Use the `showmount -e` command to check if the export was successfull. 
 
