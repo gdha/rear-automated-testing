@@ -7,7 +7,9 @@
   copy: content='APT::Get::AllowUnauthenticated "true";' dest=/etc/apt/apt.conf.d/99allowunauthenticated owner=root group=root mode=0644
 
 - name: update all packages
-  apt: upgrade=yes
-    register: out
+  apt:
+    upgrade: yes
+    update_cache: yes
+    dpkg_options: 'force-confold,force-confdef'
 
-- debug: var=out.stdout_lines
+#- debug: var=out.stdout_lines

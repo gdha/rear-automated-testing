@@ -2,7 +2,8 @@
 # ansible/common/roles/rear-test/tasks/define_timezone.yml
 
 - name: define timezone to Europe/Brussels
-  command: /usr/bin/timedatectl set-timezone Europe/Brussels
+  timezone: 
+    name: Europe/Brussels
 
 - name: disable RTC time in the local time zone
   command: /usr/bin/timedatectl set-local-rtc 0

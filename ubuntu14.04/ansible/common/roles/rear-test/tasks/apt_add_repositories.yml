@@ -3,8 +3,8 @@
 
 - name: add http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_14.04/ repo
   apt_repository:
-    repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_14.04/ ./
-    #repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/xUbuntu_14.04/ ./
+    #repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_14.04/ ./
+    repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/xUbuntu_14.04/ ./
     state: present
     update_cache: yes
 
