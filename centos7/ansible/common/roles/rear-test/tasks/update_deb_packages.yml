@@ -1,0 +1,22 @@
+---
+# File ansible/common/roles/rear-test/tasks/update_all_packages.yml
+#
+# A work-around is https://github.com/ansible/ansible/issues/11620 for allow_unauthenticated:
+#
+- name: super-ugly hack to allow unauthenticated packages to install
+  copy: content='APT::Get::AllowUnauthenticated "true";' dest=/etc/apt/apt.conf.d/99allowunauthenticated owner=root group=root mode=0644
+
+# A work-around for issue #29 - unsigned packages are blocked
+- name: extremely insecure setting until issue 29 is fixed (AllowInsecureRepositories "true")
+  copy: content='Acquire::AllowInsecureRepositories "true";' dest=/etc/apt/apt.conf.d/99allowinsecurerepositories owner=root group=root mode=0644
+
+- name: install aptitude (need this for upgrade action)
+  package: name=aptitude state=present
+
+- name: update all packages
+  apt:
+    upgrade: yes
+    update_cache: yes
+    dpkg_options: 'force-confold,force-confdef'
+
+#- debug: var=out.stdout_lines

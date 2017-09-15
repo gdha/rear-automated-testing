@@ -1,0 +1,12 @@
+---
+# common/install_common_packages.yml
+# Here we install packages which are named the same across all supported distro's
+
+- name: Install common basic development packages
+  package: name={{ item }} state=present
+  with_items:
+    - git
+    - tree
+    - vim-enhanced
+    - wget
+    - libselinux-python

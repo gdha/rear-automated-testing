@@ -1,0 +1,39 @@
+---
+# ansible/common/roles/rear-test/tasks/apt_add_repositories.yml
+
+# Specific section for Ubuntu distribution
+# ########################################
+# The apt_key Release is not a proper key for rear - no to log an issue at OBS
+#- name: download the Release.key from OBS
+#  apt_key:
+#    url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_{{ ansible_distribution_version }}/Release.key
+
+- name: add http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_version repo
+  apt_repository:
+    repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_{{ ansible_distribution_version }}/ ./
+    #repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/xUbuntu_17.04/ ./
+    # Downloading stable version can better be done from https://launchpad.net/ubuntu/+source/rear
+    # However, the real URL is not found yet
+    state: present
+    update_cache: yes
+
+  when: ansible_distribution == "Ubuntu"
+# alternative example:
+# when: ansible_distribution == RedHat AND ansible_distribution_major_version == 6
+
+###################################################################################################################
+# A section for Debian
+# ####################
+#- name: download the Release.key from OBS
+#  apt_key:
+#    url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian_{{ ansible_distribution_version }}/Release.key
+
+- name: add http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian_version repo
+  apt_repository:
+    repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian_{{ ansible_distribution_version }}/ ./
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Debian"
+
+#### continue for Ubuntu/Debian:
+

@@ -1,0 +1,11 @@
+---
+# install_rh_packages.yml
+# Only RedHat related RPMs will be installed here
+
+- name: Install common basic RedHat development packages
+  package: name={{ item }} state=present
+  with_items:
+    - epel-release
+    - httpd
+    - createrepo
+

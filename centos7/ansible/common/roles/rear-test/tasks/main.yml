@@ -2,17 +2,32 @@
 # File: ansible/common/roles/rear-test/tasks/main.yml
 # Ansible taks which are common for client and server
 
+# The following set are the same for RedHat and Debian OS family
 - include: define_timezone.yml
-- include: copy_repos.yml
-- include: update_all_packages.yml
-- include: create_users.yml
 - include: create_private_ssh_key.yml
-- include: configure_kernel_parameters.yml
 - include: update_sshd_config.yml
+- include: configure_kernel_parameters.yml
+- include: update_imapd_conf.yml
+
+# A block dedicated for ansible_os_family == "RedHat"
+- block:
+  - include: update_rh_packages.yml
+  - include: copy_repos.yml
+
+  when: ansible_os_family == "RedHat"
+
+# A block dedicated for ansible_os_family == "Debian"
+- block:
+  - include: update_deb_packages.yml
+  - include: apt_add_repositories.yml
+
+  when: ansible_os_family == "Debian"
+
+#############################################
+- include: create_users.yml
 - include: update_and_restart_network.yml
 - include: disable_biosdevnames.yml
 - include: change_selinux_state.yml
-- include: update_imapd_conf.yml
 
 - name: Install common basic development packages
   package: name={{ item }} state=present
