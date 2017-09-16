@@ -8,11 +8,13 @@
 - include: update_sshd_config.yml
 - include: configure_kernel_parameters.yml
 - include: update_imapd_conf.yml
+- include: install_common_packages.yml
 
 # A block dedicated for ansible_os_family == "RedHat"
 - block:
   - include: update_rh_packages.yml
   - include: copy_repos.yml
+  - include: install_rh_packages.yml
 
   when: ansible_os_family == "RedHat"
 
@@ -20,6 +22,7 @@
 - block:
   - include: update_deb_packages.yml
   - include: apt_add_repositories.yml
+  - include: install_deb_packages.yml
 
   when: ansible_os_family == "Debian"
 
@@ -29,16 +32,6 @@
 - include: disable_biosdevnames.yml
 - include: change_selinux_state.yml
 
-- name: Install common basic development packages
-  package: name={{ item }} state=present
-  with_items:
-    - epel-release
-    - git
-    - tree
-    - vim-enhanced
-    - httpd
-    - createrepo
-    - wget
 
 # Add various helpful configuration files
 - name: Install the hosts file
@@ -53,11 +46,9 @@
     - net-tools
     - samba
     - samba-client
-    - bind-utils
     - rear
     - mtools
     - attr
-    - libusal
     - sshfs
     - bc
 

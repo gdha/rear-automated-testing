@@ -12,4 +12,5 @@
     state=present
     insertafter=EOF
     create=true
-  notify: restart network
+  notify: restart network service
+  when: ansible_os_family == "RedHat"

@@ -7,6 +7,4 @@
   with_items:
     - git
     - tree
-    - vim-enhanced
     - wget
-    - libselinux-python

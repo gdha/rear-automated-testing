@@ -8,4 +8,6 @@
     - epel-release
     - httpd
     - createrepo
-
+    - vim-enhanced
+    - bind-utils
+    - libusal

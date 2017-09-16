@@ -2,4 +2,10 @@
 # install_deb_packages.yml
 # Only install Debian/Ubuntu related packages
 
+- name: Install common basic Debian/Ubuntu development packages
+  package: name={{ item }} state=present
+  with_items:
+    - vim
+    - selinux
+    - python-selinux
 
