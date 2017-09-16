@@ -3,7 +3,15 @@
 
 - name: copy bareos.repo to /etc/yum.repos.d directory
   copy: src=bareos.repo dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
+  when: ansible_os_family == "RedHat"
 
+# Bareos does not precompile all distribution version yet (e.g. 17.04 is not available)
+- name: add http://download.bareos.org/bareos/release/latest/xUbuntu repo
+  apt_repository:
+    repo: deb http://download.bareos.org/bareos/release/latest/xUbuntu_{{ ansible_distribution_version }}/ ./
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
 
 # we have to be careful when we re-provision that the dir /var/lib/pgsql/ is wiped out
 # before running initdb once again
@@ -13,22 +21,33 @@
     path: /var/lib/pgsql/data
     state: absent
 
-- name: Install postgresql
+- name: Install postgresql (rh arch)
   package: name={{ item }} state=present
   with_items:
    - postgresql-server
+  when: ansible_os_family == "RedHat"
+
+- name: Install postgresql (deb arch)
+  package: name={{ item }} state=present allow_unauthenticated=yes
+  with_items:
+   - postgresql
+   - postgresql-contrib
+  when: ansible_os_family == "Debian"
 
 - name: Initialize the postgresql database
   command: /bin/postgresql-setup initdb
   register: out
+  when: ansible_os_family == "RedHat"
 
 - debug: var=out.stdout_lines
+  when: ansible_os_family == "RedHat"
 
 - name: Enable/Start database server
   service: name=postgresql state=started enabled=yes
 
+# allow_unauthenticated=yes required for Ubuntu - verify if Centos breaks on it or not?
 - name: Install bareos server packages
-  package: name={{ item }} state=present
+  package: name={{ item }} state=present allow_unauthenticated=yes
   with_items:
    - bareos 
    - bareos-database-postgresql

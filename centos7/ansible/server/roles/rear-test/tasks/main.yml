@@ -5,7 +5,7 @@
 - include: configure-and-start-dhcpd-tftp.yml
 - include: start-samba.yml
 - include: setup-bareos-server.yml
-
+  
 
 # Add various helpful configuration files
 - name: Install the message of the day

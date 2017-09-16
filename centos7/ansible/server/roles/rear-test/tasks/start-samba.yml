@@ -1,12 +1,21 @@
 ---
 # server/roles/rear-test/tasks/start-samba.yml
 
-- name: start Samba
+- name: start Samba (rh arch)
   service: name={{ item }} state=started enabled=yes
   with_items:
      - smb
      - nmb
+  when: ansible_os_family == "RedHat"
 
+- name: start Samba (deb arch)
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+     - smbd
+     - nmbd
+  when: ansible_os_family == "Debian"
+
+# SELinux should be in permissive mode on all distro's
 - name: run setsebool -P samba_enable_home_dirs on
   shell: sleep 1; setsebool -P samba_enable_home_dirs on
   async: 1

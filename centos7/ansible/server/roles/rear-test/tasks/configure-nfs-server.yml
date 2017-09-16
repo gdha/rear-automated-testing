@@ -2,11 +2,20 @@
 # server/roles/rear-test/tasks/configure-nfs-server.yml
 #
 
-- name: Install packages required by the server only
+- name: Install packages required by the server only (redhat arch)
   package: name={{ item }} state=present
   with_items:
     - nfs-utils
     - rpcbind
+  when: ansible_os_family == "RedHat"
+
+- name: install nfs server packages (debian arch)
+  package: name={{ item }} state=present
+  with_items:
+    - nfs-kernel-server
+    - nfs-common
+    - rpcbind
+  when: ansible_os_family == "Debian"
 
 - name: directory /export/nfs is used to store NFS backups
   file: path=/export/nfs state=directory mode=0755
@@ -20,12 +29,20 @@
 - name: create the /etc/exports file
   copy: src=exports dest=/etc/exports mode=0644
 
-- name: start and enable NFS related services
+- name: start and enable NFS related services (redhat arch)
   service: name={{ item }} state=started enabled=yes
   with_items:
     - nfs-idmapd
     - rpcbind
     - nfs-server
+  when: ansible_os_family == "RedHat"
+
+- name: start and enable NFS related services (debian arch)
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - nfs-server
+    - rpcbind
+  when: ansible_os_family == "Debian"
 
 - name: export NFS shares
   shell: sleep 2; exportfs -a

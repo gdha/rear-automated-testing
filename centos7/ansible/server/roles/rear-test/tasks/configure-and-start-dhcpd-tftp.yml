@@ -10,6 +10,21 @@
     - tftp
     - tftp-server
     - xinetd
+  when: ansible_os_family == "RedHat"
+
+- name: Install packages we need for dhcp and tftpboot
+  package: name={{ item }} state=present
+  with_items:
+    - isc-dhcp-server
+    - syslinux
+    - syslinux-common
+    - syslinux-utils
+    - isolinux
+    - pxelinux
+    - tftp
+    - tftpd
+    - xinetd
+  when: ansible_os_family == "Debian"
 
 # The 2 lines are always appended instead of replaced.
 #- name: Modify /etc/xinetd.d/tftp server_args and enable tftp service
@@ -30,21 +45,42 @@
 - name: Copy tftp file to /etc/xinetd.d/tftp
   copy: src=tftp dest=/etc/xinetd.d/tftp mode=0644
 
+- name: create /run/dhcp-server directory
+  file:
+    path: /run/dhcp-server
+    state: directory
+    mode: 0755
+  when: ansible_os_family == "Debian"
+
 - name: Create the pxelinux.cfg directory
   file:
     path: /export/nfs/tftpboot/pxelinux.cfg
     state: directory
     mode: 0755
 
-- name: Copy pxelinux.0 to /export/nfs/tftpboot directory
+- name: Copy pxelinux.0 to /export/nfs/tftpboot directory (rh arch)
   copy: src=/usr/share/syslinux/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
+  when: ansible_os_family == "RedHat"
 
-- name: Copy menu.c32 to /export/nfs/tftpboot directory
+- name: Copy pxelinux.0 to /export/nfs/tftpboot directory (deb arch)
+  copy: src=/usr/lib/PXELINUX/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
+  when: ansible_os_family == "Debian"
+
+- name: Copy menu.c32 to /export/nfs/tftpboot directory (rh arch)
   copy: src=/usr/share/syslinux/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
+  when: ansible_os_family == "RedHat"
+
+- name: Copy menu.c32 to /export/nfs/tftpboot directory (deb arch)
+  copy: src=/usr/lib/syslinux/modules/bios/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
+  when: ansible_os_family == "Debian"
 
 - name: Copy dhcpd.conf file
   copy: src=dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=0644
 
 - name: Make sure dhcpd daemon is up and running
   service: name=dhcpd state=started enabled=yes
+  when: ansible_os_family == "RedHat"
 
+- name: Make sure isc-dhcp-server is up and running
+  service: name=isc-dhcp-server state=started enabled=yes
+  when: ansible_os_family == "Debian"
