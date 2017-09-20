@@ -5,11 +5,16 @@
 - include: github_pub_key.yml
 - include: setup-bareos-client.yml
 
-- name: Install redhat test tools, beakerlib packages and some other goodies
+- name: Install redhat test tools, beakerlib packages and some other goodies (rh arch)
   package: name={{ item }} state=present
   with_items:
     - rear-rhts
     - beakerlib
+  when: ansible_os_family == "RedHat"
+
+- name: Install some tools useful on the client (all arch)
+  package: name={{ item }} state=present
+  with_items:
     - nano
 
 # Add various helpful configuration files
