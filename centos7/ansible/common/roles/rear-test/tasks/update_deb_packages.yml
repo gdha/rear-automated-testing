@@ -18,5 +18,6 @@
     upgrade: yes
     update_cache: yes
     dpkg_options: 'force-confold,force-confdef'
+  ignore_errors: True
 
 #- debug: var=out.stdout_lines

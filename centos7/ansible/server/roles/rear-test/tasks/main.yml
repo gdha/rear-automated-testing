@@ -1,6 +1,13 @@
 ---
 # server/roles/rear-test/tasks/main.yml
 
+# As on 'server' we do not require rear we will remove it again - Ubuntu14 specific
+- name: Remove ReaR package on server (due to isolinux blocker)
+  apt:
+    name: rear
+    state: absent
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
+
 - include: configure-nfs-server.yml
 - include: configure-and-start-dhcpd-tftp.yml
 - include: start-samba.yml

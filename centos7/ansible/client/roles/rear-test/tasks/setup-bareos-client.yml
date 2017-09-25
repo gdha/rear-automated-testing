@@ -19,6 +19,15 @@
    - bareos-bconsole
   when: ansible_os_family == "RedHat"
 
+- name: Install bareos pre-requisites for ubuntu14 only
+  package: name={{ item }} state=present  allow_unauthenticated=yes
+  with_items:  
+   - libfastlz
+   - libjansson4
+   - liblzo2-2
+   - bareos-common
+  when: ansible_distribution == "Ubuntu" AND ansible_distribution_major_version == 14
+
 - name: Install bareos client packages (deb arch)
   package: name={{ item }} state=present  allow_unauthenticated=yes
   with_items:

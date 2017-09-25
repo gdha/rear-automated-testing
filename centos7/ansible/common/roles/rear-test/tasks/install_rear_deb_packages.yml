@@ -1,0 +1,44 @@
+---
+# Install debian/ubuntu related packages required by rear
+
+- name: Install packages required by ReaR
+  package: name={{ item }} state=present allow_unauthenticated=yes
+  with_items:
+    - syslinux
+    - syslinux-common
+    - cifs-utils
+    - genisoimage
+    - net-tools
+    - samba
+    - samba-common
+    - samba-client
+    - bind9utils
+    - nfs-common
+    - ethtool
+    - libisoburn1
+    - libburn4
+    - libisofs6
+    - libjte1
+    - xorriso
+    - iproute
+    - libsigsegv2
+    - selinux
+  ignore_errors: True
+
+- name: download rear package locally
+  shell: apt-get download rear
+  async: 1
+  poll: 0
+
+
+- name: install rear (and exclude isolinux)
+  shell: dpkg  --ignore-depends isolinux -i rear_*.deb 
+  async: 1
+  poll: 0
+
+- name: install rear dependencies (if still required)
+  shell: apt-get -f install
+  register: out
+  async: 1
+  poll: 0
+

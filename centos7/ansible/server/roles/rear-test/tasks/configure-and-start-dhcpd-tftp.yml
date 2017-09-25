@@ -12,7 +12,7 @@
     - xinetd
   when: ansible_os_family == "RedHat"
 
-- name: Install packages we need for dhcp and tftpboot
+- name: Install packages we need for dhcp and tftpboot (ubuntu>15)
   package: name={{ item }} state=present
   with_items:
     - isc-dhcp-server
@@ -24,7 +24,16 @@
     - tftp
     - tftpd
     - xinetd
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '15'
+
+- name: Install packages we need for dhcp and tftpboot (ubuntu14)
+  package: name={{ item }} state=present
+  with_items:
+    - isc-dhcp-server
+    - tftp
+    - tftpd
+    - xinetd
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
 # The 2 lines are always appended instead of replaced.
 #- name: Modify /etc/xinetd.d/tftp server_args and enable tftp service
@@ -62,17 +71,25 @@
   copy: src=/usr/share/syslinux/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
   when: ansible_os_family == "RedHat"
 
-- name: Copy pxelinux.0 to /export/nfs/tftpboot directory (deb arch)
+- name: Copy pxelinux.0 to /export/nfs/tftpboot directory (ubuntu >15)
   copy: src=/usr/lib/PXELINUX/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '15'
+
+- name: Copy pxelinux.0 to /export/nfs/tftpboot directory (ubuntu14)
+  copy: src=/usr/lib/syslinux/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
 - name: Copy menu.c32 to /export/nfs/tftpboot directory (rh arch)
   copy: src=/usr/share/syslinux/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
   when: ansible_os_family == "RedHat"
 
-- name: Copy menu.c32 to /export/nfs/tftpboot directory (deb arch)
+- name: Copy menu.c32 to /export/nfs/tftpboot directory (ubuntu >15)
   copy: src=/usr/lib/syslinux/modules/bios/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '15'
+
+- name: Copy menu.c32 to /export/nfs/tftpboot directory (ubuntu14)
+  copy: src=/usr/lib/syslinux/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
 - name: Copy dhcpd.conf file
   copy: src=dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=0644

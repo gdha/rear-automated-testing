@@ -5,3 +5,15 @@
   selinux:
     policy: targeted
     state: permissive
+  when: ansible_os_family == "RedHat"
+
+- name: change the selinux to disabled (for ubuntu 14)
+  selinux:
+    state: disabled
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
+
+- name: change the selinux to permissive (ubuntu >14)
+  selinux:
+    policy: targeted
+    state: permissive
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '14'

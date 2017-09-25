@@ -15,6 +15,7 @@
   - include: update_rh_packages.yml
   - include: copy_repos.yml
   - include: install_rh_packages.yml
+  - include: install_rear_rh_packages.sh
 
   when: ansible_os_family == "RedHat"
 
@@ -23,6 +24,7 @@
   - include: update_deb_packages.yml
   - include: apt_add_repositories.yml
   - include: install_deb_packages.yml
+  - include: install_rear_deb_packages.yml
 
   when: ansible_os_family == "Debian"
 
@@ -36,19 +38,4 @@
 # Add various helpful configuration files
 - name: Install the hosts file
   copy: src=hosts dest=/etc/hosts mode=0644
-
-- name: Install common packages required by ReaR
-  package: name={{ item }} state=present
-  with_items:
-    - syslinux
-    - cifs-utils
-    - genisoimage
-    - net-tools
-    - samba
-    - samba-client
-    - rear
-    - mtools
-    - attr
-    - sshfs
-    - bc
 

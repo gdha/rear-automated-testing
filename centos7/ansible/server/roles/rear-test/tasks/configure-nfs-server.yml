@@ -37,12 +37,20 @@
     - nfs-server
   when: ansible_os_family == "RedHat"
 
-- name: start and enable NFS related services (debian arch)
+- name: start and enable NFS related services (ubuntu version == 14)
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - nfs-kernel-server
+    - rpcbind
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
+
+- name: start and enable NFS related services (ubuntu version >14)
   service: name={{ item }} state=started enabled=yes
   with_items:
     - nfs-server
     - rpcbind
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '14'
+  #when: ansible_os_family == "Debian"
 
 - name: export NFS shares
   shell: sleep 2; exportfs -a

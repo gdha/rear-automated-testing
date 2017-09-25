@@ -4,6 +4,7 @@
 
 - name: Install common basic Debian/Ubuntu development packages
   package: name={{ item }} state=present
+  ignore_errors: True
   with_items:
     - vim
     - selinux
