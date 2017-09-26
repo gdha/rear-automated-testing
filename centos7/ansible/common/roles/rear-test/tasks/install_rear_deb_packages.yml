@@ -25,20 +25,12 @@
     - selinux
   ignore_errors: True
 
+# download the rear package locally and install it at the very end on the client only
+# via ansible/client/roles/rear-test/tasks/install_rear_deb_pkg_at_the_end.yml
+# as ubuntu14 is real pain to provision due to the missing isolinux package
+# and that comes from rear Depends rule (unfortunately)
 - name: download rear package locally
   shell: apt-get download rear
-  async: 1
-  poll: 0
-
-
-- name: install rear (and exclude isolinux)
-  shell: dpkg  --ignore-depends isolinux -i rear_*.deb 
-  async: 1
-  poll: 0
-
-- name: install rear dependencies (if still required)
-  shell: apt-get -f install
-  register: out
   async: 1
   poll: 0
 

@@ -21,3 +21,4 @@
 - name: Install the message of the day
   copy: src=motd dest=/etc/motd
 
+- include: install_rear_deb_pkg_at_the_end.yml

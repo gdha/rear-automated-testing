@@ -7,10 +7,17 @@
     state: permissive
   when: ansible_os_family == "RedHat"
 
-- name: change the selinux to disabled (for ubuntu 14)
-  selinux:
-    state: disabled
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
+# With Ubuntu 14 we always get the error "sudo: a password is required" and then the playbook halts
+# When we try it manually on the 'client' we get the following:
+#  # setenforce disabled
+#  setenforce: SELinux is disabled
+#  # setenforce enabled
+#  setenforce: SELinux is disabled
+# For these reasons we think it is wiser to skip the ubuntu 14 selinux task altogether
+#- name: change the selinux to disabled (for ubuntu 14)
+#  selinux:
+#    state: disabled
+#  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
 - name: change the selinux to permissive (ubuntu >14)
   selinux:

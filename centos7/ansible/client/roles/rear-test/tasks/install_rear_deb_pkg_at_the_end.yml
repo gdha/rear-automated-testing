@@ -1,0 +1,15 @@
+---
+
+# on ubuntu14 isolinux package does not exist (isolinux is part of syslinux-common)
+- name: install rear (and exclude isolinux)
+  shell: dpkg  --ignore-depends isolinux -i rear_*.deb
+  async: 1
+  poll: 0
+
+# we hope that next task will install isolinux if required (on debian/ubuntu)
+- name: install rear dependencies (if still required)
+  shell: apt-get -f install
+  register: out
+  async: 1
+  poll: 0
+  
