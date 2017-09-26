@@ -48,8 +48,11 @@
     - bareos-fd.conf
     - bconsole.conf
 
+- name: Create /usr/local/bin directory (if required)
+  file: path=/usr/local/bin state=directory
+
 - name: copy the pre-backup script for rear/bareos (rear mkbackup calls this one)
-  copy: src=client-backup-with-bareos dest=/etc/rear/client-backup-with-bareos owner=root mode=0755
+  copy: src=client-backup-with-bareos dest=/usr/local/bin/client-backup-with-bareos owner=root mode=0755
 
 - name: Enable/Start bareos related services
   service: name={{ item }} state=started enabled=yes
