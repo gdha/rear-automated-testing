@@ -1,10 +1,20 @@
 ---
 
+- name: Install required packages we need for ReaR (Ubuntu>15)
+  package: name={{ item }} state=present
+  with_items:
+    - syslinux
+    - syslinux-common
+    - syslinux-utils
+    - isolinux
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '15'
+
 # on ubuntu14 isolinux package does not exist (isolinux is part of syslinux-common)
 - name: install rear (and exclude isolinux)
   shell: dpkg  --ignore-depends isolinux -i rear_*.deb
   async: 1
   poll: 0
+
 
 # we hope that next task will install isolinux if required (on debian/ubuntu)
 - name: install rear dependencies (if still required)
