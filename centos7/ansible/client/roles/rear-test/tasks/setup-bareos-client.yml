@@ -5,6 +5,12 @@
   copy: src=bareos.repo dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
   when: ansible_os_family == "RedHat"
 
+- name: Download the Release.key from bareos
+  apt_key:
+    url: http://download.bareos.org/bareos/release/latest/xUbuntu_{{ ansible_distribution_version }}/Release.key
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
 - name: add http://download.bareos.org/bareos/release/latest/xUbuntu repo
   apt_repository:
     repo: deb http://download.bareos.org/bareos/release/latest/xUbuntu_{{ ansible_distribution_version }}/ ./

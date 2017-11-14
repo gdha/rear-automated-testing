@@ -6,6 +6,12 @@
   when: ansible_os_family == "RedHat"
 
 # Bareos does not precompile all distribution version yet (e.g. 17.04 is not available)
+- name: Download the Release.key from bareos
+  apt_key:
+    url: http://download.bareos.org/bareos/release/latest/xUbuntu_{{ ansible_distribution_version }}/Release.key
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
 - name: add http://download.bareos.org/bareos/release/latest/xUbuntu repo
   apt_repository:
     repo: deb http://download.bareos.org/bareos/release/latest/xUbuntu_{{ ansible_distribution_version }}/ ./

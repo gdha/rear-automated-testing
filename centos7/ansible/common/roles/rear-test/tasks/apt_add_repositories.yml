@@ -36,7 +36,7 @@
 - name: download the Release.key from OBS
   apt_key:
     url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian_{{ ansible_distribution_version }}/Release.key
-   state: present
+    state: present
   when: ansible_distribution == "Debian"
 
 - name: add http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian repo
