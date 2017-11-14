@@ -76,7 +76,8 @@ Vagrant.configure(2) do |config|
 
     #recover.vm.network "public_network"
     recover.vm.network :private_network, ip: "192.168.33.5"
-    recover.ssh.username = "root"
+    recover.ssh.username = "vagrant"
+    recover.ssh.password = "vagrant"
 
     recover.vm.provider :virtualbox do |recover_prov|
       recover_prov.name = "recover_ubuntu16"

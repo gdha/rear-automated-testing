@@ -1,15 +1,20 @@
 ---
 # ansible/common/roles/rear-test/tasks/apt_add_repositories.yml
 
-#########################################
+# Be careful - we are working with Snapshots here - for Stable release we still need to figure it out (TODO)
+##########################################
 # Specific section for Ubuntu distribution
 ##########################################
-# The apt_key Release is not a proper gpg key for rear - should log an issue at OBS
+# manual action on VM works fine:
+# # wget -q -O - download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_16.04/Release.key | apt-key add -
+# OK
+#
 # We skip it for the moment until we know how to do it; or fixed
-#- name: download the Release.key from OBS
-#  apt_key:
-#    url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_{{ ansible_distribution_version }}/Release.key
-#  when: ansible_distribution == "Ubuntu"
+- name: download the Release.key from OBS
+  apt_key:
+    url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_{{ ansible_distribution_version }}/Release.key
+    state: present
+  when: ansible_distribution == "Ubuntu"
 
 - name: add http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu repo
   apt_repository:
@@ -28,10 +33,11 @@
 ######################
 # A section for Debian
 ######################
-#- name: download the Release.key from OBS
-#  apt_key:
-#    url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian_{{ ansible_distribution_version }}/Release.key
-#  when: ansible_distribution == "Debian"
+- name: download the Release.key from OBS
+  apt_key:
+    url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian_{{ ansible_distribution_version }}/Release.key
+   state: present
+  when: ansible_distribution == "Debian"
 
 - name: add http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian repo
   apt_repository:

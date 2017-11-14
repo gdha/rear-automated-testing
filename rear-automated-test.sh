@@ -223,6 +223,25 @@ if [[ ! -d "$distro" ]] ; then
     exit 1 
 fi
 
+# check which "distro" was last used - if different we should warn the user about it
+# as we probably want to destroy the previous vagrant boxes first - we use a symbolic link
+# to keep track of the "latest" distro used.
+if [[ ! -h "latest" ]] ; then
+    # Link does not yet exists - create it
+    ln -s "$distro" "latest"
+    targetdistro="$distro"
+else
+    # link "latest" exists - to which distro does it point?
+    targetdistro=$( ls -l latest | awk 'NF>1{print $NF}' )
+fi
+
+if [[ "$targetdistro" != "$distro" ]] ; then
+    echo "It would be better to destroy the Vagrant boxes first of distro $targetdistro"
+    echo "before starting doing tests with distr $distro"
+    echo "Press 'enter' to continue or Ctrl-C to quit"
+    read junk
+fi
+
 # define a proper supported vagrant provider
 case "$provider" in
 	"") # use default VAGRANT_DEFAULT_PROVIDER as defined in the beginning
