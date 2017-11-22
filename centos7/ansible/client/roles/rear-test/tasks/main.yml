@@ -2,8 +2,8 @@
 # File: ansible/client/roles/rear-test/tasks/main.yml
 # Ansible tasks meant for the client only
 
-- include: github_pub_key.yml
-- include: setup-bareos-client.yml
+- include_tasks: github_pub_key.yml
+- include_tasks: setup-bareos-client.yml
 
 - name: Install redhat test tools, beakerlib packages and some other goodies (rh arch)
   package: name={{ item }} state=present
@@ -21,4 +21,14 @@
 - name: Install the message of the day
   copy: src=motd dest=/etc/motd
 
-- include: install_rear_deb_pkg_at_the_end.yml
+- include_tasks: install_rear_deb_pkg_at_the_end.yml
+
+# GnuPG part (for duplicity)
+- include_tasks: install_gnupg_software.yml
+
+# gpg_generator_user is defined as root in ../default/main.yml
+- name: Ensure GPG user exists
+  user: name={{ gpg_generator_user }}
+  when: ansible_distribution != 'OpenBSD' and ansible_os_family != 'Darwin' and ansible_os_family != "Alpine"
+
+- include_tasks: gpgkey_generate.yml

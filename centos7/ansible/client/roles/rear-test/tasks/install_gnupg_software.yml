@@ -1,0 +1,15 @@
+---
+# playbook ansible/client/roles/rear-test/tasks/install_gnupg_software.yml
+#
+
+- name: install GNU Privacy Guard v2 software (RH family)
+  package: name={{ item }} state=present
+  with_items:
+    - gnupg2
+  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: install GNU Privacy Guard v2 software (Ubuntu family)
+  package: name={{ item }} state=present
+  with_items:
+    - gpgv2
+  when: (ansible_distribution == 'Debian' and ansible_distribution_version|int >= 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_version|int >= 14)

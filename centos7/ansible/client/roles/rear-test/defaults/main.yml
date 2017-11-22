@@ -1,0 +1,31 @@
+---
+
+## defaults are originating from git@github.com:juju4/ansible-gpgkey_generate.git
+#################################################################################
+#gpg_generator_user: "{{ ansible_ssh_user }}"
+gpg_generator_user: "root"
+## Note: gpg_home is the path of user generating keys, it could be gpg_user or different.
+##	it's both keys destination and home path for .gnupg dir
+## gpg_home: "/home/{{ gpg_generator_user }}"
+gpg_home: "/{{ gpg_generator_user }}"
+
+##gpg_user: "{{ ansible_ssh_user }}"
+gpg_user: "{{ gpg_generator_user }}"
+gpg_realname: "Root"
+#gpg_userhome:
+gpg_useremail: "{{ gpg_user }}@localhost"
+## ATTENTION! if not provided, no passphrase! Also, use Ansible Vault!
+#gpg_passphrase: "Passphrase_example.CHANGE_ME!"
+gpg_pubkeyfile: "{{ gpg_user }}.pub"
+gpg_privkeyfile: "{{ gpg_user }}.priv"
+gpg_pubkeyfileexport: "{{ gpg_user }}.asc"
+gpg_fingerprint: "{{ gpg_user }}-fingerprint"
+
+gpg_keylength: 2048
+gpg_subkeylength: 2048
+gpg_expire: 360
+
+## recover files on orchestrator? where?
+gpg_pull: true
+gpg_pull_privatekey: false
+gpg_pulldir: tmp
