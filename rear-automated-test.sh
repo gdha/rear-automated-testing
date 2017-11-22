@@ -98,14 +98,14 @@ shift $(( OPTIND - 1 ))
 
 # initialize the LOGFILE and LOG_DIR
 if [[ ! -d "$LOG_DIR" ]] ; then
-    mkdir -m 755 -p "$LOG_DIR"   # this is the top directory of our LOG_DIR
-    echo "$(bold $(red ${MESSAGE_PREFIX}Cannot create $LOG_DIR))"
+    # this is the top directory of our LOG_DIR - sub-directory with timestamp are automatically created
+    mkdir -m 755 -p "$LOG_DIR" || Error "${MESSAGE_PREFIX}Cannot create $LOG_DIR"
 fi
-# However, for each run we will create a seperate sub-directory benaeth LOG_DIR
+# However, for each run we will create a seperate sub-directory beneath LOG_DIR
 # with tamestamp entry +%F_%H-%M-%S (e.g. 2017-11-20_17-09-37)
 # The TEST_LOG_DIR name which will be used in this script and also by ReaR to mount this to store its recover log
 TEST_LOG_DIR="$LOG_DIR/$(date +%F_%H-%M-%S)"   # make it fixed so we can use it in several other places
-mkdir -p -m 755 "$TEST_LOG_DIR"
+mkdir -p -m 755 "$TEST_LOG_DIR" || Error "${MESSAGE_PREFIX}Cannot create $TEST_LOG_DIR"
 
 
 # Define LOGFILE for this script
@@ -138,8 +138,10 @@ Author: Gratien D'haese
 Copyright: GPL v3
 
 "
-
-LogPrint "See the log file $LOGFILE for details"
+LogPrint "Command args: $PRGNAME $@"
+LogPrint "
+  See the log file $LOGFILE for details and errors
+"
 
 # check if vagrant is present
 if ! type -p vagrant &>/dev/null ; then
@@ -166,7 +168,8 @@ fi
 if [[ "$targetdistro" != "$distro" ]] ; then
     LogPrint "It would be better to destroy the Vagrant boxes first of distro $targetdistro"
     LogPrint "before starting doing tests with distro $distro"
-    LogPrint "Press 'enter' to continue or Ctrl-C to quit"
+    Log "Press 'enter' to continue or Ctrl-C to quit"
+    echo "$(bold Press $(green 'enter') to continue or $(red  Ctrl-C) to quit)"
     read junk
 fi
 
@@ -387,6 +390,7 @@ PXE)
  
                     [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path" | tee -a $LOGFILE
                     [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg" | tee -a $LOGFILE
+                    vagrant_host=$boot_server
                     ;;
         libvirt)   # we use the $server to PXE boot from
                    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
@@ -500,19 +504,22 @@ LogPrint ""
 Log "ReaR version that will be tested is:"
 echo "$(bold ReaR version that will be tested is:)"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -V" | tee -a $LOGFILE
-LogPrint ""
+LogPrint "
+"
 
 Log "Content of /etc/rear/local.conf is:"
 echo "$(bold Content of /etc/rear/local.conf is:)"
 ssh -i ../insecure_keys/vagrant.private root@$client "grep -v \# /etc/rear/local.conf" | tee -a $LOGFILE
-LogPrint ""
+LogPrint "
+"
 
 Log "Run 'rear -v mkbackup'"
 echo "$(bold Run 'rear -v mkbackup')"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup" | tee -a $LOGFILE
 rc=$?
 
-echo
+LogPrint "
+"
 if [[ $rc -ne 0 ]] ; then
     Log "Please check the rear logging /var/log/rear/rear-client.log"
     echo "$(red Please check the rear logging /var/log/rear/rear-client.log)"
@@ -523,8 +530,9 @@ if [[ $rc -ne 0 ]] ; then
 else
     Log "The rear mkbackup was successful"
     echo "$(bold $(green The rear mkbackup was successful))"
-    LogPrint ""
 fi
+LogPrint "
+"
 
 # According the boot_method we can do different stuff now:
 case $boot_method in
@@ -575,6 +583,8 @@ case $boot_method in
 
 esac
 
+LogPrint "
+"
 Log "Halting the client VM before doing the recovery"
 echo "$(bold Halting the client VM $(italic before doing the recovery))"
 LogPrint "Recover VM will use the client IP address after it has been fully restored"
@@ -585,7 +595,7 @@ LogPrint ""
 #############################################################################################################################
 
 # For issue #15 with virtualbox and "recover: Warning: Authentication failure. Retrying" we need to copy
-# the client private key to the recover directory
+# the client private key to the recover directory (made no difference)
 case $VAGRANT_DEFAULT_PROVIDER in
     virtualbox) 
         if [[ -f .vagrant/machines/client/virtualbox/private_key ]] ; then
