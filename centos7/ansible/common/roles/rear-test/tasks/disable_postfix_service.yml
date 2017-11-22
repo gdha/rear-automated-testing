@@ -1,0 +1,10 @@
+---
+# common/disable_postfix_service.yml
+# Package 'postfix' is installed via task install_common_packages.yml
+# However, we do not want the service to be enabled to avoid mailq issues
+
+- name: disable postfix systemd service
+  service:
+    name: postfix
+    state: stopped
+    enabled: no

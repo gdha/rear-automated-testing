@@ -12,3 +12,4 @@
     - gawk
     - bash
     - attr
+    - postfix
