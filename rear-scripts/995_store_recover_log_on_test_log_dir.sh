@@ -4,14 +4,7 @@
 # We keep this recover log together with the output of the rear-automated-test log
 #
 
-# The following code is only meant to be used for the 'recover' workflow
-# and its partial workflows 'layoutonly' and 'restoreonly'
-# cf. https://github.com/rear/rear/issues/987
-# and https://github.com/rear/rear/issues/1088
-recovery_workflows=( "recover" "layoutonly" "restoreonly" )
-IsInArray $WORKFLOW ${recovery_workflows[@]} || return 0
-
-# Copy the logfile:
+# Copy the logfile as rear-$HOSTNAME-${WORKFLOW}.log
 # Usually RUNTIME_LOGFILE=/var/log/rear/rear-$HOSTNAME.log
 # The RUNTIME_LOGFILE name is set by the main script from LOGFILE in default.conf
 # but later user config files are sourced in the main script where LOGFILE can be set different
@@ -25,7 +18,7 @@ AddExitTask "rm -Rf $v $BUILD_DIR/logdir >&2"
 mount_url $TEST_LOG_DIR_URL $BUILD_DIR/logdir
 
 LogPrint "Save the $LOGFILE to $TEST_LOG_DIR_URL"
-cp $v $LOGFILE $BUILD_DIR/logdir >&2
+cp $v $LOGFILE "$BUILD_DIR/logdir/rear-$HOSTNAME-${WORKFLOW}.log" >&2
 
 # umount path
 Log "Unmounting  $TEST_LOG_DIR_URL"

@@ -497,10 +497,16 @@ rm -f /tmp/rear_config.$$
 #
 # Before running ReaR we need to copy one more script to have the recover log to be copied onto TEST_LOG_DIR
 # Important note: TEST_LOG_DIR will be mounted by the recover VM so make sure it is exported by the host/hypervisor
-# That script will only run at the end of a recover log and is stored as:
-# /usr/share/rear/wrapup/default/995_store_recover_log_on_test_log_dir.sh
+# That script will run at the end of a 'rear mkbackup' or 'rear recover' and copy the logfile (via NFS) to TEST_LOG_DIR
+# We will copy the script twice to:
+#  - /usr/share/rear/wrapup/default/995_store_recover_log_on_test_log_dir.sh
+#  - /usr/share/rear/backup/default/995_store_recover_log_on_test_log_dir.sh
 LogPrint ""
 LogPrint "Copy 995_store_recover_log_on_test_log_dir.sh to the client VM"
+# the backup area is only executed by the 'backup' workflow - runs on the client VM:
+scp -i ../insecure_keys/vagrant.private ../rear-scripts/995_store_recover_log_on_test_log_dir.sh root@$client:/usr/share/rear/backup/default/995_store_recover_log_on_test_log_dir.sh | tee -a $LOGFILE
+
+# the wrapup area is only executed by the 'recover' workflow - runs on the recover VM:
 scp -i ../insecure_keys/vagrant.private ../rear-scripts/995_store_recover_log_on_test_log_dir.sh root@$client:/usr/share/rear/wrapup/default/995_store_recover_log_on_test_log_dir.sh | tee -a $LOGFILE
 
 
