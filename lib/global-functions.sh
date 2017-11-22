@@ -1,4 +1,4 @@
-function IsNotPingable {
+function IsNotPingable () {
     case $(uname -s) in
         CYGWIN*) ping -n 1 $1 2>&1 | grep -qE '(timed out|host unreachable)'
                  rc=$?
@@ -14,7 +14,7 @@ function IsNotPingable {
     return $rc
 }
 
-function findUser() {
+function findUser () {
     thisPID=$$
     origUser=$(whoami)
     thisUser=$origUser
@@ -34,7 +34,7 @@ function findUser() {
     esac
 }
 
-function helpMsg {
+function helpMsg () {
     cat <<eof
 Usage: $PRGNAME [-d distro] [-b <boot method>] [-s <server IP>] [-p provider] [-c rear-config-file.conf] [-t test] -vh
         -d: The distribution to use for this automated test (default: $distro)
@@ -60,7 +60,7 @@ Comments:
 eof
 }
 
-function define_pxe_tftpboot_path {
+function define_pxe_tftpboot_path () {
     # pxe_tftpboot_path path is need by boot methods PXE and ISO
     # PXE to fill up the client PXE boot configs
     # ISO to remove to client PXE configs (otherwise we boot from PXE or boothd0)
@@ -77,7 +77,7 @@ function define_pxe_tftpboot_path {
     echo $pxe_tftpboot_path
 }
 
-function os_release {
+function os_release () {
     # purpose of this function is to return a string with OS ID which is
     # typically retrieved from /etc/os-release (on modern OSes)
     # Not used for the moment

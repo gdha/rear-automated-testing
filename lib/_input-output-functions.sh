@@ -67,7 +67,6 @@ function DoExitTasks () {
 #}
 
 # For actually intended user messages output to the original STDOUT
-# but only when the user launched 'rear -v' in verbose mode:
 function Print () {
     echo -e "${MESSAGE_PREFIX}$*" 
 }
@@ -104,14 +103,14 @@ function DebugPrint () {
 }
 
 # For messages that should appear in the log file and also
-# on the user's terminal when the user launched 'rear -v' in verbose mode:
+# on the user's terminal
 function LogPrint () {
     Log "$@"
     Print "$@"
 }
 
 # For messages that should appear in the log file and also
-# on the user's terminal regardless whether or not the user launched 'rear' in verbose mode:
+# on the user's terminal
 function LogPrintError () {
     Log "$@"
     PrintError "$@"
@@ -132,7 +131,7 @@ function StopIfError () {
 }
 
 
-# Exit if there is a bug in ReaR:
+# Exit if there is a bug
 function BugError () {
     Error "
 ====================
@@ -143,7 +142,7 @@ and include the relevant parts from $LOGFILE
 ===================="
 }
 
-# If return code is non-zero, there is a bug in ReaR:
+# If return code is non-zero, there is a bug
 function BugIfError () {
     if (( $? != 0 )) ; then
         BugError "$@"
@@ -153,7 +152,6 @@ function BugIfError () {
 # Show the user if there is an error:
 function PrintIfError () {
     # If return code is non-zero, show that on the user's terminal
-    # regardless whether or not the user launched 'rear' in verbose mode:
     if (( $? != 0 )) ; then
         PrintError "$@"
     fi
@@ -169,38 +167,37 @@ function LogIfError () {
 # Log if there is an error and also show it to the user:
 function LogPrintIfError () {
     # If return code is non-zero, show that on the user's terminal
-    # regardless whether or not the user launched 'rear' in verbose mode:
     if (( $? != 0 )) ; then
         LogPrintError "$@"
     fi
 }
 
 # usage example of colored output: echo "some $(bold $(red hello world)) test"
-function bold {
+function bold () {
     ansi 1 "$@";
 }
 
-function italic {
+function italic () {
      ansi 3 "$@";
 }
 
-function underline {
+function underline () {
      ansi 4 "$@";
 }
 
-function strikethrough {
+function strikethrough () {
      ansi 9 "$@";
 }
 
-function red {
+function red () {
      ansi 31 "$@";
 }
 
-function green {
+function green () {
      ansi 32 "$@";
 }
 
-function ansi {
+function ansi () {
      case $(uname -s) in
         Linux)  echo -e "\e[${1}m${*:2}\e[0m" ;;
         Darwin) echo -e "\033[${1}m${*:2}\033[0m" ;;
