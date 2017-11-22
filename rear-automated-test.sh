@@ -37,6 +37,7 @@ LOG_DIR=/export/rear-tests/logs
 
 MESSAGE_PREFIX=
 DEBUG=
+CMD_OPTS=( "$@" )
 
 # Keep PID of main process (i.e. the main script that the user had launched as 'rear'):
 readonly MASTER_PID=$$
@@ -138,7 +139,7 @@ Author: Gratien D'haese
 Copyright: GPL v3
 
 "
-LogPrint "Command args: $PRGNAME $@"
+LogPrint "Command line options: $PRGNAME ${CMD_OPTS[@]}"
 LogPrint "
   See the log file $LOGFILE for details and errors
 "
@@ -190,6 +191,7 @@ case $VAGRANT_DEFAULT_PROVIDER in
     libvirt)
         # most likely Linux only
         [[ ! -d /var/lib/libvirt ]] && Error "Libvirt seems not to be installed - use another provider perhaps"
+        LogPrint "Using Libvirt as hypervisor"
         ;;
     virtualbox) 
         # can run on Linux, MacOS, Windows
@@ -198,6 +200,8 @@ case $VAGRANT_DEFAULT_PROVIDER in
         else
             Error "VirtualBox seems not to be installed - use another provider perhaps"
         fi
+        # do a check if we have a DISPLAY variable defined (recover VM needs it #39)
+        env | grep -q DISPLAY || Error "VirtualBox requires a proper 'DISPLAY' setting"
         ;;
 esac
 
