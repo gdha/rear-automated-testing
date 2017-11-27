@@ -4,6 +4,7 @@
 
 # The following set are the same for RedHat and Debian OS family
 - include: define_timezone.yml
+- include: chrony_service_install_config.yml
 - include: create_private_ssh_key.yml
 - include: update_sshd_config.yml
 - include: configure_kernel_parameters.yml
@@ -29,6 +30,7 @@
   when: ansible_os_family == "Debian"
 
 #############################################
+# Common tasks for RedHat and Ubuntu
 - include: create_users.yml
 - include: update_and_restart_network.yml
 - include: disable_biosdevnames.yml

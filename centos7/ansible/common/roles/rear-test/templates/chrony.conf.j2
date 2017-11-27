@@ -1,0 +1,33 @@
+{% for server in chrony_ntp_servers -%}
+server {{ server }} {{ chrony_server_settings }}
+{% endfor -%}
+
+keyfile {{ chrony_keyfile_path }}
+
+driftfile {{ chrony_driftfile_path }}
+log tracking measurements statistics
+logdir /var/log/chrony
+maxupdateskew 100.0
+{% if chrony_max_step is defined -%}
+{{ chrony_max_step }}
+{% endif -%}
+
+dumponexit
+dumpdir /var/lib/chrony
+local stratum 10
+logchange 0.5
+{{ chrony_rtc }}
+{% if chrony_client_log is defined -%}
+{{ chrony_client_log }}
+{% endif -%}
+
+{% if chrony_bind_addresses is defined -%}
+{% for address in chrony_bind_addresses -%}
+bindcmdaddress {{ address }}
+{% endfor -%}
+{% endif -%}
+
+{% if chrony_stratum_weight is defined -%}
+{{ chrony_stratum_weight }}
+{% endif -%}
+

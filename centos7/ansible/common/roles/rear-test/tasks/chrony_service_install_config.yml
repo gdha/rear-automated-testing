@@ -1,0 +1,63 @@
+---
+# ansible/common/roles/rear-test/tasks/chrony_service_install_config.yml
+# Original coming from https://github.com/marklee77/ansible-role-chrony
+- set_fact:
+    ansible_distro: "{{ ansible_distribution|lower|replace('\"', '') }}"
+
+- name: gather os specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+      - "{{ ansible_distro }}-{{
+            ansible_distribution_version|lower|replace('/', '_') }}.yml"
+      - "{{ ansible_distro }}-{{ ansible_distribution_release }}.yml"
+      - "{{ ansible_distro }}-{{
+            ansible_distribution_major_version|lower|replace('/', '_') }}.yml"
+      - "{{ ansible_distro }}.yml"
+      - "{{ ansible_os_family|lower }}.yml"
+      skip: true
+
+- name: ensure ntp package is absent
+  package:
+    name: ntp
+    state: absent
+
+- name: ensure chrony requirements packages are installed
+  package:
+    name: "{{ item }}"
+    state: "{{ chrony_package_state }}"
+  with_items: "{{ chrony_pre_packages }}"
+  when: chrony_pre_packages|length > 0
+
+- name: ensure chrony packages are installed
+  package:
+    name: "{{ item }}"
+    state: "{{ chrony_package_state }}"
+  with_items: "{{ chrony_packages }}"
+  when: chrony_packages|length > 0
+
+- name: update chrony.conf from template
+  template:
+    src: chrony.conf.j2
+    dest: "{{ chrony_config_path }}"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  register: chrony_conf
+
+- name: ensure chrony service is restarted if necessary
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items: "{{ chrony_services }}"
+  when: chrony_services|length > 0 and chrony_conf|changed
+
+- name: ensure chrony service is started and enabled
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ chrony_services }}"
+  when: chrony_services|length > 0
+

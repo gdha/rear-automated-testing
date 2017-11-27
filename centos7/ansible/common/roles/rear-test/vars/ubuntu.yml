@@ -1,0 +1,13 @@
+---
+chrony_packages:
+  - chrony
+
+chrony_services:
+  - chrony
+
+chrony_config_path: /etc/chrony/chrony.conf
+chrony_keyfile_path: /etc/chrony/chrony.keys
+chrony_driftfile_path: /var/lib/chrony/chrony.drift
+chrony_rtc: rtconutc
+chrony_server_settings: minpoll 8
+

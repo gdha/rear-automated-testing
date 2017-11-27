@@ -1,0 +1,26 @@
+---
+chrony_pre_packages:
+  - ca-certificates
+  - libselinux-python
+
+chrony_packages:
+  - chrony
+
+chrony_services:
+  - chronyd
+
+chrony_config_path: /etc/chrony.conf
+chrony_keyfile_path: /etc/chrony.keys
+chrony_driftfile_path: /var/lib/chrony/drift
+chrony_rtc: rtcsync
+chrony_client_log: noclientlog
+chrony_max_step: makestep 10 3
+
+chrony_bind_addresses:
+ - ::1
+ - 127.0.0.1
+
+chrony_stratum_weight: stratumweight 0
+
+chrony_server_settings: iburst
+
