@@ -10,30 +10,6 @@
 - name: entropy state
   debug: var=entropy
 
-- name: apt | Ensure have enough randomness
-  apt: name={{item}} state=present update_cache=yes
-  with_items:
-    - rng-tools
-## https://docs.ansible.com/ansible/become.html#becoming-an-unprivileged-user
-    - acl
-  when: (ansible_distribution == 'Debian' and ansible_distribution_version|int >= 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_version|int >= 14)
-
-- name: apt | Ensure have enough randomness
-  apt: name={{item}} state=present update_cache=yes
-  with_items:
-    - rng-tools
-    - gnupg
-  when: (ansible_distribution == 'Debian' and ansible_distribution_version|int < 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_version|int < 14)
-
-
-- name: yum | Ensure have enough randomness
-  yum: name={{item}} state=present update_cache=yes
-  with_items:
-    - haveged
-    - rng-tools
-    - acl
-  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
 - name: Enable haveged - redhat
   service: name=haveged state=started enabled=yes
   when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
