@@ -433,6 +433,7 @@ ISO)
                    [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path" | tee -a $LOGFILE
                    [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg" | tee -a $LOGFILE
                    # ISO images are stored under /export/isos/client - we will make a soft link to it
+                   [[ ! -d /export/isos ]] && mkdir -p -m 755 /export/isos | tee -a $LOGFILE
                    # in our pxelinux config file rear-client we will use this for the ISO menu
                    [[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos "$pxe_tftpboot_path/isos"
                    # we need memdisk to boot an ISO image
@@ -442,6 +443,7 @@ ISO)
        libvirt)    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
                    boot_server="192.168.33.15"
                    ssh -i ../insecure_keys/vagrant.private root@$server "mkdir -p -m 755 $pxe_tftpboot_path/pxelinux.cfg" | tee -a $LOGFILE
+                   ssh -i ../insecure_keys/vagrant.private root@$server "[[ ! -d /export/isos ]] && mkdir -p -m 755 /export/isos" | tee -a $LOGFILE
                    ssh -i ../insecure_keys/vagrant.private root@$server "[[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos $pxe_tftpboot_path/isos" | tee -a $LOGFILE
                    ssh -i ../insecure_keys/vagrant.private root@$server "[[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk $pxe_tftpboot_path" | tee -a $LOGFILE
                    # vagrant_host is the default value
@@ -526,11 +528,14 @@ LogPrint "
 Log "Run 'rear -v mkbackup'"
 echo "$(bold Run 'rear -v mkbackup')"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup" | tee -a $LOGFILE
+# To capture errors we have to grab for ERROR keyword in the rear.log file (on the client) and the output is checked
+# once more to really capture the ERROR code (rc=0 means ERROR in this case)
+ssh -i ../insecure_keys/vagrant.private root@$client "grep ERROR /var/log/rear/rear-client.log" | grep -q ERROR
 rc=$?
 
 LogPrint "
 "
-if [[ $rc -ne 0 ]] ; then
+if [[ $rc -eq 0 ]] ; then
     Log "Please check the rear logging /var/log/rear/rear-client.log"
     echo "$(red Please check the rear logging /var/log/rear/rear-client.log)"
     LogPrint "The last 20 lines are:"
