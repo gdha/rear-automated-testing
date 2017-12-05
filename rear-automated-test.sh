@@ -433,9 +433,10 @@ ISO)
                    [[ ! -d "$pxe_tftpboot_path" ]] && mkdir -p -m 755 "$pxe_tftpboot_path" | tee -a $LOGFILE
                    [[ ! -d "$pxe_tftpboot_path/pxelinux.cfg" ]] && mkdir -p -m 755 "$pxe_tftpboot_path/pxelinux.cfg" | tee -a $LOGFILE
                    # ISO images are stored under /export/isos/client - we will make a soft link to it
-                   [[ ! -d /export/isos ]] && mkdir -p -m 755 /export/isos | tee -a $LOGFILE
+                   #[[ ! -d /export/isos ]] && mkdir -p -m 755 /export/isos | tee -a $LOGFILE
+                   [[ ! -d $pxe_tftpboot_path/isos ]] && mkdir -p -m 755 "$pxe_tftpboot_path/isos" | tee -a $LOGFILE
                    # in our pxelinux config file rear-client we will use this for the ISO menu
-                   [[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos "$pxe_tftpboot_path/isos"
+                   #[[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos "$pxe_tftpboot_path/isos"
                    # we need memdisk to boot an ISO image
                    [[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk "$pxe_tftpboot_path"
                    vagrant_host=$boot_server
@@ -443,8 +444,8 @@ ISO)
        libvirt)    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
                    boot_server="192.168.33.15"
                    ssh -i ../insecure_keys/vagrant.private root@$server "mkdir -p -m 755 $pxe_tftpboot_path/pxelinux.cfg" | tee -a $LOGFILE
-                   ssh -i ../insecure_keys/vagrant.private root@$server "[[ ! -d /export/isos ]] && mkdir -p -m 755 /export/isos" | tee -a $LOGFILE
-                   ssh -i ../insecure_keys/vagrant.private root@$server "[[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos $pxe_tftpboot_path/isos" | tee -a $LOGFILE
+                   ssh -i ../insecure_keys/vagrant.private root@$server "mkdir -p -m 755 $pxe_tftpboot_path/isos" | tee -a $LOGFILE
+                   #ssh -i ../insecure_keys/vagrant.private root@$server "[[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos $pxe_tftpboot_path/isos" | tee -a $LOGFILE
                    ssh -i ../insecure_keys/vagrant.private root@$server "[[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk $pxe_tftpboot_path" | tee -a $LOGFILE
                    # vagrant_host is the default value
                    ;;
@@ -530,7 +531,7 @@ echo "$(bold Run 'rear -v mkbackup')"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup" | tee -a $LOGFILE
 # To capture errors we have to grab for ERROR keyword in the rear.log file (on the client) and the output is checked
 # once more to really capture the ERROR code (rc=0 means ERROR in this case)
-ssh -i ../insecure_keys/vagrant.private root@$client "grep ERROR /var/log/rear/rear-client.log" | grep -q ERROR
+ssh -i ../insecure_keys/vagrant.private root@$client "tail -20 /var/log/rear/rear-client.log | grep ERROR" | grep -q ERROR
 rc=$?
 
 LogPrint "
@@ -561,9 +562,9 @@ case $boot_method in
     Log "Make client area readable for others on PXE boot server $boot_server"
     echo "$(bold Make client area readable for others on PXE boot server $(green $boot_server))"
     case $VAGRANT_DEFAULT_PROVIDER in
-       virtualbox) chmod 755 "$pxe_tftpboot_path"/client
+       virtualbox) chmod -R 755 "$pxe_tftpboot_path"/client
                    ;;
-       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 /export/nfs/tftpboot/client" | tee -a $LOGFILE
+       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod -R 755 $pxe_tftpboot_path/client" | tee -a $LOGFILE
                    ;;
     esac
     LogPrint ""
@@ -576,20 +577,21 @@ case $boot_method in
     case $VAGRANT_DEFAULT_PROVIDER in
        virtualbox) [[ ! -d "$pxe_tftpboot_path"/client ]] && mkdir -p -m 755 "$pxe_tftpboot_path"/client
                    chmod 755 "$pxe_tftpboot_path"/client
-                   if [[ -d /export/isos/client ]] ; then
-                       chmod 755  /export/isos/client
-                       chmod 644  /export/isos/client/*.iso
+                   if [[ -d $pxe_tftpboot_path/isos/client ]] ; then
+                       chmod 755  $pxe_tftpboot_path/isos/client
+                       chmod 644  $pxe_tftpboot_path/isos/client/*.iso
                    else
-                       mkdir -p -m 755 /export/isos/client
+                       #mkdir -p -m 755 /export/isos/client
+                       Error "$pxe_tftpboot_path/isos/client not found"
                    fi
                    # the PXE entry must be created after the rear mkbackup has finished as the pxe cfg file is recreated
                    LogPrint "Copy PXE configuration entry to pxelinux.cfg to enable ISO boot menu entry"
                    # we overwrite any existing pxelinux.cfg file with our template pxelinux-cfg-with-iso-entry
                    cat ../templates/pxelinux-cfg-with-iso-entry > "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
                    ;;
-       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod -R 755 /export/nfs/tftpboot/client" | tee -a $LOGFILE
-                   ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod -R 755 /export/isos/client" | tee -a $LOGFILE
-                   ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 644  /export/isos/client/*.iso" | tee -a $LOGFILE
+       libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod -R 755 $pxe_tftpboot_path/client" | tee -a $LOGFILE
+                   ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 $pxe_tftpboot_path/isos/client" | tee -a $LOGFILE
+                   ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 644  $pxe_tftpboot_path/isos/client/*.iso" | tee -a $LOGFILE
                    scp -i ../insecure_keys/vagrant.private ../templates/pxelinux-cfg-with-iso-entry root@$boot_server:"$pxe_tftpboot_path/pxelinux.cfg/rear-client" | tee -a $LOGFILE
                    ;;
     esac
