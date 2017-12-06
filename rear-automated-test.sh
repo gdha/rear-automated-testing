@@ -459,7 +459,7 @@ ISO)
 
    Log "Configure rear on client to use OUTPUT=ISO method"
    echo "$(bold Configure rear on client to use $(green OUTPUT=ISO) method)"
-   scp -i ../insecure_keys/vagrant.private  /tmp/rear_config.$$ root@$client:/etc/rear/local.conf | tee -a LOGFILE
+   scp -i ../insecure_keys/vagrant.private  /tmp/rear_config.$$ root@$client:/etc/rear/local.conf | tee -a $LOGFILE
    LogPrint ""
    # We need to check the OUTPUT_URL/BACKUP_URL paths on the server side; if paths do not exist create them
    if grep -q ^OUTPUT_URL /tmp/rear_config.$$ ; then
