@@ -269,6 +269,7 @@ echo "$(bold Current distro directory is $(green $distro))"
 
 # Before starting vagrant we need to copy the Vagrantfile for the proper provider (VAGRANT_DEFAULT_PROVIDER)
 LogPrint "Copy the Vagrantfile.$VAGRANT_DEFAULT_PROVIDER to Vagrantfile"
+# TODO: use sed to replace the @pxe_tftpboot_path@ in Vagrantfile.$VAGRANT_DEFAULT_PROVIDER
 cp Vagrantfile.$VAGRANT_DEFAULT_PROVIDER Vagrantfile
 
 # trap Cntrl-C interrupts during vagrant calls (we will foresee a small time to interrupt
@@ -439,6 +440,8 @@ ISO)
                    #[[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos "$pxe_tftpboot_path/isos"
                    # we need memdisk to boot an ISO image
                    [[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk "$pxe_tftpboot_path"
+                   # we need chain.c32 as well
+                   [[ -f /usr/share/syslinux/chain.c32 ]] && cp -p /usr/share/syslinux/chain.c32 "$pxe_tftpboot_path"
                    vagrant_host=$boot_server
                    ;;
        libvirt)    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
@@ -447,6 +450,7 @@ ISO)
                    ssh -i ../insecure_keys/vagrant.private root@$server "mkdir -p -m 755 $pxe_tftpboot_path/isos" | tee -a $LOGFILE
                    #ssh -i ../insecure_keys/vagrant.private root@$server "[[ ! -h "$pxe_tftpboot_path/isos" ]] && ln -s /export/isos $pxe_tftpboot_path/isos" | tee -a $LOGFILE
                    ssh -i ../insecure_keys/vagrant.private root@$server "[[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk $pxe_tftpboot_path" | tee -a $LOGFILE
+                   ssh -i ../insecure_keys/vagrant.private root@$server "[[ -f /usr/share/syslinux/chain.c32 ]] && cp -p /usr/share/syslinux/chain.c32 $pxe_tftpboot_path" | tee -a $LOGFILE
                    # vagrant_host is the default value
                    ;;
    esac
@@ -588,11 +592,13 @@ case $boot_method in
                    LogPrint "Copy PXE configuration entry to pxelinux.cfg to enable ISO boot menu entry"
                    # we overwrite any existing pxelinux.cfg file with our template pxelinux-cfg-with-iso-entry
                    cat ../templates/pxelinux-cfg-with-iso-entry > "$pxe_tftpboot_path/pxelinux.cfg/rear-client"
+                   [[ ! -h "$pxe_tftpboot_path/pxelinux.cfg/default" ]] && ln -s $pxe_tftpboot_path/pxelinux.cfg/rear-client $pxe_tftpboot_path/pxelinux.cfg/default | tee -a $LOGFILE
                    ;;
        libvirt)    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod -R 755 $pxe_tftpboot_path/client" | tee -a $LOGFILE
                    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 755 $pxe_tftpboot_path/isos/client" | tee -a $LOGFILE
                    ssh -i ../insecure_keys/vagrant.private root@$boot_server "chmod 644  $pxe_tftpboot_path/isos/client/*.iso" | tee -a $LOGFILE
                    scp -i ../insecure_keys/vagrant.private ../templates/pxelinux-cfg-with-iso-entry root@$boot_server:"$pxe_tftpboot_path/pxelinux.cfg/rear-client" | tee -a $LOGFILE
+                   ssh -i ../insecure_keys/vagrant.private root@$boot_server "ln -s $pxe_tftpboot_path/pxelinux.cfg/rear-client $pxe_tftpboot_path/pxelinux.cfg/default" | tee -a $LOGFILE
                    ;;
     esac
 
