@@ -19,6 +19,7 @@ mount_url $TEST_LOG_DIR_URL $BUILD_DIR/logdir
 
 LogPrint "Save the $LOGFILE to $TEST_LOG_DIR_URL"
 cp $v $LOGFILE "$BUILD_DIR/logdir/rear-$HOSTNAME-${WORKFLOW}.log" >&2
+chmod 644 "$BUILD_DIR/logdir/rear-$HOSTNAME-${WORKFLOW}.log"
 
 # umount path
 Log "Unmounting  $TEST_LOG_DIR_URL"
