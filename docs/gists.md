@@ -1,3 +1,7 @@
+---
+title: Uploading the test results to GitHub Gist
+---
+
 # Uploading the test results to GitHub Gist
 
 ## Software Requirements
