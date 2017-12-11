@@ -32,3 +32,7 @@
   when: ansible_distribution != 'OpenBSD' and ansible_os_family != 'Darwin' and ansible_os_family != "Alpine"
 
 - include_tasks: gpgkey_generate.yml
+
+# duplicity and duply software installation
+- include_tasks: install_duplicity_software.yml
+
