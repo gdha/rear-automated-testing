@@ -1,0 +1,26 @@
+---
+# playbook ansible/client/roles/rear-test/tasks/install_duplicity_software.yml
+#
+
+- name: install duplicity software (RH family)
+  package: name={{ item }} state=present
+  with_items:
+    - duplicity
+    - duply
+  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: install duplicity software (Debian/Ubuntu family for more recent versions)
+  package: name={{ item }} state=present
+  with_items:
+    - duplicity
+    - duply
+    - python-paramiko
+  when: (ansible_distribution == 'Debian' and ansible_distribution_version|int >= 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_version|int >= 14)
+
+- name: install duplicity software (Debian/Ubuntu family for older versions)
+  apt: name={{item}} state=present update_cache=yes
+  with_items:
+    - duplicity
+    - duply
+    - python-paramiko
+  when: (ansible_distribution == 'Debian' and ansible_distribution_version|int < 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_version|int < 14)
