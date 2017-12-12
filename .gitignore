@@ -1,0 +1,8 @@
+*.retry
+/.vagrant/
+Vagrantfile
+/.cache/
+console.log
+latest
+*.deb
+/tmp/
