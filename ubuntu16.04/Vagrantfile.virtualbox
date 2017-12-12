@@ -96,6 +96,9 @@ Vagrant.configure(2) do |config|
       recover_prov.customize ["modifyvm", :id, "--boot1", "net", "--boot2", "DVD",
                               "--boot3", "disk", "--boot4", "none"]
       recover_prov.customize ["modifyvm", :id, "--nattftpfile1", "pxelinux.0"]
+      # Adding a serial console to avoid the error "/dev/ttyS0: not a tty" with systemd
+      recover_prov.customize ["modifyvm", :id, "--uart1", "0x3F8", "4" ]
+      recover_prov.customize ["modifyvm", :id, "--uartmode1", "file", "console.log" ]
       # end of |recover_prov|
       end
     # end of |recover|
