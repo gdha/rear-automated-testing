@@ -1,8 +1,8 @@
 *.retry
-/.vagrant/
+*/.vagrant/
 Vagrantfile
-/.cache/
+*/.cache/
 console.log
 latest
 *.deb
-/tmp/
+centos7/ansible/client/tmp/
