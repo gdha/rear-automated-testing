@@ -35,4 +35,4 @@
 
 # duplicity and duply software installation
 - include_tasks: install_duplicity_software.yml
-
+- include_tasks: setup_duply_client.yml

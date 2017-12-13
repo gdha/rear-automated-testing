@@ -1,0 +1,5 @@
+---
+# setup-duply-server.yml
+
+- name: create the duplicity target backup directory
+  file: dest=/root/backup state=directory mode=0700 owner=root

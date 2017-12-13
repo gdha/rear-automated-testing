@@ -11,10 +11,11 @@
 #    state: absent
 #  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
-- include: configure-nfs-server.yml
-- include: configure-and-start-dhcpd-tftp.yml
-- include: start-samba.yml
-- include: setup-bareos-server.yml
+- include_tasks: configure-nfs-server.yml
+- include_tasks: configure-and-start-dhcpd-tftp.yml
+- include_tasks: start-samba.yml
+- include_tasks: setup-bareos-server.yml
+- include_tasks: setup-duply-server.yml
   
 
 # Add various helpful configuration files
