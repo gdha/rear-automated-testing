@@ -1,5 +1,14 @@
+rm -f /tmp/bareos.job
 bconsole <<EOD
+@output /tmp/bareos.job
 run job=client-backup yes
-wait
+wait job=client-backup
 quit
+EOD
+
+echo "list $(grep ^JobId /tmp/bareos.job)
+quit" > /tmp/bareos.input
+
+bconsole <<EOD
+@input /tmp/bareos.input
 EOD
