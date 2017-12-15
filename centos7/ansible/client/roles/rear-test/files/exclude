@@ -6,8 +6,8 @@
 # - **
 # for more details see duplicity manpage, section File Selection
 # http://duplicity.nongnu.org/duplicity.1.html#sect9
-/sys
-/proc
-/run
-/tmp
-/var/tmp
+- /sys
+- /proc
+- /run
+- /tmp
+- /var/tmp
