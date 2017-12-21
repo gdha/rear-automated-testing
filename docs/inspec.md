@@ -4,12 +4,12 @@ title: Compliance Checks using inspec
 
 # Compliance Checks using inspec
 
-We will be using the program `inspec` from Chef (freely available at https://github.com/chef/inspec) to perform compliance checks on the client and the recovered system. Both should match.
+We will be using the program `inspec` from Chef (freely available at [https://github.com/chef/inspec](https://github.com/chef/inspec)) to perform compliance checks on the client and the recovered system. Both should match.
 
 ## Installing inspec on the hypervisor
 
 We do not need the `inspec` executable on our virtual machines, but we do need it to be available on our hypervisor (or the system from where you start up the vagrant VMs).
-Go the the web-site https://downloads.chef.io/inspec and dowload the appropriate package for your Linux distribution and install it on the hypervisor.
+Go the the web-site [https://downloads.chef.io/inspec](https://downloads.chef.io/inspec) and dowload the appropriate package for your Linux distribution and install it on the hypervisor.
 
 Check the basic functionality:
 
