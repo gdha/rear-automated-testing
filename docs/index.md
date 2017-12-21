@@ -13,7 +13,7 @@ This is the documentation around our "Relax-and-Recover (ReaR) Automated Testing
 - Virtual Machines Provisioning using Ansible
 - The script rear-automated-testing.sh
 - Usage
-- Test Results
+- [Compliance Tests](inspec.md)
 - [Upload test results with gist](gists.md)
 
 ## License
