@@ -2,30 +2,31 @@
 # bareos_ini_file.yml reads the bareos.ini file that contains the URL for bareos downloads
 
 # the bareos.ini.template contains the variables to download the public bareos software
-- name: copy the "bareos.ini.template" file to /root/bareos.ini
-  copy: src=bareos.ini.template dest=/root/bareos.ini mode=0644
+- name: copy the "bareos.ini.template" file to /tmp/bareos.ini
+  copy: src=bareos.ini.template dest=/tmp/bareos.ini mode=0644
 
 # Note: this is the location of the file on the vagrant VMs (if present)
-- name: check if "bareos.ini" is present or not (requires baeros subscription)
+- name: check if "bareos.ini" is present or not (requires a bareos subscription)
   stat: path=/vagrant/ansible/common/roles/rear-test/files/bareos.ini
   register: bareos_ini_file
 
 # bareos.ini is NOT there by default as should be copied by hand (by you) if you have a valid
 # BAREOS Subcription or Support Contract which allows you to download the official bareos software
 # Be aware: when bareos.ini is not found you will see a skipped message passing by during provisioning
-- name: copy the bareos.ini file to /root/bareos.ini
-  copy: src=bareos.ini dest=/root/bareos.ini mode=0644
+- name: copy the bareos.ini file to /tmp/bareos.ini
+  copy: src=bareos.ini dest=/tmp/bareos.ini mode=0644
   when: bareos_ini_file.stat.exists == True
   ignore_errors: True
 
-
-- set_fact:
-    bareos_user: "{{ lookup('ini', 'bareos_user section=bareos file=/root/bareos.ini default=') }}"
-    bareos_pass: "{{ lookup('ini', 'bareos_pass section=bareos file=/root/bareos.ini default=') }}"
-    bareos_prot: "{{ lookup('ini', 'bareos_prot section=bareos file=/root/bareos.ini default=http://') }}"
-    bareos_fqdn: "{{ lookup('ini', 'bareos_fqdn section=bareos file=/root/bareos.ini default=download.bareos.org') }}"
-    bareos_path: "{{ lookup('ini', 'bareos_path section=bareos file=/root/bareos.ini default=/bareos/release/') }}"
-    bareos_version: "{{ lookup('ini', 'bareos_version section=bareos file=/root/bareos.ini default=latest') }}"
+# seems that the 'lookup' can only read from a local file (on the hypervisor)??
+- name: read the bareos variables from /tmp/bareos.ini
+  set_fact:
+    bareos_user: "{{ lookup('ini', 'bareos_user section=bareos file=/tmp/bareos.ini default=') }}"
+    bareos_pass: "{{ lookup('ini', 'bareos_pass section=bareos file=/tmp/bareos.ini default=') }}"
+    bareos_prot: "{{ lookup('ini', 'bareos_prot section=bareos file=/tmp/bareos.ini default=http://') }}"
+    bareos_fqdn: "{{ lookup('ini', 'bareos_fqdn section=bareos file=/tmp/bareos.ini default=download.bareos.org') }}"
+    bareos_path: "{{ lookup('ini', 'bareos_path section=bareos file=/tmp/bareos.ini default=/bareos/release/') }}"
+    bareos_version: "{{ lookup('ini', 'bareos_version section=bareos file=/tmp/bareos.ini default=latest') }}"
 
 #- debug:
 #    msg: "var bareos_user is {{ bareos_user }}"
@@ -39,6 +40,6 @@
 - set_fact:
     bareos_url: "{{ bareos_prot }}{{ bareos_user }}{{ bareos_pass }}{{ bareos_fqdn }}{{ bareos_path }}{{ bareos_version }}"
 
-- debug:
-    msg: "var bareos_url is {{ bareos_url }}"
+#- debug:
+#    msg: "var bareos_url is {{ bareos_url }}"
 
