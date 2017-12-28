@@ -42,6 +42,6 @@
 - include_tasks: update_and_restart_network.yml
 - include_tasks: disable_biosdevnames.yml
 - include_tasks: change_selinux_state.yml
-
+- include_tasks: disable_postfix_service.yml
 
 
