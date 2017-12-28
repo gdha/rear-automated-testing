@@ -2,14 +2,20 @@
 # bareos_ini_file.yml reads the bareos.ini file that contains the URL for bareos downloads
 
 # the bareos.ini.template contains the variables to download the public bareos software
-- name: copy the bareos.ini.template file to /root/bareos.ini
+- name: copy the "bareos.ini.template" file to /root/bareos.ini
   copy: src=bareos.ini.template dest=/root/bareos.ini mode=0644
+
+# Note: this is the location of the file on the vagrant VMs (if present)
+- name: check if "bareos.ini" is present or not (requires baeros subscription)
+  stat: path=/vagrant/ansible/common/roles/rear-test/files/bareos.ini
+  register: bareos_ini_file
 
 # bareos.ini is NOT there by default as should be copied by hand (by you) if you have a valid
 # BAREOS Subcription or Support Contract which allows you to download the official bareos software
-# Be aware: when bareos.ini is not found you will see a non-fatal error passing by during provisioning
+# Be aware: when bareos.ini is not found you will see a skipped message passing by during provisioning
 - name: copy the bareos.ini file to /root/bareos.ini
   copy: src=bareos.ini dest=/root/bareos.ini mode=0644
+  when: bareos_ini_file.stat.exists == True
   ignore_errors: True
 
 

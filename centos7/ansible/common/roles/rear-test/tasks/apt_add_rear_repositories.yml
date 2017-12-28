@@ -8,9 +8,8 @@
 # manual action on VM works fine:
 # # wget -q -O - download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_16.04/Release.key | apt-key add -
 # OK
-#
-# We skip it for the moment until we know how to do it; or fixed
-- name: download the Release.key from OBS
+
+- name: download the Release.key from OBS of rear "snapshot"
   apt_key:
     url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/xUbuntu_{{ ansible_distribution_version }}/Release.key
     state: present
@@ -24,8 +23,21 @@
     # However, the real URL is not found yet
     state: present
     update_cache: yes
-
   when: ansible_distribution == "Ubuntu"
+
+- name: download the Release.key from OBS of rear "stable"
+  apt_key:
+    url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/xUbuntu_{{ ansible_distribution_version }}/Release.key
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
+- name: add http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/xUbuntu repo
+  apt_repository:
+    repo: deb http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/xUbuntu_{{ ansible_distribution_version }}/ ./
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+
 # alternative example:
 # when: ansible_distribution == RedHat AND ansible_distribution_major_version == 6
 
@@ -33,7 +45,7 @@
 ######################
 # A section for Debian
 ######################
-- name: download the Release.key from OBS
+- name: download the Release.key from OBS of rear "Snapshot"
   apt_key:
     url: http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/Debian_{{ ansible_distribution_version }}/Release.key
     state: present

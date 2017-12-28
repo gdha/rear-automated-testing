@@ -1,0 +1,8 @@
+[Archiving_Backup_Rear]
+name=Relax-and-Recover (CentOS_7)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/CentOS_7/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/CentOS_7/repodata/repomd.xml.key
+enabled=1
+
