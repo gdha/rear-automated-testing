@@ -1,0 +1,38 @@
+---
+# bareos_ini_file.yml reads the bareos.ini file that contains the URL for bareos downloads
+
+# the bareos.ini.template contains the variables to download the public bareos software
+- name: copy the bareos.ini.template file to /root/bareos.ini
+  copy: src=bareos.ini.template dest=/root/bareos.ini mode=0644
+
+# bareos.ini is NOT there by default as should be copied by hand (by you) if you have a valid
+# BAREOS Subcription or Support Contract which allows you to download the official bareos software
+# Be aware: when bareos.ini is not found you will see a non-fatal error passing by during provisioning
+- name: copy the bareos.ini file to /root/bareos.ini
+  copy: src=bareos.ini dest=/root/bareos.ini mode=0644
+  ignore_errors: True
+
+
+- set_fact:
+    bareos_user: "{{ lookup('ini', 'bareos_user section=bareos file=/root/bareos.ini default=') }}"
+    bareos_pass: "{{ lookup('ini', 'bareos_pass section=bareos file=/root/bareos.ini default=') }}"
+    bareos_prot: "{{ lookup('ini', 'bareos_prot section=bareos file=/root/bareos.ini default=http://') }}"
+    bareos_fqdn: "{{ lookup('ini', 'bareos_fqdn section=bareos file=/root/bareos.ini default=download.bareos.org') }}"
+    bareos_path: "{{ lookup('ini', 'bareos_path section=bareos file=/root/bareos.ini default=/bareos/release/') }}"
+    bareos_version: "{{ lookup('ini', 'bareos_version section=bareos file=/root/bareos.ini default=latest') }}"
+
+#- debug:
+#    msg: "var bareos_user is {{ bareos_user }}"
+
+#- debug:
+#    msg: "var bareos_pass is {{ bareos_pass }}"
+
+#- debug:
+#    msg: "var bareos_prot is {{ bareos_prot }}"
+
+- set_fact:
+    bareos_url: "{{ bareos_prot }}{{ bareos_user }}{{ bareos_pass }}{{ bareos_fqdn }}{{ bareos_path }}{{ bareos_version }}"
+
+- debug:
+    msg: "var bareos_url is {{ bareos_url }}"
+

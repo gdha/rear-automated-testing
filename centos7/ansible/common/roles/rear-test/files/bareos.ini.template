@@ -1,0 +1,19 @@
+# Attention: for BAREOS customers who have a valid subscription or support contract may
+# copy this "bareos.ini.template" file to "bareos.ini" file and
+# modify the default attributes with your proper credentials which
+# allows you to download updated bareos packages
+#
+# bareos_user looks like "user%40example.com:" (in your mail address the @ is replaced by %40) (and always end with ":")
+# bareos_pass is "your_secret_password@" (provided by bareos) (and always append "@" to your password)
+# bareos_prot is "https://" (note s in https!)
+# bareos_fqdn is "download.bareos.com" (the "org" extention has been replaced by "com") 
+# bareos_path is "/bareos/release/" (do NOT change this line)
+# bareos_version is "latest" (you could change this to 16.2 or 17.2 or keep latest)
+# ATTENTION: do not use " around the values!
+[bareos]
+bareos_user =
+bareos_pass =
+bareos_prot = http://
+bareos_fqdn = download.bareos.org
+bareos_path = /bareos/release/
+bareos_version = latest

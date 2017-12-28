@@ -6,3 +6,4 @@ console.log
 latest
 *.deb
 centos7/ansible/client/tmp/
+bareos.ini
