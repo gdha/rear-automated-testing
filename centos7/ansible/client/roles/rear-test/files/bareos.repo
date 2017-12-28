@@ -1,7 +1,0 @@
-[bareos_bareos-16.2]
-name=bareos bareos-16.2 (CentOS_7)
-type=rpm-md
-baseurl=http://download.bareos.org/bareos/release/16.2/CentOS_7/
-gpgcheck=1
-gpgkey=http://download.bareos.org/bareos/release/16.2/CentOS_7/repodata/repomd.xml.key
-enabled=1
