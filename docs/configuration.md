@@ -11,6 +11,7 @@ There are no configuration requirements to use the Relax-and-Recover Automated T
 For all users the public Bareos download area will be used, but if you wish to use the updated (subscribed) versions of bareos then you need to do the following additional steps *before* provisioning the *client* and *server* VMs with `vagrant`.
 
 Enter the directory `rear-automated-testing/centos7/ansible/common/roles/rear-test/files` and copy the `bareos.ini.template` file into the same directory as `bareos.ini` (do **not** delete the `bareos.ini.template` file however!).
+Please note, even if you want to provision the VMs with Ubuntu the `bareos.ini` file in the directory `rear-automated-testing/centos7/ansible/common/roles/rear-test/files` should be modified, because all Linus distro's supported by this project share the same ansible directories.
 
     $ cd rear-automated-testing/centos7/ansible/common/roles/rear-test/files
     $ cp bareos.ini.template bareos.ini
@@ -38,7 +39,9 @@ The `bareos.ini` file needs to be modified with your credentials you received fr
     bareos_path = /bareos/release/
     bareos_version = latest
 
-    For example, if your e-mail address is "user@company.com" and password "my-secret-pw" then modify the `bareos.ini` as follows:
+
+For example, if your e-mail address is "user@company.com" and password "my-secret-pw" then modify the `bareos.ini` as follows:
+
 
     [bareos]
     bareos_user = user%40company.com:
