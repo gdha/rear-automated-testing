@@ -10,6 +10,7 @@ This is the documentation around our "Relax-and-Recover (ReaR) Automated Testing
 
 - Introduction
 - Software Requirements
+- [Configuration](configuration.md)
 - Virtual Machines Provisioning using Ansible
 - The script rear-automated-testing.sh
 - Usage
@@ -33,3 +34,4 @@ Feedback like reporting typos or errors, feature requests, ideas, suggestions, e
 People or Companies who sponsor ReaR Automated Testing are:
 
 - [IT3 Consultants bvba](http://www.it3.be/)
+- [Bareos](http://www.bareos.com/en/)
