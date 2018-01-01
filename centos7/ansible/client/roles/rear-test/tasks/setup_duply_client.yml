@@ -1,23 +1,27 @@
 ---
 # File: ansible/client/roles/rear-test/tasks/setup_duply_client.yml
+# The location of our conf file should be in /etc/duply/duply-client
+# and not in /root/.duply/duply-client as during recovery duply only
+# looks for the conf file in /etc/duply/duply-client directory - see
+# issue https://github.com/rear/rear/issues/1664
+- name: Create the /etc/duply/duply-client directory
+  file: path=/etc/duply/duply-client state=directory mode=0700
 
-- name: Create the /root/.duply/duply-client directory
-  file: path=/root/.duply/duply-client state=directory mode=0700
-
-- name: Copy the duply configuration to /root/.duply/duply-client
-  copy: src=duply.conf dest=/root/.duply/duply-client/conf mode=0600
+- name: Copy the duply configuration to /etc/duply/duply-client
+  copy: src=duply.conf dest=/etc/duply/duply-client/conf mode=0600
 
 - name: Copy the exclude file
-  copy: src=exclude dest=/root/.duply/duply-client/exclude mode=0600
+  copy: src=exclude dest=/etc/duply/duply-client/exclude mode=0600
 
 # now we have all software and configuration files in place; test it
 # We might run into trouble as on server:/root/backup might not yet be created
 # when we run this test
-- name: Run duply status check
-  shell: "echo yes | duply duply-client status"
-  become: yes
-  become_user: "{{ gpg_generator_user }}"
-  register: command_result
-  ignore_errors: True
+### we do NOT want to run this test as it will give errors ALWAYS!
+#- name: Run duply status check
+#  shell: "echo yes | duply duply-client status"
+#  become: yes
+#  become_user: "{{ gpg_generator_user }}"
+#  register: command_result
+#  ignore_errors: True
 
 #- debug: var=command_result
