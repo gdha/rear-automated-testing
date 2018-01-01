@@ -5,7 +5,12 @@
 # looks for the conf file in /etc/duply/duply-client directory - see
 # issue https://github.com/rear/rear/issues/1664
 - name: Create the /etc/duply/duply-client directory
-  file: path=/etc/duply/duply-client state=directory mode=0700
+  file: path=/etc/duply/duply-client state=directory mode=0700 recurse=yes
+
+# create a symbolic link as 'duply' is creating new profiles under /root/.duply
+# instead of /etc/duply (as superuser) - man page is not correct on that point
+- name: Create symbolic link from /etc/duply/duply-client to /root/.duply
+  file: src=/etc/duply/duply-client dest=/root/.duply/duply-client state=link
 
 - name: Copy the duply configuration to /etc/duply/duply-client
   copy: src=duply.conf dest=/etc/duply/duply-client/conf mode=0600
