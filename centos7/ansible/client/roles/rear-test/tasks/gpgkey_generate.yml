@@ -80,6 +80,9 @@
   become: yes
   become_user: "{{ gpg_generator_user }}"
 
+- name: trust the GPG key (for duplicity)
+  shell: "echo $(gpg --list-keys --fingerprint | grep `cat {{ gpg_home }}/{{ gpg_key }}` -A 1 | tail -1 | tr -d '[:space:]' | awk 'BEGIN { FS = \"=\" } ; { print $2 }'):6 | gpg --import-ownertrust"
+
 #### we comment out the following 2 tasks as we do not need exported gpg key nor fingerprint on the hypervisor (yet)
 #- debug: var=gpg_pull
 #- name: fetch files to orchestrator
