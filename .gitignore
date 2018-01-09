@@ -7,3 +7,4 @@ latest
 *.deb
 centos7/ansible/client/tmp/
 bareos.ini
+inspec.lock
