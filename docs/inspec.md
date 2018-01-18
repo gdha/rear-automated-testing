@@ -43,6 +43,6 @@ Great it works. To test it out you can create a example test as follow:
 
 As you can see from above example we can do a secure shell connection to the client VM and perform our little compliance test without requiring the executable to be present on the client VM itself.
 
-To save the ouput to a file we can pipe the command `dos2unix` (is not standard installed) and pipe to tee, e.g.
+To save the ouput to a file which does not contain control charecters we can pipe the output of `inspec` to the executable `dos2unix` (is not standard installed) and pipe again to the `tee` command, e.g.
 
-     sudo inspec exec ../inspec/compliance-checks -i ../insecure_keys/vagrant.private -t ssh://root@client | dos2unix | tee -a /tmp/output
+     $ sudo inspec exec ../inspec/compliance-checks -i ../insecure_keys/vagrant.private -t ssh://root@client | dos2unix | tee -a /tmp/output
