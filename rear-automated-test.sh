@@ -7,6 +7,7 @@
 PRGNAME=${0##*/}
 PRGDIR=$(pwd)
 VERSION=1.2
+DISPLAY=:0
 
 distro="centos7"	# default distro when no argument is given
 boot_method="PXE"	# default boot method to use to recover rear on 'recover' VM
@@ -204,6 +205,8 @@ case $VAGRANT_DEFAULT_PROVIDER in
         env | grep -q DISPLAY || Error "VirtualBox requires a proper 'DISPLAY' setting"
         ;;
 esac
+
+export DISPLAY	# especially for MacOS OS/x
 
 # Check and/or add the client/server IP addresses to the local /etc/hosts file
 grep -q "^$client" /etc/hosts
