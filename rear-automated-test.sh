@@ -36,6 +36,10 @@ DO_TEST=		# execute a validation test (default no)
 LOG_DIR=/export/rear-tests/logs
 # LOGFILE - we define this after we have read all command line arguments (especially LOG_DIR)
 
+# release_nr is used to capture which "stable" version of ReaR we want to test
+# By default, we only test the latest unstable version
+release_nr=
+
 MESSAGE_PREFIX=
 DEBUG=
 CMD_OPTS=( "$@" )
@@ -80,7 +84,7 @@ while getopts ":d:b:s:p:c:l:t:vh" opt; do
     case "$opt" in
         d) distro="$OPTARG" ;;
         b) boot_method="$OPTARG" ;;
-	s) boot_server="$OPTARG" ;;
+	s) release_nr="$OPTARG" ;;
 	p) provider="$OPTARG" ;;
 	c) config="$OPTARG"
            [[ ! -f "$config" ]] && Error "ReaR Configuration file $config not found."
@@ -335,19 +339,44 @@ fi
 
 # first update rear inside VM client
 LogPrint ""
-Log "Update rear on the VM client"
-echo "$(bold Update rear on the VM client)"
-case "$distro" in
-    (ubuntu*)
-        # Ubuntu does not always update ReaR properly; therefore, we better first remove the package and re-install it
-        ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt -y remove rear" | tee -a $LOGFILE
-        ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get update" | tee -a $LOGFILE
-        ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get -y --force-yes install rear" | tee -a $LOGFILE
-        ;;
-    (centos*)
-        ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
-        ;;
-esac
+if [[ -z "$release_nr" ]] ; then
+    # We will test the latest unstable ReaR version
+    Log "Update rear on the VM client"
+    echo "$(bold Update rear on the VM client)"
+    case "$distro" in
+        (ubuntu*)
+            # Ubuntu does not always update ReaR properly; therefore, we better first remove the package and re-install it
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt -y remove rear" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get update" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get -y --force-yes install rear" | tee -a $LOGFILE
+            ;;
+        (centos*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
+            ;;
+    esac
+
+else
+    # We will try to install the request "stable" ReaR version
+    # PS: we will not test if the var release_nr makes sense - if not, the install will fail (force exit)?
+    Log "Install the stable ReaR version $release_nr"
+    echo "$(bold Install stable ReaR version $release_nr on the VM client)"
+    case "$distro" in
+        (ubuntu*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt -y remove rear" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get update" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m apt-get -y --force-yes install rear" | tee -a $LOGFILE
+            ;;
+        (centos*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m rpm -e rear" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --showduplicates list rear" > /tmp/REAR-versions.$$
+            REAR_VER=$( grep rear /tmp/REAR-versions.$$ | grep -v Snapshot | grep "${release_nr}-" | tail -1 | awk '{print $2}' )
+            rm -f /tmp/REAR-versions.$$
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y install rear-$REAR_VER" | tee -a $LOGFILE
+            [[ $? -eq 1 ]] && Error "Could not install stable version rear-$REAR_VER"
+            ;;
+    esac
+
+fi
 LogPrint ""
 
 # Option -f test will be executed on 'client' VM only (at least for now)
