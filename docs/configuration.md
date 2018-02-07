@@ -17,7 +17,7 @@ Please note, even if you want to provision the VMs with Ubuntu the `bareos.ini` 
     $ cp bareos.ini.template bareos.ini
     $ vi bareos.ini
 
-The `bareos.ini` file needs to be modified with your credentials you received from Bareos company.
+The `bareos.ini` file needs to be modified with your credentials you received from Bareos company. For example, the template file looks like:
 
     # Attention: for BAREOS customers who have a valid subscription or support contract may
     # copy this "bareos.ini.template" file to "bareos.ini" file and
@@ -52,4 +52,4 @@ For example, if your e-mail address is "user@company.com" and password "my-secre
     bareos_version = latest
 
 *Be aware* that the *bareos_user* key must end with an additional ":" and the *bareos_pass* should end with an additional "@". Furthermore, the *bareos_prot* should be modified to use the secure http protocol, and the *bareos_fqdn* address should have the "com" extension instead of the "org".
-You are free to modify the *bareos_version* key to the value of the bareos version you want to install on the *client* and *server* VMs. However, make sure it is available on the location of bareos or the provisioning will fail.
+You are free to modify the *bareos_version* key to the value of the bareos version you want to install on the *client* and *server* VMs. However, make sure it is available on the location of bareos download section or the provisioning will fail for sure.
