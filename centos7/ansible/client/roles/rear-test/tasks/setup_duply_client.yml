@@ -7,6 +7,9 @@
 - name: Create the /etc/duply/duply-client directory
   file: path=/etc/duply/duply-client state=directory mode=0700 recurse=yes
 
+- name: Create the /root/.duply directory
+  file: path=/root/.duply state=directory mode=0700
+
 # create a symbolic link as 'duply' is creating new profiles under /root/.duply
 # instead of /etc/duply (as superuser) - man page is not correct on that point
 - name: Create symbolic link from /etc/duply/duply-client to /root/.duply
