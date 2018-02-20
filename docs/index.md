@@ -11,6 +11,7 @@ This is the documentation around our "Relax-and-Recover (ReaR) Automated Testing
 - [Introduction](introduction.md)
 - [Software Requirements](software.md)
 - [Configuration](configuration.md)
+- [Vagrant Boxes](vagrantboxes.md)
 - Virtual Machines Provisioning using Ansible
 - The script rear-automated-testing.sh
 - Usage
