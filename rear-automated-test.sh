@@ -638,6 +638,15 @@ case $boot_method in
 
 esac
 
+# Before halting the client VM run some compliance checks on the client and save the output under $TEST_LOG_DIR
+if test $(which inspec 2>/dev/null) ; then
+    if ! test $(which dos2unix 2>/dev/null) ; then
+        echo "$(bold WARNING: Package $(green 'dos2unix') is missing. $(red InSpec needs it for proper output))"
+    fi
+    inspec exec ../inspec/compliance-checks -i ../insecure_keys/vagrant.private -t ssh://root@client | dos2unix | tee -a $TEST_LOG_DIR/inspec_results_client_before_recovery
+fi
+
+
 LogPrint "
 "
 Log "Halting the client VM before doing the recovery"
@@ -679,4 +688,6 @@ fi
 # Go back to original starting directory
 cd $Current_dir
 
+# exit message
+echo "$(bold The log files are saved under $(red $TEST_LOG_DIR))"
 exit 0
