@@ -690,4 +690,10 @@ cd $Current_dir
 
 # exit message
 echo "$(bold The log files are saved under $(red $TEST_LOG_DIR))"
+echo
+if test $(which inspec 2>/dev/null) ; then
+    echo "$(bold You might consider to run, when the client VM was recovered, the following command:)"
+    echo "inspec exec ../inspec/compliance-checks -i ../insecure_keys/vagrant.private -t ssh://root@client | dos2unix | tee -a $TEST_LOG_DIR/inspec_results_client_after_recovery"
+fi
+
 exit 0
