@@ -14,7 +14,7 @@ This is the documentation around our "Relax-and-Recover (ReaR) Automated Testing
 - [Vagrant Boxes](vagrantboxes.md)
 - [Virtual Machines Provisioning using Ansible](ansible.md)
 - The script rear-automated-testing.sh
-- Usage
+- The ReaR templates
 - [Compliance Tests](inspec.md)
 - [Upload test results with gist](gists.md)
 - [Request missing features](sponsoring.md)
