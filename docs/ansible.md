@@ -33,4 +33,21 @@ We tend to do the provisioning of the client and server VM before using the `rea
          
 Follow the same sequence for the *client* VM and once both VMs are fullu provisioned you are ready to use the `rear-automated-test.sh` script to test out ReaR.
 
-In the `Vagrantfile` you probably saw that there is a third sectionabout the *recover* VM, but nothing has to be done for that one as we will doing a bare metal restore via `rear -v recover` from rescue image made on the *client* VM.
+In the `Vagrantfile` you probably saw that there is a third section about the *recover* VM, but nothing has to be done for that one as we will doing a bare metal restore via `rear -v recover` from rescue image made on the *client* VM.
+
+## Ansible Common playbooks
+
+The [`main.yml`](https://github.com/gdha/rear-automated-testing/blob/master/centos7/ansible/common/roles/rear-test/tasks/main.yml) playbook contains a list of tasks that will be executed on both the *client* and *server* VM via **ansible**
+We use the *block* definition to separate the Debian from the RedHat families, threfore, all tasks run on both Ubuntu as CentOS VMs, but are skipped accordingly.
+
+## Ansible Client playbooks
+
+The [`main.yml`](https://github.com/gdha/rear-automated-testing/blob/master/centos7/ansible/client/roles/rear-test/tasks/main.yml) playbook will only run on the *client* VM. Roughly, it sets up a Bareos client and duplicity software among other smaller tasks.
+
+## Ansible Server playbooks
+
+The [`main.yml`](https://github.com/gdha/rear-automated-testing/blob/master/centos7/ansible/server/roles/rear-test/tasks/main.yml) playbook will only run on the *server* VM and will setup up a local DHCP server (including PXE), Bareos backup server, samba server and duplicity end-point server.
+
+## New Playbooks or Tasks?
+
+Of course, we are willing to add new playbooks or tasks if there is a request for it. Therefore, create an [issue](https://github.com/gdha/rear-automated-testing/issues) with your request. If it is a serious effort to implement the request then we expect we may raise a [purchase order](http://www.it3.be/rear-support/rear-support-pricelist.pdf) for it as we must invest time (and time is precious and expensive).
