@@ -52,4 +52,4 @@ The [`main.yml`](https://github.com/gdha/rear-automated-testing/blob/master/cent
 
 Of course, we are willing to add new playbooks or tasks if there is a request for it. Therefore, create an [issue](https://github.com/gdha/rear-automated-testing/issues) with your request. If it is a serious effort to implement the request then we expect we may raise a [purchase order](http://www.it3.be/rear-support/rear-support-pricelist.pdf) for it as we must invest time (and time is precious and expensive).
 
-Of course, we welcome *Pull Requests* with new tasks or updates on existing tasks. We promise we will consider these seriously and give you feedback. Even minor corrections or enhacements are welcome, e.g. to fix grammer errors to name one (as I am not native English speaking).
+Of course, we welcome *Pull Requests* with new tasks or updates on existing tasks. We promise we will consider these seriously and give you feedback. Even minor corrections or enhacements are welcome, e.g. to fix grammar errors to name one (as I am not native English speaking).
