@@ -12,6 +12,8 @@ If for some reason you want to use another vagrant box than the one define in th
 
 A side note: use the **root** account to download the boxes as our project will require the root account anyhow.
 
+## Vagrant Box Add
+
 To start the manual download (it is not mandatory, but strongly advised) go into the Linux distribution directory, e.g. `centos7` and `sudo su` to become root.
 
 To download the *Centos/7* box do the following:
@@ -32,3 +34,24 @@ To download the *Centos/7* box do the following:
         box: Downloading: https://vagrantcloud.com/centos/boxes/7/versions/1801.02/providers/virtualbox.box
 
 You can list the available box on your system with the command `vagrant box list` 
+
+## Vagrant Box Update
+
+It might be possible that during an *provisioning* or bringing up the boxes you will see a message that the Vagrant Box is out of date. You can bring the box up-to-date as following:
+
+    # vagrant box update 
+    ==> server: Checking for updates to 'centos/7'
+        server: Latest installed version: 1801.02
+        server: Version constraints: 
+        server: Provider: virtualbox
+    ==> server: Box 'centos/7' (v1801.02) is running the latest version.
+
+In above case the box was already up-to-date and no further action was required.
+
+## Vagrant Box Remove
+
+If you no longer require the use of one of the Vagrant Boxes you can simply:
+
+- Remove the _client_ and _server_ virtual machines from your host system corresponding with the Vagrant Box
+- Remove the Vagrant Box itself with the command `vagrant box remove`
+
