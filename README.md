@@ -15,22 +15,13 @@ Select the GNU/Linux OS to test by going into the proper directory. However, ini
 ````
 $ cd rear-automated-testing
 $ sudo ./rear-automated-test.sh -h
-
-+--------------------------------------------------+
-|    Relax-and-Recover Automated Testing script    |
-|             version 1.1                          |
-+--------------------------------------------------+
-
-Author: Gratien D'haese
-Copyright: GPL v3
-
-
-Usage: rear-automated-test.sh [-d distro] [-b <boot method>] [-s <server IP>] [-p provider] [-c rear-config-file.conf] [-t test] -vh
+Usage: rear-automated-test.sh [-d distro] [-b <boot method>] [-s <stable rear version>] [-p provider] [-c rear-config-file.conf] [-t test] -vh
         -d: The distribution to use for this automated test (default: centos7)
         -b: The boot method to use by our automated test (default: PXE)
-        -s: The <boot server> IP address (default: 192.168.33.15)
+        -s: The <stable rear version> is the specific version we want to test, e.g. 2.3 (default: <empty> )
         -p: The vagrant <provider> to use (default: virtualbox)
         -c: The ReaR config file we want to use with this test (default: PXE-booting-example-with-URL-style.conf)
+        -l: The ReaR test logs top directory (default: /export/rear-tests/logs)
         -t: The ReaR validation test directory (see tests directory; no default)
         -h: This help message.
         -v: Revision number of this script.
@@ -39,12 +30,12 @@ Comments:
 --------
 <distro>: select the distribution you want to use for these testings
 <boot method>: select the rescue image boot method (default PXE) - supported are PXE and ISO
-<boot server>: is the server where the PXE or ISO images resides on (could be the hypervisor or host system)
+<stable rear version>: select the specific version to test, e.g. 2.3. Empty means use the latest unstable version
 <provider>: as we use vagrant we need to select the provider to use (virtualbox, libvirt)
 <rear-config-file.conf>: is the ReaR config file we would like to use to drive the test scenario with (optional with PXE)
-<test-dir>: under the tests/ directory there are sub-directories with the beakerlib tests (donated by RedHat).
-       When -t option is used then we will not execute an automated recover test (at least no yet)
-
+<logs directory>: is the direcory where the logs are kept of each run including the rear recovery log of the recover VM
+<test-dir>: under the tests/ directory there are sub-directories with the beakerlib tests (donated by RedHat)
+       When -t option is used then we will not execute an automated recover test (at least not yet)
 ````
 
 ### Using KVM/libvirt
