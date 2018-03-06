@@ -62,8 +62,9 @@ To see which vagrant boxes are already present on your hosts system:
 If you no longer require the use of one of the Vagrant Boxes you can simply:
 
 - Remove the _client_ and _server_ virtual machines from your host system corresponding with the Vagrant Box
-- Remove the Vagrant Box itself with the command `vagrant box remove`:
+- Remove the Vagrant Box itself with the command `vagrant box remove`
 
+Example:
 
     # vagrant box remove centos/7 --box-version 1702.01
     Removing box 'centos/7' (v1702.01) with provider 'libvirt'...
