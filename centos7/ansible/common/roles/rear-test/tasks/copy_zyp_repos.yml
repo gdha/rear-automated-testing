@@ -1,0 +1,27 @@
+---
+# File: ansible/common/roles/rear-test/tasks/copy_zyp_repos.yml for SLES
+
+# the ReaR Snapshot YUM repo
+# We use OpenSUSE Leap 42.3 as SLES12 SP3 distro (closest match in open source version)
+- zypper_repository:
+    repo: "http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/SLE_12_SP3/Archiving:Backup:Rear:Snapshot.repo"
+    auto_import_keys: yes
+    disable_gpg_check: yes
+    state: present
+  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "42"
+
+# the ReaR Stable YUM repo
+- zypper_repository:
+    repo: "http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/SLE_12_SP3/Archiving:Backup:Rear.repo"
+    auto_import_keys: yes
+    disable_gpg_check: yes
+    state: present
+  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "42"
+
+- zypper_repository:
+    repo: "http://download.opensuse.org/repositories/home:/gdha/SLE_12/home:gdha.repo"
+    auto_import_keys: yes
+    disable_gpg_check: yes
+    state: present
+  when: ansible_os_family == "Suse" 
+

@@ -3,6 +3,15 @@
 # Package 'postfix' is installed via task install_common_packages.yml
 # However, we do not want the service to be enabled to avoid mailq issues
 
+- name: disable IPv6 in main.cfg of postfix
+  lineinfile:
+    dest=/etc/postfix/main.cf
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+  with_items:
+    - regexp: "^inet_protocols =.*"
+      line: "inet_protocols = ipv4"
+
 - name: disable postfix systemd service
   service:
     name: postfix

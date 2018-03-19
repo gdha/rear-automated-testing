@@ -9,4 +9,4 @@
     - vim
     - selinux
     - python-selinux
-
+    - ntpdate

@@ -2,6 +2,7 @@
 # common/install_common_packages.yml
 # Here we install packages which are named the same across all supported distro's
 
+# we added ignore_errors: True because 'ntpdate' is not available on SLES
 - name: Install common basic development packages
   package: name={{ item }} state=present
   with_items:
@@ -13,4 +14,4 @@
     - bash
     - attr
     - postfix
-    - ntpdate
+  ignore_errors: True

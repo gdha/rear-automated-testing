@@ -2,6 +2,6 @@
 # ansible/common/roles/rear-test/tasks/create_bareos_repo.yml
 
 - name: Create /etc/yum.repos.d/bareos.repo YUM file
-  template: src=bareos.repo.j2 dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
+  template: src=bareos.repo.centos7.j2 dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
   when: ansible_os_family == "RedHat"
 

@@ -1,0 +1,11 @@
+# ansible localhost -m setup | grep distr
+ [WARNING]: Could not match supplied host pattern, ignoring: all
+ [WARNING]: provided hosts list is empty, only localhost is available
+        "ansible_distribution": "openSUSE Leap", 
+        "ansible_distribution_file_parsed": true, 
+        "ansible_distribution_file_path": "/etc/os-release", 
+        "ansible_distribution_file_variety": "SuSE", 
+        "ansible_distribution_major_version": "42", 
+        "ansible_distribution_release": "3", 
+        "ansible_distribution_version": "42.3", 
+ansible_os_family": "Suse"

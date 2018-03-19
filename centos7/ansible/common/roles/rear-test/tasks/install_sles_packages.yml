@@ -1,0 +1,11 @@
+---
+# install_sles_packages.yml
+# Only SLES related RPMs will be installed here
+
+- name: Install common basic SLES development packages
+  package: name={{ item }} state=present
+  with_items:
+    - httpd
+    - createrepo
+    - vim
+    - bind-utils

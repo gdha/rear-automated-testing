@@ -11,3 +11,4 @@
     - vim-enhanced
     - bind-utils
     - libusal
+    - ntpdate

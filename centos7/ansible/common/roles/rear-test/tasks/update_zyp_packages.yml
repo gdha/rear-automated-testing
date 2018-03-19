@@ -1,0 +1,8 @@
+# update_zyp_packages.yml
+---
+
+- name: Update all packages with zypper
+  zypper:
+    name: '*'
+    state: latest
+    update_cache: yes

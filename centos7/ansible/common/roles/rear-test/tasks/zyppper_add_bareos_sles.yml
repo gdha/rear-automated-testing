@@ -1,0 +1,20 @@
+#  ansible/common/roles/rear-test/tasks/zyppper_add_bareos_sles.yml
+---
+# We use OpenSUSE Leap 42.3 as SLES12 SP3 distro (closest match in open source version)
+#- name: add zypper repo for bareos (SLE12)
+#  template: src=bareos.repo.sles12.j2 dest=/etc/zypp/repos.d/bareos.repo mode=0644 owner=root
+#  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "42"
+
+- name: Add BAREOS repository for SLES12
+  zypper_repository:
+    name: bareos
+    repo: "{{ bareos_url }}/SLE_12_SP3/"
+    auto_import_keys: yes
+    disable_gpg_check: no
+    state: present
+  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "42"
+
+# OpenSUSE 11 matches SLES 11 in general
+- name: add zypper repo for bareos (SLE11)
+  template: src=bareos.repo.sles11.j2 dest=/etc/zypp/repos.d/bareos.repo mode=0644 owner=root
+  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
