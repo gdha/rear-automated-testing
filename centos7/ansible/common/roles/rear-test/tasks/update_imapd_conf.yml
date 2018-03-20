@@ -9,3 +9,5 @@
   with_items:
     - regexp: "^#Domain =.*"
       line: "Domain = box"
+    - regexp: "^Domain =.*"
+      line: "Domain = box"
