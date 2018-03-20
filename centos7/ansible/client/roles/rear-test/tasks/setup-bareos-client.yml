@@ -8,6 +8,7 @@
    - bareos-bconsole
   when: ansible_os_family == "RedHat"
 
+####
 
 - name: Install bareos pre-requisites for ubuntu14 only
   package: name={{ item }} state=present force=yes  allow_unauthenticated=yes
@@ -30,6 +31,16 @@
    - bareos-bconsole
   when: ansible_os_family == "Debian"
 
+####
+
+- name: Install bareos client package (incl. pre-requisites) for SLES12
+  package: name={{ item }} state=present
+  with_items:
+    - bareos-filedaemon
+    - bareos-bconsole
+  when: ansible_os_family == "Suse"
+
+####
 
 - name: copy bareos configuration files to /etc/bareos
   copy: src={{ item }} dest=/etc/bareos/{{ item }} owner=bareos group=bareos mode=0644

@@ -4,6 +4,7 @@
 # we have to be careful when we re-provision that the dir /var/lib/pgsql/ is wiped out
 # before running initdb once again
 
+##### postgres part
 - name: Remove directory /var/lib/pgsql/data
   file:
     path: /var/lib/pgsql/data
@@ -22,6 +23,14 @@
    - postgresql-contrib
   when: ansible_os_family == "Debian"
 
+- name: Install postgresql (sles arch)
+  package: name={{ item }} state=present
+  with_items:
+   - postgresql
+   - postgresql-contrib
+   - postgresql-server
+  when: ansible_os_family == "Suse"
+
 - name: Initialize the postgresql database
   command: /bin/postgresql-setup initdb
   register: out
@@ -33,6 +42,7 @@
 - name: Enable/Start database server
   service: name=postgresql state=started enabled=yes
 
+##### bareos part
 - name: Install bareos server packages (deb arch)
   package: name={{ item }} state=present allow_unauthenticated=yes
   with_items:
@@ -40,12 +50,12 @@
    - bareos-database-postgresql
   when: ansible_os_family == "Debian"
 
-- name: Install bareos server packages (rh arch)
+- name: Install bareos server packages (rh/sles arch)
   package: name={{ item }} state=present
   with_items:
    - bareos
    - bareos-database-postgresql
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Suse"
 
 
 - name: copy bareos configuration files to /etc/bareos

@@ -1,12 +1,12 @@
 ---
 # server/roles/rear-test/tasks/start-samba.yml
 
-- name: start Samba (rh arch)
+- name: start Samba (rhi/sles arch)
   service: name={{ item }} state=started enabled=yes
   with_items:
      - smb
      - nmb
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Suse"
 
 - name: start Samba (deb arch)
   service: name={{ item }} state=started enabled=yes

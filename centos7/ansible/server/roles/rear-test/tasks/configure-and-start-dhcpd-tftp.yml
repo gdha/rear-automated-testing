@@ -35,6 +35,15 @@
     - xinetd
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
+- name: Install packages we need for dhcp and tftpboot (SLES)
+  package: name={{ item }} state=present
+  with_items:
+    - dhcp-server
+    - xinetd
+    - tftp
+    - gfxboot
+  when: ansible_os_family == "Suse"
+
 # The 2 lines are always appended instead of replaced.
 #- name: Modify /etc/xinetd.d/tftp server_args and enable tftp service
 #  lineinfile:
@@ -79,6 +88,10 @@
   copy: src=/usr/lib/syslinux/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
+- name: Copy pxelinux.0 to /export/nfs/tftpboot directory (SLES)
+  copy: src=/usr/share/syslinux/pxelinux.0 dest=/export/nfs/tftpboot/pxelinux.0 mode=0644
+  when: ansible_os_family == "Suse"
+
 - name: Copy menu.c32 to /export/nfs/tftpboot directory (rh arch)
   copy: src=/usr/share/syslinux/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
   when: ansible_os_family == "RedHat"
@@ -91,13 +104,32 @@
   copy: src=/usr/lib/syslinux/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
-- name: Copy dhcpd.conf file
+- name: Copy menu.c32 to /export/nfs/tftpboot directory (sles arch)
+  copy: src=/usr/share/syslinux/menu.c32 dest=/export/nfs/tftpboot/menu.c32 mode=0644
+  when: ansible_os_family == "Suse"
+
+- name: Copy dhcpd.conf file to /etc/dhcp/dhcpd.conf (rhel and debian)
   copy: src=dhcpd.conf dest=/etc/dhcp/dhcpd.conf mode=0644
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Debian"
+
+- name: Copy dhcpd.conf file to /etc/dhcpd.conf (sles)
+  copy: src=dhcpd.conf dest=/etc/dhcpd.conf mode=0644
+  when: ansible_os_family == "Suse"
+
+- name: Define interface to listen to for SLES for dhcpd
+  lineinfile:
+    dest=/etc/sysconfig/dhcpd
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+  with_items:
+    - regexp: "^DHCPD_INTERFACE=.*"
+      line: "DHCPD_INTERFACE=eth1"
+  when: ansible_os_family == "Suse"
 
 - name: Make sure dhcpd daemon is up and running
   service: name=dhcpd state=started enabled=yes
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" or ansible_os_family == "Suse"
 
-- name: Make sure isc-dhcp-server is up and running
+- name: Make sure isc-dhcp-server is up and running (debian)
   service: name=isc-dhcp-server state=started enabled=yes
   when: ansible_os_family == "Debian"

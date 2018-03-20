@@ -17,6 +17,13 @@
     - rpcbind
   when: ansible_os_family == "Debian"
 
+- name: install nfs server packages (sles arch)
+  package: name={{ item }} state=present
+  with_items:
+    - nfs-kernel-server
+    - rpcbind
+  when: ansible_os_family == "Suse"
+
 - name: directory /export/nfs is used to store NFS backups
   file: path=/export/nfs state=directory mode=0755
 
@@ -25,6 +32,9 @@
 
 - name: directory /export/nfs/tftpboot is used by PXE booting
   file: path=/export/nfs/tftpboot state=directory mode=0755
+
+- name: directory /export/isos is used to store ISO images
+  file: path=/export/isos state=directory mode=0755
 
 - name: create the /etc/exports file
   copy: src=exports dest=/etc/exports mode=0644
@@ -36,6 +46,13 @@
     - rpcbind
     - nfs-server
   when: ansible_os_family == "RedHat"
+
+- name: start and enable NFS related services (SLES)
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - rpcbind
+    - nfsserver
+  when: ansible_os_family == "Suse"
 
 - name: start and enable NFS related services (ubuntu version == 14)
   service: name={{ item }} state=started enabled=yes

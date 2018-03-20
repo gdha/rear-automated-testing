@@ -1,5 +1,5 @@
 ---
 
-- name: restart xinitd
+- name: restart xinetd
   service: name=xinetd state=restarted
 
