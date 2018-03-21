@@ -41,7 +41,7 @@ Usage: $PRGNAME [-d distro] [-b <boot method>] [-s <stable rear version>] [-p pr
         -b: The boot method to use by our automated test (default: $boot_method)
         -s: The <stable rear version> is the specific version we want to test, e.g. 2.3 (default: <empty> )
         -p: The vagrant <provider> to use (default: $VAGRANT_DEFAULT_PROVIDER)
-        -c: The ReaR config file we want to use with this test (default: PXE-booting-example-with-URL-style.conf)
+        -c: The ReaR config file we want to use with this test (default: PXE-booting-with-URL-style.conf)
         -l: The ReaR test logs top directory (default: $LOG_DIR)
         -t: The ReaR validation test directory (see tests directory; no default)
         -h: This help message.

@@ -177,6 +177,10 @@ if [[ "$targetdistro" != "$distro" ]] ; then
     Log "Press 'enter' to continue or Ctrl-C to quit"
     echo "$(bold Press $(green 'enter') to continue or $(red  Ctrl-C) to quit)"
     read junk
+    # If we come to this point then Enter was given - rm the latest link and create a new one
+    rm -f latest
+    ln -s "$distro" "latest"
+    Log "Create softlink from distro $distro to latest"
 fi
 
 # The following section are steps executed on the hypervisor (this system):
@@ -353,6 +357,9 @@ if [[ -z "$release_nr" ]] ; then
         (centos*)
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
             ;;
+        (sles*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m zypper --non-interactive install rear" | tee -a $LOGFILE
+            ;;
     esac
 
 else
@@ -372,6 +379,14 @@ else
             REAR_VER=$( grep rear /tmp/REAR-versions.$$ | grep -v Snapshot | grep "${release_nr}-" | tail -1 | awk '{print $2}' )
             rm -f /tmp/REAR-versions.$$
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y install rear-$REAR_VER" | tee -a $LOGFILE
+            [[ $? -eq 1 ]] && Error "Could not install stable version rear-$REAR_VER"
+            ;;
+        (sles*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m rpm -e rear" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m zypper packages | grep rear | cut -d '|' -f 3,4" > /tmp/REAR-versions.$$
+            REAR_VER=$( grep " rear" /tmp/REAR-versions.$$ | grep -v git | grep "${release_nr}-" | tail -1 | awk '{print $3}' )
+            rm -f /tmp/REAR-versions.$$
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m zypper --non-interactive install rear-$REAR_VER" | tee -a $LOGFILE
             [[ $? -eq 1 ]] && Error "Could not install stable version rear-$REAR_VER"
             ;;
     esac
