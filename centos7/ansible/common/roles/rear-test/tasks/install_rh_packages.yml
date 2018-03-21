@@ -12,3 +12,5 @@
     - bind-utils
     - libusal
     - ntpdate
+    - chrony
+    - rdate

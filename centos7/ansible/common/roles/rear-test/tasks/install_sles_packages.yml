@@ -9,3 +9,5 @@
     - createrepo
     - vim
     - bind-utils
+    - rdate
+    - chrony
