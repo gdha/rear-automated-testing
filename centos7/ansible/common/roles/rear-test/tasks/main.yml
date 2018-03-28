@@ -9,7 +9,6 @@
 # The following set are the same for RedHat, SLES and Debian OS family
 - include_tasks: bareos_ini_file.yml
 - include_tasks: define_timezone.yml
-- include_tasks: chrony_service_install_config.yml
 - include_tasks: create_private_ssh_key.yml
 - include_tasks: update_sshd_config.yml
 - include_tasks: configure_kernel_parameters.yml
@@ -18,6 +17,7 @@
 
 # A block dedicated for ansible_os_family == "RedHat"
 - block:
+  - include_tasks: chrony_service_install_config.yml
   - include_tasks: create_bareos_repo.yml
   - include_tasks: update_rh_packages.yml
   - include_tasks: copy_yum_repos.yml
@@ -26,7 +26,7 @@
 
   when: ansible_os_family == "RedHat"
 
-# A block dedicated for ansible_os_family == "Suse"
+# A block dedicated for ansible_os_family == "Suse" (SLES 11 and 12)
 - block:
   - include_tasks: zyppper_add_bareos_sles.yml
   - include_tasks: update_zyp_packages.yml
@@ -36,8 +36,15 @@
 
   when: ansible_os_family == "Suse"
 
+# Only working on SLES 12 (SLES 11 only uses ntp)
+- block:
+  - include_tasks: chrony_service_install_config.yml
+
+  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "42"
+
 # A block dedicated for ansible_os_family == "Debian"
 - block:
+  - include_tasks: chrony_service_install_config.yml
   - include_tasks: create_bareos_apt_source.yml
   - include_tasks: update_deb_packages.yml
   - include_tasks: apt_add_rear_repositories.yml

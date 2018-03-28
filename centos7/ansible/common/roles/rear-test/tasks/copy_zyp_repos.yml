@@ -20,6 +20,20 @@
     state: present
   when: ansible_os_family == "Suse" and ansible_distribution_major_version == "42"
 
+# the ReaR Snapshot YUM repo
+# We use OpenSUSE 11  as SLES11 SP4 distro (closest match in open source version)
+- zypper_repository:
+    name: Relax-and-Recover snapshot packages (SLE_11_SP4)
+    repo: "http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/SLE_11_SP4/"
+    state: present
+  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
+
+- zypper_repository:
+    name: Relax-and-Recover (SLE_11_SP4)
+    repo: "http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/SLE_11_SP4/"
+    state: present
+  when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
+
 #- zypper_repository:
 #    repo: "http://download.opensuse.org/repositories/home:/gdha/SLE_12/home:gdha.repo"
 #    auto_import_keys: yes

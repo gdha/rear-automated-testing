@@ -11,3 +11,4 @@
     - bind-utils
     - rdate
     - chrony
+  ignore_errors: True
