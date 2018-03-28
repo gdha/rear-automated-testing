@@ -20,18 +20,13 @@
     state: present
   when: ansible_os_family == "Suse" and ansible_distribution_major_version == "42"
 
-# the ReaR Snapshot YUM repo
-# We use OpenSUSE 11  as SLES11 SP4 distro (closest match in open source version)
-- zypper_repository:
-    name: Relax-and-Recover snapshot packages (SLE_11_SP4)
-    repo: "http://download.opensuse.org/repositories/Archiving:/Backup:/Rear:/Snapshot/SLE_11_SP4/"
-    state: present
+# the ReaR Stable and Snapshot Zypper repos
+- name: add zypper repo for ReaR Stable (SLE11)
+  template: src=rear-stable.repo.sles11.j2 dest=/etc/zypp/repos.d/rear-stable.repo mode=0644 owner=root
   when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
 
-- zypper_repository:
-    name: Relax-and-Recover (SLE_11_SP4)
-    repo: "http://download.opensuse.org/repositories/Archiving:/Backup:/Rear/SLE_11_SP4/"
-    state: present
+- name: add zypper repo for ReaR Snapshot (SLE11)
+  template: src=rear-snapshot.repo.sles11.j2 dest=/etc/zypp/repos.d/rear-snapshot.repo mode=0644 owner=root
   when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
 
 #- zypper_repository:
