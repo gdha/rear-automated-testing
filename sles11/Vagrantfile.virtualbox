@@ -5,13 +5,13 @@ nodes = [
    { :hostname => 'client', 
      :ip => '192.168.33.10', 
      :box => 'gdha/sles11sp4',
-     :box_version => '0.0.2',
+     #:box_version => '0.0.2',
      :box_url => 'https://app.vagrantup.com/gdha/boxes/sles11sp4',
      :ram => 1024 },
    { :hostname => 'server',
      :ip => '192.168.33.15',
      :box => 'gdha/sles11sp4',
-     :box_version => '0.0.2',
+     #:box_version => '0.0.2',
      :box_url => 'https://app.vagrantup.com/gdha/boxes/sles11sp4',
      :ram => 1024 }
 ]

@@ -22,11 +22,11 @@
 
 # the ReaR Stable and Snapshot Zypper repos
 - name: add zypper repo for ReaR Stable (SLE11)
-  template: src=rear-stable.repo.sles11.j2 dest=/etc/zypp/repos.d/rear-stable.repo mode=0644 owner=root
+  template: src=Archiving_Backup_Rear.repo.j2 dest=/etc/zypp/repos.d/Archiving_Backup_Rear.repo mode=0644
   when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
 
 - name: add zypper repo for ReaR Snapshot (SLE11)
-  template: src=rear-snapshot.repo.sles11.j2 dest=/etc/zypp/repos.d/rear-snapshot.repo mode=0644 owner=root
+  template: src=Archiving_Backup_Rear_Snapshot.repo.j2 dest=/etc/zypp/repos.d/Archiving_Backup_Rear_Snapshot.repo mode=0644
   when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
 
 #- zypper_repository:
@@ -37,4 +37,4 @@
 #  when: ansible_os_family == "Suse" 
 
 - name: Refresh the repos while importing the gpg keys with zypper
-  command: zypper --gpg-auto-import-keys ref
+  command: zypper --non-interactive --gpg-auto-import-keys ref
