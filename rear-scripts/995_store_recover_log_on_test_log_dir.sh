@@ -15,7 +15,7 @@ Log "Mounting  $TEST_LOG_DIR_URL"
 mkdir -p $v "$BUILD_DIR/logdir" >&2
 StopIfError "Could not mkdir '$BUILD_DIR/logdir'"
 AddExitTask "rm -Rf $v $BUILD_DIR/logdir >&2"
-mount_url $TEST_LOG_DIR_URL $BUILD_DIR/logdir
+mount_url $TEST_LOG_DIR_URL $BUILD_DIR/logdir "rw,noatime,nolock"
 
 LogPrint "Save the $LOGFILE to $TEST_LOG_DIR_URL"
 cp $v $LOGFILE "$BUILD_DIR/logdir/rear-$HOSTNAME-${WORKFLOW}.log" >&2

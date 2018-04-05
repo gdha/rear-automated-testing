@@ -22,7 +22,7 @@ local path=$( url_path $PXE_CONFIG_URL )
 mkdir -p $v "$BUILD_DIR/tftpbootfs" >&2
 StopIfError "Could not mkdir '$BUILD_DIR/tftpbootfs'"
 AddExitTask "rm -Rf $v $BUILD_DIR/tftpbootfs >&2"
-mount_url $PXE_CONFIG_URL $BUILD_DIR/tftpbootfs
+mount_url $PXE_CONFIG_URL $BUILD_DIR/tftpbootfs "rw,noatime,nolock"
 PXE_LOCAL_PATH=$BUILD_DIR/tftpbootfs
 
 # step 4 - append "default boothd0" to the PXE config file of host "client"
