@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # rear-automated-test.sh script
-
+# Author: Gratien D'haese - IT3 Consultants
 
 # Define generic variables
 PRGNAME=${0##*/}
 PRGDIR=$(pwd)
-VERSION=1.2
+VERSION=1.3
 DISPLAY=:0
 
 distro="centos7"	# default distro when no argument is given
@@ -396,6 +396,7 @@ LogPrint ""
 
 # Option -f test will be executed on 'client' VM only (at least for now)
 # Therefore, check if the test is an existing directory for the test we want
+# TODO: remove this block and replace by a good set of inspec compliance controls
 if [[ "$DO_TEST" = "y" ]] ; then
     # $test_dir contains the test we want to execute; first copy it to the client vm
     Log "Copying the Beaker tests onto the VM client"    
@@ -562,6 +563,9 @@ scp -i ../insecure_keys/vagrant.private ../rear-scripts/995_store_recover_log_on
 
 # the wrapup area is only executed by the 'recover' workflow - runs on the recover VM:
 scp -i ../insecure_keys/vagrant.private ../rear-scripts/995_store_recover_log_on_test_log_dir.sh root@$client:/usr/share/rear/wrapup/default/995_store_recover_log_on_test_log_dir.sh | tee -a $LOGFILE
+
+# copy a script for SLES11 to remove the 70-persistent-net.rules file on rescue image - issue #59
+scp -i ../insecure_keys/vagrant.private ../rear-scripts/700_remove_persistent_net_rules.sh root@$client:/usr/share/rear/build/SUSE_LINUX/700_remove_persistent_net_rules.sh | tee -a $LOGFILE
 
 
 LogPrint ""
