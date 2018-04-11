@@ -4,14 +4,32 @@ title: Configuration
 
 # Configuration
 
-There are no configuration requirements to use the Relax-and-Recover Automated Testing project. However, there is one exception for Bareos customers with a valid Bareos Subscription of Bareos Support Contract. These users have received a special login (and password) to download fixes and updates of the bareos software.
+There are some configuration requirements to use the Relax-and-Recover Automated Testing project.
+
+## Enable the Hypervisor host as a NFS server
+
+The hypervisor host should be a NFS server where we can store ISO images on (if we define this in the ReaR configuration), or to store the logs of the ReaR mkbackup and recover sessions. As most of the vagrant boxes we use are only working with VirtualBox we better enable or host as a NFS server. PXE and TFTP are handled through VirtualBox itself so do not worry about these servives.
+
+For Linux we have defined the following exports:
+
+    # cat /etc/exports
+    /export 192.168.0.0/16(rw,no_root_squash) 10.0.2.0/24(rw,insecure,no_root_squash) 127.0.0.1(rw,insecure,no_root_squash)
+    /root/.config/VirtualBox/TFTP 192.168.0.0/16(rw,no_root_squash) 10.0.2.0/24(rw,insecure,no_root_squash) 127.0.0.1(rw,insecure,no_root_squash)
+
+For Mac/OS we have defined:
+
+    /   -alldirs  -rw  -maproot=0:0 -sec=sys:krb5  -network 192.168.33.0 -mask 255.255.255.0
+
+
 
 ## Bareos Customers
 
-For all users the public Bareos download area will be used, but if you wish to use the updated (subscribed) versions of bareos then you need to do the following additional steps *before* provisioning the *client* and *server* VMs with `vagrant`.
+For Bareos customers with a valid Bareos Subscription of Bareos Support Contract. These users have received a special login (and password) to download fixes and updates of the bareos software.
+
+For all other users (without a Bareos Support Contract) the public Bareos download area will be used, but if you wish to use the updated (subscribed) versions of bareos then you need to do the following additional steps *before* provisioning the *client* and *server* VMs with `vagrant`.
 
 Enter the directory `rear-automated-testing/centos7/ansible/common/roles/rear-test/files` and copy the `bareos.ini.template` file into the same directory as `bareos.ini` (do **not** delete the `bareos.ini.template` file however!).
-Please note, even if you want to provision the VMs with Ubuntu the `bareos.ini` file in the directory `rear-automated-testing/centos7/ansible/common/roles/rear-test/files` should be modified, because all Linus distro's supported by this project share the same ansible directories.
+Please note, even if you want to provision the VMs with Ubuntu or SLES the `bareos.ini` file in the directory `rear-automated-testing/centos7/ansible/common/roles/rear-test/files` should be modified, because all Linux distributions supported by this project share the same ansible directories.
 
     $ cd rear-automated-testing/centos7/ansible/common/roles/rear-test/files
     $ cp bareos.ini.template bareos.ini
