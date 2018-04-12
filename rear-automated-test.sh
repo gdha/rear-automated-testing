@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 #
 # rear-automated-test.sh script
 # Author: Gratien D'haese - IT3 Consultants
@@ -210,11 +210,11 @@ case $VAGRANT_DEFAULT_PROVIDER in
             Error "VirtualBox seems not to be installed - use another provider perhaps"
         fi
         # do a check if we have a DISPLAY variable defined (recover VM needs it #39)
+        export DISPLAY	# especially for MacOS OS/x
         env | grep -q DISPLAY || Error "VirtualBox requires a proper 'DISPLAY' setting"
         ;;
 esac
 
-export DISPLAY	# especially for MacOS OS/x
 
 # Check and/or add the client/server IP addresses to the local /etc/hosts file
 grep -q "^$client" /etc/hosts
@@ -358,6 +358,8 @@ if [[ -z "$release_nr" ]] ; then
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
             ;;
         (sles*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m rpm -e rear" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m zypper --non-interactive ref" | tee -a $LOGFILE
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m zypper --non-interactive install rear" | tee -a $LOGFILE
             ;;
     esac
@@ -662,7 +664,7 @@ if test $(which inspec 2>/dev/null) ; then
     if ! test $(which dos2unix 2>/dev/null) ; then
         echo "$(bold WARNING: Package $(green 'dos2unix') is missing. $(red InSpec needs it for proper output))"
     fi
-    inspec exec ../inspec/compliance-checks -i ../insecure_keys/vagrant.private -t ssh://root@client | dos2unix | tee -a $TEST_LOG_DIR/inspec_results_client_before_recovery
+    inspec exec ../inspec/compliance-checks -i ../insecure_keys/vagrant.private -t ssh://root@client | dos2unix -f | tee -a $TEST_LOG_DIR/inspec_results_client_before_recovery
 fi
 
 
@@ -712,7 +714,7 @@ echo "$(bold The log files are saved under $(red $TEST_LOG_DIR))"
 echo
 if test $(which inspec 2>/dev/null) ; then
     echo "$(bold You might consider to run, when the client VM was recovered, the following command:)"
-    echo "inspec exec ./inspec/compliance-checks -i ./insecure_keys/vagrant.private -t ssh://root@client | dos2unix | tee $TEST_LOG_DIR/inspec_results_client_after_recovery"
+    echo "inspec exec ./inspec/compliance-checks -i ./insecure_keys/vagrant.private -t ssh://root@client | dos2unix -f | tee $TEST_LOG_DIR/inspec_results_client_after_recovery"
 fi
 
 exit 0
