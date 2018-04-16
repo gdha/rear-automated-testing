@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 #
 # rear-automated-test.sh script
 # Author: Gratien D'haese - IT3 Consultants
