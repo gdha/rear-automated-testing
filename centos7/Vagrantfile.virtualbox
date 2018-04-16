@@ -27,13 +27,10 @@ Vagrant.configure(2) do |config|
      
       nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
 
-      #nodeconfig.vm.provision "shell", inline: "echo RUNNING yum update -y"
-      #nodeconfig.vm.provision "shell", inline: "sudo yum update -y"
-
       nodeconfig.vm.provision "ansible_local" do |ansible|
          # first run the common ansible playbook
          ansible.playbook = "ansible/common/vagrant-playbook.yml"
-         ansible.sudo = true
+         ansible.become = true
          # ansible.verbose = 'vvvv'
       end
       nodeconfig.ssh.forward_agent    = true
@@ -53,13 +50,13 @@ Vagrant.configure(2) do |config|
       if host =~ /server/
          nodeconfig.vm.provision "ansible_local" do |ansible|
            ansible.playbook = "ansible/server/vagrant-playbook.yml"
-           ansible.sudo = true
+           ansible.become = true
            # ansible.verbose = 'vvvv'
          end
       elsif host =~ /client/
         nodeconfig.vm.provision "ansible_local" do |ansible|
           ansible.playbook = "ansible/client/vagrant-playbook.yml"
-          ansible.sudo = true
+          ansible.become = true
           # ansible.verbose = 'vvvv'
         end
       end
@@ -81,7 +78,7 @@ Vagrant.configure(2) do |config|
     recover.ssh.private_key_path = ["~/.vagrant.d/insecure_private_key","~/.ssh/id_rsa"]
 
     #recover.vm.network "public_network"
-    recover.vm.network :private_network, ip: "192.168.33.5"
+    recover.vm.network :private_network, ip: "192.168.33.10"
     recover.ssh.username = "root"
 
     recover.vm.provider :virtualbox do |recover_prov|
