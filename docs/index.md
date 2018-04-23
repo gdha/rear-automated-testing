@@ -39,3 +39,5 @@ People or Companies who sponsor "**ReaR Automated Testing**" project are:
 - [Bareos](http://www.bareos.com/en/)
 
 To become a sponsor you simply need to acquire a ["Relax-and-Recover Software Subscription"](http://www.it3.be/rear-support/)
+
+[logo]: (images/Interconnect.png)
