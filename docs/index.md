@@ -40,4 +40,4 @@ People or Companies who sponsor "**ReaR Automated Testing**" project are:
 
 To become a sponsor you simply need to acquire a ["Relax-and-Recover Software Subscription"](http://www.it3.be/rear-support/)
 
-[logo]: (images/Interconnect.png)
+[logo]: https://github.com/gdha/rear-automated-testing/blob/master/docs/images/Interconnect.png "interconnect logo"
