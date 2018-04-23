@@ -42,3 +42,7 @@ People or Companies who sponsor "**ReaR Automated Testing**" project are:
 - [Bareos](http://www.bareos.com/en/)
 
 To become a sponsor you simply need to acquire a ["Relax-and-Recover Software Subscription"](http://www.it3.be/rear-support/)
+
+## Logo
+
+The *free* logo [Interconnect](https://wayfx.com/wp-content/themes/understrap/images/logos/downloads/Interconnect.zip) is originating from [Wayfunction](https://wayfx.com/logos/). Many thanks for it.
