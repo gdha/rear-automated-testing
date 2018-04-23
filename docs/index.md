@@ -2,6 +2,9 @@
 title: Relax-and-Recover (ReaR) Automated Testing
 ---
 ![Interconnect logo](images/Interconnect.png)
+<p align="center">
+  <img src="mages/Interconnect.png" width="150"/>
+</p>
 # Relax-and-Recover (ReaR) Automated Testing
 
 This is the documentation around our "Relax-and-Recover (ReaR) Automated Testing" project.
@@ -39,5 +42,3 @@ People or Companies who sponsor "**ReaR Automated Testing**" project are:
 - [Bareos](http://www.bareos.com/en/)
 
 To become a sponsor you simply need to acquire a ["Relax-and-Recover Software Subscription"](http://www.it3.be/rear-support/)
-
-[logo]: https://github.com/gdha/rear-automated-testing/blob/master/docs/images/Interconnect.png "interconnect logo"
