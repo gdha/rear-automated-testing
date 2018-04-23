@@ -1,7 +1,7 @@
 ---
 title: Relax-and-Recover (ReaR) Automated Testing
 ---
-
+![alt text][logo]
 # Relax-and-Recover (ReaR) Automated Testing
 
 This is the documentation around our "Relax-and-Recover (ReaR) Automated Testing" project.
