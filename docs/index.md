@@ -1,9 +1,9 @@
 ---
 title: Relax-and-Recover (ReaR) Automated Testing
 ---
-![Interconnect logo](images/Interconnect.png)
+[comment]:  ![Interconnect logo](images/Interconnect.png)
 <p align="center">
-  <img src="mages/Interconnect.png" width="150"/>
+  <img src="images/Interconnect.png" width="150"/>
 </p>
 # Relax-and-Recover (ReaR) Automated Testing
 
