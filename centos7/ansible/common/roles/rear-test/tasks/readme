@@ -1,0 +1,11 @@
+To find out on which type we are running start the vagrant vm and login and run:
+$ ansible localhost -m setup | grep -e family -e ansible_distribution
+ [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+        "ansible_distribution": "Fedora", 
+        "ansible_distribution_file_parsed": true, 
+        "ansible_distribution_file_path": "/etc/redhat-release", 
+        "ansible_distribution_file_variety": "RedHat", 
+        "ansible_distribution_major_version": "28", 
+        "ansible_distribution_release": "Twenty Eight", 
+        "ansible_distribution_version": "28", 
+        "ansible_os_family": "RedHat",
