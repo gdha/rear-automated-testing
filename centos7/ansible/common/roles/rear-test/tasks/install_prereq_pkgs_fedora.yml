@@ -1,0 +1,13 @@
+# common/install_prereq_pkgs_fedora.yml
+# uses selinux but python bindings (libselinux-python) required
+
+- name: Install pre-requisite packages for Fedora
+  package: name={{ item }} state=present
+  with_items:
+    - python2-libselinux
+    - python2-dnf
+    - dlrn
+    - python2-dlrn
+    - dnf-utils
+    - dnf-yum
+  ignore_errors: True
