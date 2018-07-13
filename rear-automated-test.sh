@@ -357,6 +357,9 @@ if [[ -z "$release_nr" ]] ; then
         (centos*)
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
             ;;
+       (fedora*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m dnf -disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
+            ;;
         (sles*)
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m rpm -e rear" | tee -a $LOGFILE
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m zypper --non-interactive ref" | tee -a $LOGFILE
@@ -381,6 +384,14 @@ else
             REAR_VER=$( grep rear /tmp/REAR-versions.$$ | grep -v Snapshot | grep "${release_nr}-" | tail -1 | awk '{print $2}' )
             rm -f /tmp/REAR-versions.$$
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y install rear-$REAR_VER" | tee -a $LOGFILE
+            [[ $? -eq 1 ]] && Error "Could not install stable version rear-$REAR_VER"
+            ;;
+       (fedora*)
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m rpm -e rear" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m dnf --showduplicates list rear" > /tmp/REAR-versions.$$
+            REAR_VER=$( grep rear /tmp/REAR-versions.$$ | grep -v Snapshot | grep "${release_nr}-" | tail -1 | awk '{print $2}' )
+            rm -f /tmp/REAR-versions.$$
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m dnf --disableplugin=fastestmirror -y install rear-$REAR_VER" | tee -a $LOGFILE
             [[ $? -eq 1 ]] && Error "Could not install stable version rear-$REAR_VER"
             ;;
         (sles*)

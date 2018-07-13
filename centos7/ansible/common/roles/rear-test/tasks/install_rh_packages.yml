@@ -14,3 +14,4 @@
     - ntpdate
     - chrony
     - rdate
+  ignore_errors: True

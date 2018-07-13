@@ -9,7 +9,14 @@
     - haveged
     - rng-tools
     - acl
-  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: Create symbolic link to /bin/gpg towards /bin/gpg2
+  file:
+    src: "/bin/gpg"
+    dest: "/bin/gpg2"
+    state: link
+  when: ansible_os_family == "RedHat"
 
 - name: install GNU Privacy Guard v2 software (Debian/Ubuntu family more recent versions)
   package: name={{ item }} state=present

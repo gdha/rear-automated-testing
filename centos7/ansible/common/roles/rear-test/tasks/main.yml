@@ -2,6 +2,11 @@
 # File: ansible/common/roles/rear-test/tasks/main.yml
 # Ansible taks which are common for client and server
 
+- block:
+  - include_tasks: install_prereq_pkgs_fedora.yml
+
+  when: ansible_distribution == "Fedora"
+
 # Add various helpful configuration files
 - name: Install the hosts file
   copy: src=hosts dest=/etc/hosts mode=0644

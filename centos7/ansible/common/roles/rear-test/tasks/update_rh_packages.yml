@@ -1,8 +1,15 @@
 ---
 # File ansible/common/roles/rear-test/tasks/update_all_packages.yml
 
-- name: update all packages
+- name: update all packages (RedHat)
   yum: name=* update_cache=yes state=latest
+  when: ansible_distribution == "RedHat"
 
   # cannot use 'package: name=* state=latest' as on debian it would install ALL packages found, and not just update
   # the installed ones
+
+- name: update all packages (Fedora)
+  dnf: 
+    name: "*"
+    state: latest
+  when: ansible_distribution == "Fedora"
