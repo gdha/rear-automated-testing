@@ -1,3 +1,10 @@
+To install VBoxGuestAdditions you also need:
+- gcc
+- perl
+- make
+- kernel-devel
+- kernel-headers
+------------------------------------------------------------------------------------------------------------------------
 To find out on which type we are running start the vagrant vm and login and run:
 $ ansible localhost -m setup | grep -e family -e ansible_distribution
  [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'

@@ -358,7 +358,7 @@ if [[ -z "$release_nr" ]] ; then
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
             ;;
        (fedora*)
-            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m dnf -disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
+            ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m dnf --disableplugin=fastestmirror -y update rear" | tee -a $LOGFILE
             ;;
         (sles*)
             ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m rpm -e rear" | tee -a $LOGFILE
