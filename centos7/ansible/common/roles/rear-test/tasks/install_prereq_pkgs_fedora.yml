@@ -13,6 +13,6 @@
     - make
     - gcc
     - perl
-    - kernel-devel
     - kernel-headers
+    #- kernel-devel
   ignore_errors: True
