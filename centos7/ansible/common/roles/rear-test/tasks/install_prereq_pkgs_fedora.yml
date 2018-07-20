@@ -4,6 +4,7 @@
 - name: Install pre-requisite packages for Fedora
   package: name={{ item }} state=present
   with_items:
+    - pstree
     - python2-libselinux
     - python2-dnf
     - dlrn
