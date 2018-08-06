@@ -34,7 +34,7 @@
 #    auto_import_keys: yes
 #    disable_gpg_check: yes
 #    state: present
-#  when: ansible_os_family == "Suse" 
+#  when: ansible_os_family == "Suse"
 
 - name: Refresh the repos while importing the gpg keys with zypper
   command: zypper --non-interactive --gpg-auto-import-keys ref

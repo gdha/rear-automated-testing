@@ -9,7 +9,7 @@
   # the installed ones
 
 - name: update all packages (Fedora)
-  dnf: 
+  dnf:
     name: "*"
     state: latest
   when: ansible_distribution == "Fedora"

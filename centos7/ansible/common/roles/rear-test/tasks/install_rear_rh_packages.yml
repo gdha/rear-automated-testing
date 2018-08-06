@@ -1,7 +1,6 @@
 ---
-# ansible/common/roles/rear-test/tasks/install_rear_sles_packages.sh
-# This section will only be executed with SLES distro's (currently equal with RHEL)
- 
+# ansible/common/roles/rear-test/tasks/install_rear_rh_packages.sh
+# This section will only be executed with RedHat distro's
 - name: Install packages required by ReaR
   package: name={{ item }} state=present
   with_items:
@@ -14,4 +13,3 @@
     - mtools
     - sshfs
     - rear
-
