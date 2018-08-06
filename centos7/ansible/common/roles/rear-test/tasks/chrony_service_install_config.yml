@@ -1,18 +1,17 @@
 ---
 # ansible/common/roles/rear-test/tasks/chrony_service_install_config.yml
 # Original coming from https://github.com/marklee77/ansible-role-chrony
-- set_fact:
+- name: define ansible_distro variable in lowercase
+  set_fact:
     ansible_distro: "{{ ansible_distribution|lower|replace('\"', '') }}"
 
 - name: gather os specific variables
   include_vars: "{{ item }}"
   with_first_found:
     - files:
-      - "{{ ansible_distro }}-{{
-            ansible_distribution_version|lower|replace('/', '_') }}.yml"
+      - "{{ ansible_distro }}-{{ ansible_distribution_version|lower|replace('/', '_') }}.yml"
       - "{{ ansible_distro }}-{{ ansible_distribution_release }}.yml"
-      - "{{ ansible_distro }}-{{
-            ansible_distribution_major_version|lower|replace('/', '_') }}.yml"
+      - "{{ ansible_distro }}-{{ ansible_distribution_major_version|lower|replace('/', '_') }}.yml"
       - "{{ ansible_distro }}.yml"
       - "{{ ansible_os_family|lower }}.yml"
       skip: true
@@ -60,4 +59,3 @@
     state: started
   with_items: "{{ chrony_services }}"
   when: chrony_services|length > 0
-

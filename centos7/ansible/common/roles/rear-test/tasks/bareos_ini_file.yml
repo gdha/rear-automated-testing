@@ -37,7 +37,8 @@
 #- debug:
 #    msg: "var bareos_prot is {{ bareos_prot }}"
 
-- set_fact:
+- name: define the bareos_url with data from bareos.ini file
+  set_fact:
     bareos_url: "{{ bareos_prot }}{{ bareos_user }}{{ bareos_pass }}{{ bareos_fqdn }}{{ bareos_path }}{{ bareos_version }}"
 
 #- debug:
