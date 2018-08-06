@@ -11,10 +11,10 @@
     - acl
   when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: Create symbolic link to /bin/gpg towards /bin/gpg2
+- name: Create symbolic link from /bin/gpg2 towards /bin/gpg
   file:
-    src: "/bin/gpg"
-    dest: "/bin/gpg2"
+    src: "/bin/gpg2"
+    dest: "/bin/gpg"
     state: link
   when: ansible_os_family == "RedHat"
 
