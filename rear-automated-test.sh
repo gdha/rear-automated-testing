@@ -607,8 +607,8 @@ LogPrint "
 if [[ $rc -eq 0 ]] ; then
     Log "Please check the rear logging /var/log/rear/rear-client.log"
     echo "$(red Please check the rear logging /var/log/rear/rear-client.log)"
-    LogPrint "The last 20 lines are:"
-    ssh -i ../insecure_keys/vagrant.private root@$client "tail -20 /var/log/rear/rear-client.log" | tee -a $LOGFILE
+    LogPrint "The last 25 lines are:"
+    ssh -i ../insecure_keys/vagrant.private root@$client "tail -25 /var/log/rear/rear-client.log" | tee -a $LOGFILE
     LogPrint ""
     Error "Check yourself via 'vagrant ssh client'"
 else
