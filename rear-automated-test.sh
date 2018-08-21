@@ -599,7 +599,7 @@ echo "$(bold Run 'rear -v mkbackup')"
 ssh -i ../insecure_keys/vagrant.private root@$client "rear -v mkbackup" | tee -a $LOGFILE
 # To capture errors we have to grab for ERROR keyword in the rear.log file (on the client) and the output is checked
 # once more to really capture the ERROR code (rc=0 means ERROR in this case)
-ssh -i ../insecure_keys/vagrant.private root@$client "tail -20 /var/log/rear/rear-client.log | grep ERROR" | grep -q ERROR
+ssh -i ../insecure_keys/vagrant.private root@$client "tail -25 /var/log/rear/rear-client.log | grep ERROR" | grep -q ERROR
 rc=$?
 
 LogPrint "
