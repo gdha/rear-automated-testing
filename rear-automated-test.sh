@@ -6,7 +6,7 @@
 # Define generic variables
 PRGNAME=${0##*/}
 PRGDIR=$(pwd)
-VERSION=1.3
+VERSION=1.4
 DISPLAY=:0
 
 distro="centos7"	# default distro when no argument is given
@@ -145,8 +145,24 @@ Copyright: GPL v3
 
 "
 LogPrint "Command line options: $PRGNAME ${CMD_OPTS[@]}"
-LogPrint "
-  See the log file $LOGFILE for details and errors
+LogPrint "Distribution: $distro"
+LogPrint "Boot method: $boot_method"
+if [[ -z "$release_nr" ]] ; then
+    LogPrint "ReaR version: latest development version"
+else
+    LogPrint "ReaR version: $release_nr"
+fi
+if [[ -z "$provider" ]] ; then
+    LogPrint "Provider: $VAGRANT_DEFAULT_PROVIDER"
+else
+    LogPrint "Provider: $provider"
+fi
+if [[ ! -z "$config" ]] && [[ -f "$config" ]] ; then
+    LogPrint "ReaR configuration: $( basename $config )"
+else
+    LogPrint "ReaR configuration: PXE-booting-with-URL-style.conf"
+fi
+LogPrint "Log file: $LOGFILE
 "
 
 # check if vagrant is present
