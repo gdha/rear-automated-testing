@@ -50,7 +50,7 @@
     name: "{{ item }}"
     state: restarted
   with_items: "{{ chrony_services }}"
-  when: chrony_services|length > 0 and chrony_conf|changed
+  when: chrony_services|length > 0 and chrony_conf is changed
 
 - name: ensure chrony service is started and enabled
   service:
