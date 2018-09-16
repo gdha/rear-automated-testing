@@ -520,6 +520,10 @@ ISO)
                    # we need chain.c32 as well
                    [[ -f /usr/share/syslinux/chain.c32 ]] && cp -p /usr/share/syslinux/chain.c32 "$pxe_tftpboot_path"
                    vagrant_host=$boot_server
+                   case $(uname -s) in
+                     Darwin)
+                       scp -i ../insecure_keys/vagrant.private root@$client:/usr/share/syslinux/memdisk "$pxe_tftpboot_path"
+                   esac
                    ;;
        libvirt)    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
                    boot_server="192.168.33.15"
