@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 nodes = [
-   { :hostname => 'client', :ip => '192.168.33.10', :box => 'bento/ubuntu-17.04', :ram => 1024 },
-   { :hostname => 'server', :ip => '192.168.33.15', :box => 'bento/ubuntu-17.04', :ram => 1024 }
+   { :hostname => 'client', :ip => '192.168.33.10', :box => 'bento/ubuntu-18.04', :ram => 1024 },
+   { :hostname => 'server', :ip => '192.168.33.15', :box => 'bento/ubuntu-18.04', :ram => 1024 }
 ]
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
@@ -25,13 +25,13 @@ Vagrant.configure(2) do |config|
         #
       end
      
-      # sync .. to have both centos7 and ubuntu17 directories as there are symbolic links between them
+      # sync .. to have both centos7 and ubuntu18 directories as there are symbolic links between them
       nodeconfig.vm.synced_folder "..", "/vagrant", disabled: false
 
       nodeconfig.vm.provision "ansible_local" do |ansible|
          # first run the common ansible playbook
          ansible.compatibility_mode = "2.0"
-         ansible.playbook = "/vagrant/ubuntu17.04/ansible/common/vagrant-playbook.yml"
+         ansible.playbook = "/vagrant/ubuntu18.04/ansible/common/vagrant-playbook.yml"
          ansible.become = true
          # ansible.verbose = 'vvvv'
       end
@@ -51,14 +51,14 @@ Vagrant.configure(2) do |config|
       if host =~ /server/
          nodeconfig.vm.provision "ansible_local" do |ansible|
            ansible.compatibility_mode = "2.0"
-           ansible.playbook = "/vagrant/ubuntu17.04/ansible/server/vagrant-playbook.yml"
+           ansible.playbook = "/vagrant/ubuntu18.04/ansible/server/vagrant-playbook.yml"
            ansible.become = true
            # ansible.verbose = 'vvvv'
          end
       elsif host =~ /client/
         nodeconfig.vm.provision "ansible_local" do |ansible|
           ansible.compatibility_mode = "2.0"
-          ansible.playbook = "/vagrant/ubuntu17.04/ansible/client/vagrant-playbook.yml"
+          ansible.playbook = "/vagrant/ubuntu18.04/ansible/client/vagrant-playbook.yml"
           ansible.become = true
           # ansible.verbose = 'vvvv'
         end
@@ -83,7 +83,7 @@ Vagrant.configure(2) do |config|
     recover.ssh.username = "root"
 
     recover.vm.provider :virtualbox do |recover_prov|
-      recover_prov.name = "recover_ubuntu17"
+      recover_prov.name = "recover_ubuntu18"
       recover_prov.gui = true unless ENV['NO_GUI']
       recover_prov.customize ['setextradata', :id, 'GUI/ScaleFactor', '1.5']
       recover_prov.memory = "1024"

@@ -19,8 +19,11 @@
 #    state: disabled
 #  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '14'
 
-- name: change the selinux to permissive (ubuntu >14)
+- name: change the selinux to permissive (ubuntu =16)
   selinux:
     policy: targeted
     state: permissive
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '14'
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '16'
+
+# selinux on ubuntu18 is by default permissive and https://github.com/gdha/rear-automated-testing/issues/73
+# shows that there are issues with defining selinux policy
