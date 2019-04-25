@@ -73,6 +73,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.define "recover", autostart: false do |recover|
     recover.vm.box = "clink15/pxe"
+    # Pre-req: vagrant plugin install vagrant-disksize
+    # See URL: https://stackoverflow.com/questions/49822594/vagrant-how-to-specify-the-disk-size
+    recover.disksize.size = '80GB'
     recover.vm.boot_timeout = 3600
     recover.ssh.insert_key = "false"
     # see https://www.vagrantup.com/docs/vagrantfile/ssh_settings.html
