@@ -27,3 +27,20 @@
 
 # selinux on ubuntu18 is by default permissive and https://github.com/gdha/rear-automated-testing/issues/73
 # shows that there are issues with defining selinux policy
+# Experimentation proofed that SELinux performance is really bad on the Ubuntu boxes, therefore, it is better
+# to just disable SELinux on ubuntu alltogether.
+
+- name: Disable SELinux on Ubuntu distribution
+  lineinfile:
+     dest=/etc/selinux/config
+     regexp="{{ item.regexp }}"
+     line="{{ item.line }}"
+     state=present
+  with_items:
+    - regexp: "^SELINUX="
+      line: "SELINUX=disabled"
+  when: ansible_distribution == 'Ubuntu'
+
+- name: temporarely turning off selinux
+  shell: echo 0 > /sys/fs/selinux/enforce
+  ignore_errors: True
