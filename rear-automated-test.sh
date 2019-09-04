@@ -519,9 +519,11 @@ ISO)
                    [[ -f /usr/share/syslinux/memdisk ]] && cp -p /usr/share/syslinux/memdisk "$pxe_tftpboot_path"
                    # we need chain.c32 as well
                    [[ -f /usr/share/syslinux/chain.c32 ]] && cp -p /usr/share/syslinux/chain.c32 "$pxe_tftpboot_path"
+                   [[ -f /usr/lib/syslinux/modules/bios/chain.c32 ]] && cp -p /usr/lib/syslinux/modules/bios/chain.c32 "$pxe_tftpboot_path"
                    vagrant_host=$boot_server
                    case $(uname -s) in
                      Darwin)
+                       # The client VM is CentOS based
                        scp -i ../insecure_keys/vagrant.private root@$client:/usr/share/syslinux/memdisk "$pxe_tftpboot_path"
 <<<<<<< HEAD
 =======
