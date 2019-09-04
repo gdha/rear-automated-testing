@@ -525,10 +525,7 @@ ISO)
                      Darwin)
                        # The client VM is CentOS based
                        scp -i ../insecure_keys/vagrant.private root@$client:/usr/share/syslinux/memdisk "$pxe_tftpboot_path"
-<<<<<<< HEAD
-=======
                        ;;
->>>>>>> fcfe49fca5d6e012666116cc5272fa56adc9ed53
                    esac
                    ;;
        libvirt)    pxe_tftpboot_path=$( define_pxe_tftpboot_path )
