@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
 
   nodes.each do |node|
     config.vm.define node[:hostname] do |nodeconfig|
-      nodeconfig.vm.box = "centos/7"
+      nodeconfig.vm.box = "bento/centos-8"
       nodeconfig.vm.hostname = node[:hostname] + ".box"
       nodeconfig.vm.network :private_network, ip: node[:ip]
 
@@ -26,6 +26,19 @@ Vagrant.configure(2) do |config|
       end
      
       nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
+      
+      nodeconfig.vm.provision :shell, privileged: false do |s|
+        s.inline = <<-SHELL
+           sudo dnf -y install python3
+           sudo dnf -y install python3-pip
+           # on CentOS8:
+           sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+           sudo dnf -y install  --enablerepo epel-playground  ansible
+           # on RHEL8:
+           # sudo subscription-manager repos --enable ansible-2.8-for-rhel-8-x86_64-rpms
+           # sudo dnf -y install ansible
+        SHELL
+      end
 
       nodeconfig.vm.provision "ansible_local" do |ansible|
          ansible.compatibility_mode = "2.0"
