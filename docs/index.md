@@ -38,7 +38,7 @@ Feedback like reporting typos or errors, feature requests, ideas, suggestions, e
 
 People or Companies who sponsor "**ReaR Automated Testing**" project are:
 
-- [IT3 Consultants bvba](http://www.it3.be/)
+- [IT3 Consultants bv](http://www.it3.be/)
 - [Bareos](http://www.bareos.com/en/)
 
 To become a sponsor you simply need to acquire a ["Relax-and-Recover Software Subscription"](http://www.it3.be/rear-support/)
