@@ -18,6 +18,12 @@ boot_server="$server"	# when using Oracle VirtualBox (VB) with PXE booting then 
 			# In case of KVM we can use $server VM to boot from
 vagrant_host="192.168.33.1" # we use this variable to store the ReaR recover logfile (and is the same for VB and libvirt)
 
+# For Mac OS/X we cannot use / anymore as it became a read-only file system
+case $(uname -s) in
+  Darwin) base_dir=/System/Volumes/Data ;;
+       *) base_dir='' ;;
+esac
+
 # Default tftpboot root directory (for libvirt we keep the default; for virtualbox we need vb TFTP path (defined later)
 # The ReaR config templates need to be edited and replaced with the proper path (automatically done)
 # Variable pxe_tftpboot_path will be set by function define_pxe_tftpboot_path
@@ -33,7 +39,7 @@ DO_TEST=		# execute a validation test (default no)
 # LOG_DIR should be a NFS exported file system as the recover VM will mount it to copy its recover log file onto
 # The LOG_DIR will finally be renamed to TEST_LOG_DIR=$LOG_DIR/$TIMESTAMP to make it unique across runs
 # Finally, LOG_DIR can be given as an argument (with the '-l' option) as well
-LOG_DIR=/export/rear-tests/logs
+LOG_DIR=${base_dir}/export/rear-tests/logs
 # LOGFILE - we define this after we have read all command line arguments (especially LOG_DIR)
 
 # release_nr is used to capture which "stable" version of ReaR we want to test

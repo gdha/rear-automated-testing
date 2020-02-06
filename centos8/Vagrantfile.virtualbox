@@ -1,0 +1,123 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+nodes = [
+   { :hostname => 'client', :ip => '192.168.33.10', :box => 'centos/7', :ram => 1024 },
+   { :hostname => 'server', :ip => '192.168.33.15', :box => 'centos/7', :ram => 1024 }
+]
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
+
+Vagrant.configure(2) do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  nodes.each do |node|
+    config.vm.define node[:hostname] do |nodeconfig|
+      nodeconfig.vm.box = "bento/centos-8"
+      nodeconfig.vm.hostname = node[:hostname] + ".box"
+      nodeconfig.vm.network :private_network, ip: node[:ip]
+
+      memory = node[:ram] ? node[:ram] : 256;
+      host = node[:hostname]
+      nodeconfig.vm.provider :virtualbox do |vb|
+        #
+      end
+     
+      nodeconfig.vm.synced_folder ".", "/home/vagrant/sync", disabled: true
+      
+      nodeconfig.vm.provision :shell, privileged: false do |s|
+        s.inline = <<-SHELL
+           sudo dnf -y install python3
+           sudo dnf -y install python3-pip
+           # on CentOS8:
+           sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+           sudo dnf -y install  --enablerepo epel-playground  ansible
+           # on RHEL8:
+           # sudo subscription-manager repos --enable ansible-2.8-for-rhel-8-x86_64-rpms
+           # sudo dnf -y install ansible
+        SHELL
+      end
+
+      nodeconfig.vm.provision "ansible_local" do |ansible|
+         ansible.compatibility_mode = "2.0"
+         # first run the common ansible playbook
+         ansible.playbook = "ansible/common/vagrant-playbook.yml"
+         ansible.become = true
+         # ansible.verbose = 'vvvv'
+      end
+      nodeconfig.ssh.forward_agent    = true
+      nodeconfig.ssh.insert_key       = false
+      nodeconfig.ssh.private_key_path =  ["~/.vagrant.d/insecure_private_key","~/.ssh/id_rsa"]
+      nodeconfig.vm.provision :shell, privileged: false do |s|
+        ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+        s.inline = <<-SHELL
+           mkdir -p -m 700 /home/$USER/.ssh
+           echo #{ssh_pub_key} >> /home/$USER/.ssh/authorized_keys
+           sudo bash -c "mkdir -p -m 700 /root/.ssh"
+           sudo bash -c "echo #{ssh_pub_key} >> /root/.ssh/authorized_keys"
+        SHELL
+      end
+      #nodeconfig.vm.provision :shell, path: "provision-centos7.sh"
+      # Now we will run the client or server ansible playbook depending on the hostname
+      if host =~ /server/
+         nodeconfig.vm.provision "ansible_local" do |ansible|
+           ansible.compatibility_mode = "2.0"
+           ansible.playbook = "ansible/server/vagrant-playbook.yml"
+           ansible.become = true
+           # ansible.verbose = 'vvvv'
+         end
+      elsif host =~ /client/
+        nodeconfig.vm.provision "ansible_local" do |ansible|
+          ansible.compatibility_mode = "2.0"
+          ansible.playbook = "ansible/client/vagrant-playbook.yml"
+          ansible.become = true
+          # ansible.verbose = 'vvvv'
+        end
+      end
+
+      # specific provision script for one server
+      # nodeconfig.vm.provision :shell, path: "nodeconfig-centos7.sh"
+    # end of config.vm.define node
+    end
+  
+
+  # end of nodes.each do |node|
+  end
+
+  config.vm.define "recover", autostart: false do |recover|
+    recover.vm.box = "clink15/pxe"
+    recover.vm.boot_timeout = 3600
+    recover.ssh.insert_key = "false"
+    # see https://www.vagrantup.com/docs/vagrantfile/ssh_settings.html
+    recover.ssh.private_key_path = ["~/.vagrant.d/insecure_private_key","~/.ssh/id_rsa"]
+
+    #recover.vm.network "public_network"
+    recover.vm.network :private_network, ip: "192.168.33.10"
+    recover.ssh.username = "root"
+
+    recover.vm.provider :virtualbox do |recover_prov|
+      recover_prov.name = "recover"
+      recover_prov.gui = true unless ENV['NO_GUI']
+      recover_prov.customize ['setextradata', :id, 'GUI/ScaleFactor', '1.5']
+      recover_prov.memory = "1024"
+      recover_prov.cpus = "1"
+
+      # https://docs.vagrantup.com/v2/virtualbox/configuration.html
+      # http://superuser.com/questions/741734/virtualbox-how-can-i-add-mount-an-iso-image-file-from-command-line
+      # make sure file "/export/isos/client/rear-client.iso" is readable by others
+      # According URL https://github.com/mitchellh/vagrant/issues/8105 "IDE Controller" might be "IDE" only
+      recover_prov.customize ["storageattach", :id, "--storagectl", "IDE",
+                              "--port", "0", "--device", "1", "--type", "dvddrive",
+                              "--medium", "/export/isos/client/rear-client.iso"]
+      recover_prov.customize ["modifyvm", :id, "--boot1", "net", "--boot2", "DVD",
+                              "--boot3", "disk", "--boot4", "none"]
+      recover_prov.customize ["modifyvm", :id, "--nattftpfile1", "pxelinux.0"]
+      # end of |recover_prov|
+      end
+    # end of |recover|
+    end
+
+# end of Vagrant.configure
+end 
