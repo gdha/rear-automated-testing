@@ -8,7 +8,6 @@
     - epel-release
     - e2fsprogs
     - httpd
-    - createrepo
     - vim-enhanced
     - bind-utils
     - libusal
