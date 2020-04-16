@@ -15,8 +15,3 @@
     - chrony
     - rdate
   ignore_errors: True
-
-# { ansible_distro }}-{{ ansible_distribution_major_version|lower|replace('/', '_') }}
-- name: Enable PowerTools on RHEL/CentOS 8
-  command: yum config-manager --set-enabled PowerTools
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"

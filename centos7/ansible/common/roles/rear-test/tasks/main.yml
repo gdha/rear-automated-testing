@@ -31,6 +31,12 @@
     - include_tasks: install_rear_rh_packages.yml
   when: ansible_os_family == 'RedHat'
 
+# A block for RH/CentOS 8.x specific (e.g. issue #77)
+- name : A block for RedHat OS major version 8
+  block:
+    - include_tasks: install_rhel8_packages.yml
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
+
 # A block dedicated for ansible_os_family == "Suse" (commont for SLES 11 and 12)
 - name: A block common for SuSe SLES 11 and 12 families
   block:

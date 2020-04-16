@@ -1,0 +1,17 @@
+# {{ ansible_distro }}-{{ ansible_distribution_major_version|lower|replace('/', '_') }}
+- name: Enable PowerTools on RHEL/CentOS 8
+  command: yum config-manager --set-enabled PowerTools
+
+- name: Install common basic RedHat 8  packages
+  package: name={{ item }} state=present
+  with_items:
+    - python3
+  ignore_errors: True
+
+- name: create a symlink to python3
+  file:
+    src: /usr/bin/python3
+    dest: /usr/bin/python
+    owner: root
+    group: root
+    state: link
