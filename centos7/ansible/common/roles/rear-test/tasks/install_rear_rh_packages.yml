@@ -11,5 +11,7 @@
     - samba
     - samba-client
     - mtools
+    - fuse-sshfs
     - sshfs
     - rear
+  ignore_errors: True
