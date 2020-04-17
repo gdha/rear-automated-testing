@@ -6,10 +6,12 @@
   package: name={{ item }} state=present
   with_items:
     - dhcp
+    - dhcp-server
     - syslinux-tftpboot
     - tftp
     - tftp-server
     - xinetd
+  ignore_errors: True
   when: ansible_os_family == "RedHat"
 
 - name: Install packages we need for dhcp and tftpboot (ubuntu>15)
