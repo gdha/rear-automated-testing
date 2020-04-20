@@ -16,7 +16,14 @@
     src: "/bin/gpg2"
     dest: "/bin/gpg"
     state: link
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version|int < 8
+
+- name: Create symbolic link from /bin/gpg towards /bin/gpg2
+  file:
+    src: "/bin/gpg"
+    dest: "/bin/gpg2"
+    state: link
+  when: ansible_os_family == "RedHat" and ansible_distribution_version|int >= 8
 
 - name: install GNU Privacy Guard v2 software (Debian/Ubuntu family more recent versions)
   package: name={{ item }} state=present
