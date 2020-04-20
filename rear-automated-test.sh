@@ -429,32 +429,6 @@ else
 fi
 LogPrint ""
 
-# Option -f test will be executed on 'client' VM only (at least for now)
-# Therefore, check if the test is an existing directory for the test we want
-# TODO: remove this block and replace by a good set of inspec compliance controls
-if [[ "$DO_TEST" = "y" ]] ; then
-    # $test_dir contains the test we want to execute; first copy it to the client vm
-    Log "Copying the Beaker tests onto the VM client"    
-    echo "$(bold Copying the Beaker tests onto the VM client)"    
-    scp -i ../insecure_keys/vagrant.private -r ../tests root@$client:/var/tmp | tee -a $LOGFILE
-    # install rear-rhts and beakerlib
-    Log "Install rear-rhts  and beakerlib packages required for the Beaker tests"
-    echo "$(italic Install rear-rhts  and beakerlib packages required for the Beaker tests)"
-    ssh -i ../insecure_keys/vagrant.private root@$client "timeout 3m yum --disableplugin=fastestmirror -y install rear-rhts beakerlib" | tee -a $LOGFILE
-    # on the client vm all tests are available under /var/tmp/tests/
-    LogPrint "Executing test $test_dir"
-    LogPrint "---------------------------------"
-    ssh -i ../insecure_keys/vagrant.private root@$client "cd /var/tmp/tests/$test_dir ; make" | tee -a $LOGFILE
-    rc=$?
-    [[ $rc -gt 0 ]] && Error "make command failed for test $test_dir"
-    jFile=/$(ssh -i ../insecure_keys/vagrant.private root@$client 'tail -1 /mnt/testarea/current.log | cut -d/ -f2-' 2>/dev/null)
-    # jFile=/var/tmp/beakerlib-lGspW7z/journal.txt for example
-    [[ "$jFile" = "/" ]] && Error "Test results file not found on $client (check /mnt/testarea)"
-    scp -i ../insecure_keys/vagrant.private root@$client:$jFile ../tests/$test_dir/test-results-of-$(date '+%Y%m%d') | tee -a $LOGFILE
-    LogPrint "Saved the results as tests/$test_dir/test-results-of-$(date '+%Y%m%d')"
-    exit 0
-fi
-
 
 # According the boot_method we can do different stuff now:
 case $boot_method in
