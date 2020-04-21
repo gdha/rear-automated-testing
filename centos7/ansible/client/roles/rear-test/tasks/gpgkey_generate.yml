@@ -31,8 +31,9 @@
 - name: Ensure .gnupg config directory exists with right permissions
   file: dest={{ gpg_home }}/.gnupg state=directory mode=0700 owner="{{ gpg_generator_user }}"
 
+# Only copy the gpg.conf for Gnupg version 1
 - name: set defaut gpg options
-  copy: src=gpg.conf dest="{{ gpg_home }}/.gnupg/gpg.conf" mode=0600 owner="{{ gpg_generator_user }}"
+  copy: src=gpg.conf-1 dest="{{ gpg_home }}/.gnupg/gpg.conf-1" mode=0600 owner="{{ gpg_generator_user }}"
 
 - name: copy default template for gpg key generation
   template: src=gen-key-script dest="{{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }}" mode=0600 owner="{{ gpg_generator_user }}"
