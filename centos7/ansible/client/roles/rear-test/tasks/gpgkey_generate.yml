@@ -49,7 +49,7 @@
 - debug: var=gpgkeys
 
 - name: generate gpg key
-  command: "gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }} chdir={{ gpg_home }}"
+  command: "gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }}"
   become: yes
   become_user: "{{ gpg_generator_user }}"
   when: gpgkeys is defined and gpgkeys.stdout == ""
@@ -57,7 +57,7 @@
 #- debug: var=genkey
 
 - name: import generated keys
-  command: "gpg --import {{ gpg_home }}/{{ gpg_pubkeyfile }} {{ gpg_home }}/{{ gpg_privkeyfile }}"
+  command: "gpg --import {{ gpg_home }}/{{ gpg_pubkeyfile }}"
   become: yes
   become_user: "{{ gpg_generator_user }}"
   when: gpgkeys is defined and gpgkeys.stdout == ""
