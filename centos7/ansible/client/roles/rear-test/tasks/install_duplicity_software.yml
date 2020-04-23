@@ -6,14 +6,17 @@
   package: name={{ item }} state=present
   with_items:
     - duplicity
-    - duply
   when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: install duplicity software (Debian/Ubuntu family for more recent versions)
   package: name={{ item }} state=present
   with_items:
     - duplicity
-    - duply
     - python-paramiko
   when: (ansible_distribution == 'Debian' and ansible_distribution_version|int >= 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_version|int >= 14)
 
+# The duply package is not available in the EPEL-8 anymore, but as it is a simple bash script we downloaded that tar-ball
+# from https://sourceforge.net/projects/ftplicity/ (is duply SourceForge page, ftplicity was the old name)
+# In the files directory we saved the 'duply' bash script version 2.2.2 and we will copy this script to /usr/bin/duply
+- name: install duply bash script (all families)
+  copy: src=duply dest=/usr/bin/duply owner=root group=root mode=0755

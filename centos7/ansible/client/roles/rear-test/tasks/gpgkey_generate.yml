@@ -49,22 +49,47 @@
 - debug: var=gpgkeys
 
 - name: generate gpg key
-  command: "gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }}"
+  shell: |
+     gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }} chdir={{ gpg_home }}
+  args:
+    executable: /bin/bash
+    creates: "{{ gpg_home }}/{{ gpg_pubkeyfile }}"
   become: yes
   become_user: "{{ gpg_generator_user }}"
-  when: gpgkeys is defined and gpgkeys.stdout == ""
+  when: gpgkeys is defined and not gpgkeys.stdout
   register: genkey
-#- debug: var=genkey
+#  no_log: "{{ gpg_no_log }}"
+- debug: var=genkey
 
-- name: import generated keys
+- name: GPG<2 | import generated keys
+  command: "gpg --import {{ gpg_home }}/{{ gpg_pubkeyfile }} {{ gpg_home }}/{{ gpg_privkeyfile }}"
+  become: yes
+  become_user: "{{ gpg_generator_user }}"
+  when: >
+    gpgkeys is defined and not gpgkeys.stdout and
+    not (
+          (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 16) or
+          (ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 7)
+        )
+
+- name: GPG>2 | import generated keys
   command: "gpg --import {{ gpg_home }}/{{ gpg_pubkeyfile }}"
   become: yes
   become_user: "{{ gpg_generator_user }}"
-  when: gpgkeys is defined and gpgkeys.stdout == ""
+  when: >
+    gpgkeys is defined and not gpgkeys.stdout and
+    (
+      (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 16) or
+      (ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 7)
+    )
 
 - name: get user gpg fingerprint
-  shell: "gpg --fingerprint {{ gpg_useremail }} | awk -F= '/Key fingerprint/ { gsub(/ /,\"\", $2); print $2 }' | tee {{ gpg_home }}/{{ gpg_fingerprint }}"
-  changed_when: false
+  shell: |
+     set -o pipefail
+     gpg --list-keys --keyid-format LONG {{ gpg_useremail }} | awk -F'[ /]' '/sub/ { print $5 }' | tee {{ gpg_home }}/{{ gpg_fingerprint }}
+  args:
+    executable: /bin/bash
+    creates: "{{ gpg_home }}/{{ gpg_fingerprint }}"
   register: gpg_user_fingerprint
   become: yes
   become_user: "{{ gpg_generator_user }}"
@@ -76,13 +101,14 @@
   become_user: "{{ gpg_generator_user }}"
 
 - name: extract the GPG key (for duplicity/duply)
-  shell: "gpg --list-keys {{ gpg_generator_user }} | grep ^pub | awk '{print $2}' | cut -d/ -f2 | tee {{ gpg_home }}/{{ gpg_key }}"
+  shell: "gpg --list-keys --keyid-format LONG {{ gpg_generator_user }} | grep ^pub | awk '{print $2}' | tail -1 | cut -d/ -f2 | tee {{ gpg_home }}/{{ gpg_key }}"
   changed_when: false
   become: yes
   become_user: "{{ gpg_generator_user }}"
 
-- name: trust the GPG key (for duplicity)
-  shell: "echo $(gpg --list-keys --fingerprint | grep `cat {{ gpg_home }}/{{ gpg_key }}` -A 1 | tail -1 | tr -d '[:space:]' | awk 'BEGIN { FS = \"=\" } ; { print $2 }'):6 | gpg --import-ownertrust"
+#### no clue anymore what the output was before???
+#- name: trust the GPG key (for duplicity)
+#  shell: "echo $(gpg --list-keys --fingerprint | grep `cat {{ gpg_home }}/{{ gpg_key }}` -A 1 | tail -1 | tr -d '[:space:]' | awk 'BEGIN { FS = \"=\" } ; { print $2 }'):6 | gpg --import-ownertrust"
 
 #### we comment out the following 2 tasks as we do not need exported gpg key nor fingerprint on the hypervisor (yet)
 #- debug: var=gpg_pull
