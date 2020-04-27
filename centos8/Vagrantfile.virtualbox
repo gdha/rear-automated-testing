@@ -108,6 +108,11 @@ Vagrant.configure(2) do |config|
       # http://superuser.com/questions/741734/virtualbox-how-can-i-add-mount-an-iso-image-file-from-command-line
       # make sure file "/export/isos/client/rear-client.iso" is readable by others
       # According URL https://github.com/mitchellh/vagrant/issues/8105 "IDE Controller" might be "IDE" only
+      seconddisk =  "/VM/seconddisk.vmdk"
+      unless File.exist?(seconddisk)
+        recover_prov.customize [ "createmedium", "disk", "--filename", seconddisk, "--format", "vmdk", "--size", 1024 * 70 ]
+      end
+      recover_prov.customize [ "storageattach", :id, "--storagectl", "IDE", "--port", "1", "--device", "0", "--type", "hdd", "--medium", seconddisk]
       recover_prov.customize ["storageattach", :id, "--storagectl", "IDE",
                               "--port", "0", "--device", "1", "--type", "dvddrive",
                               "--medium", "/export/isos/client/rear-client.iso"]
