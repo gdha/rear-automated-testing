@@ -36,14 +36,16 @@ function findUser () {
 
 function helpMsg () {
     cat <<eof
-Usage: $PRGNAME [-d distro] [-b <boot method>] [-s <stable rear version>] [-p provider] [-c rear-config-file.conf] [-t test] -vh
+************************************************
+** Relax-and-Recover (ReaR) Automated Testing **
+************************************************
+Usage: $PRGNAME [-d distro] [-b <boot method>] [-s <stable rear version>] [-p provider] [-c rear-config-file.conf] -vh
         -d: The distribution to use for this automated test (default: $distro)
         -b: The boot method to use by our automated test (default: $boot_method)
         -s: The <stable rear version> is the specific version we want to test, e.g. 2.3 (default: <empty> )
         -p: The vagrant <provider> to use (default: $VAGRANT_DEFAULT_PROVIDER)
         -c: The ReaR config file we want to use with this test (default: PXE-booting-with-URL-style.conf)
         -l: The ReaR test logs top directory (default: $LOG_DIR)
-        -t: The ReaR validation test directory (see tests directory; obsolete and disabled!)
         -h: This help message.
         -v: Revision number of this script.
 
@@ -55,8 +57,6 @@ Comments:
 <provider>: as we use vagrant we need to select the provider to use (virtualbox, libvirt)
 <rear-config-file.conf>: is the ReaR config file we would like to use to drive the test scenario with (optional with PXE)
 <logs directory>: is the direcory where the logs are kept of each run including the rear recovery log of the recover VM
-<test-dir>: under the tests/ directory there are sub-directories with the beakerlib tests (donated by RedHat)
-       When -t option is used then we will not execute an automated recover test (obsolete and disabled!)
 eof
 }
 

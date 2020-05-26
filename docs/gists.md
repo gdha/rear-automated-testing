@@ -18,13 +18,16 @@ Secondly, install the **gist** software - see code at GitHub - [https://github.c
 
 That is the beauty of it it is so easy to use:
 
-    $ ls -l /export/rear-tests/logs/2017-12-06_19-00-12/
-    total 472
-    -rw-r--r--. 1 root root   8500 Dec  6 19:07 rear-automated-test.sh.log
-    -rw-r--r--. 1 root root 431081 Dec  6 19:01 rear-client-mkbackup.log
-    -rw-r--r--. 1 root root  35882 Dec  6 19:03 rear-client-recover.log
+    $ ls -l /export/rear-tests/logs/2020-05-26_16-07-57
+    total 156
+    -rw-r--r--. 1 root root   2442 May 26 16:42 inspec_results_client_after_recovery
+    -rw-r--r--. 1 root root   2442 May 26 16:10 inspec_results_client_before_recovery
+    -rw-r--r--. 1 root root  10330 May 26 16:11 rear-automated-test.sh.log
+    -rw-r--r--. 1 root root 105146 May 26 16:10 rear-client-mkbackup.log
+    -rw-r--r--. 1 root root  28983 May 26 16:13 rear-client-recover.log
 
-    $ gist /export/rear-tests/logs/2017-12-06_19-00-12/*
-    https://gist.github.com/eb9e17c5eed841452248a4fdd4d4343e
 
-The URL returned is the location where you find the three files back on the Internet. I typically you that URL on our [ReaR Wiki Test Matrix](https://github.com/rear/rear/wiki/Test-Matrix-rear-2.3) pages.
+    $ gist /export/rear-tests/logs/2020-05-26_16-07-57/*
+    https://gist.github.com/6d94e68d7548a915425b8ffd720dfed3
+
+The URL returned is the location where you find those files back on the Internet. We typically use this URL on our [ReaR Wiki Test Matrix](https://github.com/rear/rear/wiki/Test-Matrix-rear-2.6) pages.

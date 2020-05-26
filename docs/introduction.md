@@ -18,6 +18,6 @@ Albeit, a project sponsored by Customers who have a ReaR Support Contract, we wa
 
 ## References
 
-- [IT3 Consultants - main sponsor of this project](http://it3.be/)
-- [ReaR Support Contract Overview](http://it3.be/rear-support/index.html)
+- [IT3 Consultants - main sponsor of this project](https://it3.be/)
+- [ReaR Support Contract Overview](https://it3.be/rear-support/index.html)
 - [Relax-and-Recover main project site](http://relax-and-recover.org/support/)

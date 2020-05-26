@@ -6,7 +6,7 @@
 # Define generic variables
 PRGNAME=${0##*/}
 PRGDIR=$(pwd)
-VERSION=1.4
+VERSION=1.5
 DISPLAY=:0
 
 distro="centos7"	# default distro when no argument is given
@@ -32,8 +32,6 @@ esac
 # Vagrant variables
 # VAGRANT_DEFAULT_PROVIDER is an official variable vagrant supports, so we re-use this for our purposes as well
 VAGRANT_DEFAULT_PROVIDER=virtualbox	# default select virtualbox
-
-DO_TEST=		# execute a validation test (default no)
 
 # LOG_DIR is the top directory where we will keep all our logs from this script incl. the rear recover logs
 # LOG_DIR should be a NFS exported file system as the recover VM will mount it to copy its recover log file onto
@@ -86,7 +84,7 @@ if [[ $(id -u) -ne 0 ]] ; then
     esac
 fi
 
-while getopts ":d:b:s:p:c:l:t:vh" opt; do
+while getopts ":d:b:s:p:c:l:vh" opt; do
     case "$opt" in
         d) distro="$OPTARG" ;;
         b) boot_method="$OPTARG" ;;
@@ -96,10 +94,6 @@ while getopts ":d:b:s:p:c:l:t:vh" opt; do
            [[ ! -f "$config" ]] && Error "ReaR Configuration file $config not found."
            ;;
         l) LOG_DIR="$OPTARG" ;;
-	t) test_dir="$OPTARG"
-	   DO_TEST="y"
-	   [[ ! -d "tests/$test_dir" ]] && Error "Test directory tests/$test_dir not found"
-	   ;;
         h) helpMsg; exit 0 ;;
         v) echo "$PRGNAME version $VERSION"; exit 0 ;;
        \?) echo "$PRGNAME: unknown option used: [$OPTARG]."
