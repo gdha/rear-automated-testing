@@ -5,6 +5,7 @@
 - name: Check pre-requisites for Fedora distribution
   block:
     - include_tasks: install_prereq_pkgs_fedora.yml
+    - include_tasks: restorecon_etc.yml
   when: ansible_distribution == 'Fedora'
 
 # Add various helpful configuration files

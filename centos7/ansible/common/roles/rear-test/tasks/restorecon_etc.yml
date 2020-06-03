@@ -1,0 +1,6 @@
+---
+# File: common/roles/rear-test/tasks/restorecon_etc.yml
+
+- name: execute restorecon on /etc
+  command: /usr/sbin/restorecon -Rv /etc
+  ignore_errors: true
