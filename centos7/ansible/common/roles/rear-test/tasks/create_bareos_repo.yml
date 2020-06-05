@@ -9,3 +9,6 @@
   template: src=bareos.repo.centos8.j2 dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == '8'
 
+- name: Create /etc/yum.repos.d/bareos.repo YUM file for Fedora
+  template: src=bareos.repo.fedora.j2 dest=/etc/yum.repos.d/bareos.repo mode=0644 owner=root
+  when: ansible_distribution == "Fedora"
