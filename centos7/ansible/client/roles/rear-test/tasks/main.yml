@@ -17,6 +17,13 @@
   package: name={{ item }} state=present
   with_items:
     - nano
+    - rpcbind
+  ignore_errors: true
+
+- name: Enable/start rpcbind on RedHat os_family
+  service: name=rpcbind state=started enabled=yes
+  when: ansible_os_family == "RedHat"
+  
 
 # Add various helpful configuration files
 - name: Install the message of the day
