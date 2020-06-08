@@ -15,5 +15,6 @@
     - gcc
     - perl
     - kernel-headers
+    - nfs-utils
     #- kernel-devel
   ignore_errors: True
