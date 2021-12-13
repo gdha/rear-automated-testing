@@ -21,8 +21,8 @@ Secondly, install the **gh cli** software - see code at GitHub - [GH cli README]
 
 ## First time usage of gh cli
 
-    gh auth login
-    gh gist list
+    $ gh auth login
+    $ gh gist list
 
 ## Usage
 
@@ -38,7 +38,7 @@ That is the beauty of it it is so easy to use:
 
 
     $ cd /export/rear-tests/logs/2021-12-13_09-12-33
-    gh gist create -p -d 'centos8 with bareos' *
+    $ gh gist create -p -d 'centos8 with bareos' *
     Creating gist with multiple files
     ✓ Created gist inspec_results_client_after_recovery
     https://gist.github.com/bf2fcb341e5842e30ca609ff9c7eca65
