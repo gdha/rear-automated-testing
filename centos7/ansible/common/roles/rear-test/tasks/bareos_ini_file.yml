@@ -26,7 +26,7 @@
     bareos_prot: "{{ lookup('ini', 'bareos_prot section=bareos file=/tmp/bareos.ini default=http://') }}"
     bareos_fqdn: "{{ lookup('ini', 'bareos_fqdn section=bareos file=/tmp/bareos.ini default=download.bareos.org') }}"
     bareos_path: "{{ lookup('ini', 'bareos_path section=bareos file=/tmp/bareos.ini default=/bareos/release/') }}"
-    bareos_version: "{{ lookup('ini', 'bareos_version section=bareos file=/tmp/bareos.ini default=latest') }}"
+    bareos_version: "{{ lookup('ini', 'bareos_version section=bareos file=/tmp/bareos.ini default=20') }}"
 
 #- debug:
 #    msg: "var bareos_user is {{ bareos_user }}"

@@ -4,4 +4,4 @@ bareos_pass = PfeV8WwksHf6j9Uw@
 bareos_prot = https://
 bareos_fqdn = download.bareos.com
 bareos_path = /bareos/release/
-bareos_version = latest
+bareos_version = 20
