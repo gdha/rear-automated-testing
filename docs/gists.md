@@ -12,22 +12,35 @@ Copy the string into a file `~/.gist`
 
 Note: be aware you cannot see the generated string anymore after you close the web page. Make sure, you copy/pasted it into a backup file somewhere.
 
-Secondly, install the **gist** software - see code at GitHub - [https://github.com/defunkt/gist](https://github.com/defunkt/gist) and you probably need to install ruby if you miss it.
+Add the following code to your personal `~/.bash_profile`:
+
+    GITHUB_TOKEN=$(cat $HOME/.gist)
+    export GITHUB_TOKEN
+
+Secondly, install the **gh cli** software - see code at GitHub - [GH cli README](https://github.com/cli/cli#installation)
+
+## First time usage of gh cli
+
+    gh auth login
+    gh gist list
 
 ## Usage
 
 That is the beauty of it it is so easy to use:
 
-    $ ls -l /export/rear-tests/logs/2020-05-26_16-07-57
+    $ ls -l /export/rear-tests/logs/2021-12-13_09-12-33
     total 156
-    -rw-r--r--. 1 root root   2442 May 26 16:42 inspec_results_client_after_recovery
-    -rw-r--r--. 1 root root   2442 May 26 16:10 inspec_results_client_before_recovery
-    -rw-r--r--. 1 root root  10330 May 26 16:11 rear-automated-test.sh.log
-    -rw-r--r--. 1 root root 105146 May 26 16:10 rear-client-mkbackup.log
-    -rw-r--r--. 1 root root  28983 May 26 16:13 rear-client-recover.log
+    -rw-r--r--. 1 root root  2533 Dec 13 10:01 inspec_results_client_after_recovery
+    -rw-r--r--. 1 root root  2442 Dec 13 09:18 inspec_results_client_before_recovery
+    -rw-r--r--. 1 root root 10847 Dec 13 09:18 rear-automated-test.sh.log
+    -rw-r--r--. 1 root root 75127 Dec 13 09:18 rear-client-mkbackup.log
+    -rw-r--r--. 1 root root 25797 Dec 13 09:55 rear-client-recover.log
 
 
-    $ gist /export/rear-tests/logs/2020-05-26_16-07-57/*
-    https://gist.github.com/6d94e68d7548a915425b8ffd720dfed3
+    $ cd /export/rear-tests/logs/2021-12-13_09-12-33
+    gh gist create -p -d 'centos8 with bareos' *
+    Creating gist with multiple files
+    ✓ Created gist inspec_results_client_after_recovery
+    https://gist.github.com/bf2fcb341e5842e30ca609ff9c7eca65
 
 The URL returned is the location where you find those files back on the Internet. We typically use this URL on our [ReaR Wiki Test Matrix](https://github.com/rear/rear/wiki/Test-Matrix-rear-2.6) pages.
